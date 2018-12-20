@@ -10,7 +10,7 @@ module.exports = {
     var tel = ctx.params.tel
     var user = await UserRegister.findOne({
       where: {
-        'userTel': tel
+        'userEmail': tel
       }
     })
     var ui = await user.getUserInfo()
@@ -20,7 +20,7 @@ module.exports = {
     var tel = ctx.params.tel
     var user = await UserRegister.findOne({
       where: {
-        'userTel': tel
+        'userEmail': tel
       }
     })
     var ui = await user.getFromUser()
@@ -31,7 +31,7 @@ module.exports = {
     let pswd = hash.digest('base64', 'asdwsx1234')
     let ur = await UserRegister.create({
       'userId': id,
-      'userTel': '13587416958',
+      'userTel': '814930498@qq.com',
       'userPassword': pswd
     })
     let ui = await UserInfo.create({
@@ -46,7 +46,7 @@ module.exports = {
     let id1 = db.generateId()
     await UserRegister.create({
       'userId': id1,
-      'userTel': '13587413333',
+      'userEmail': '814931111@qq.com',
       'userPassword': pswd
     })
     await UserInfo.create({
@@ -62,7 +62,7 @@ module.exports = {
     let id2 = db.generateId()
     await UserRegister.create({
       'userId': id2,
-      'userTel': '13587411111',
+      'userEmail': '814930000@qq.com',
       'userPassword': pswd
     })
     await UserInfo.create({
@@ -79,17 +79,17 @@ module.exports = {
   'GET /api/createUserRelation': async (ctx, next) => {
     var fromuser = await UserRegister.findOne({
       where: {
-        'userTel': 13587416958
+        'userEmail': '814930498@qq.com'
       }
     })
     var touser1 = await UserRegister.findOne({
       where: {
-        'userTel': 13587411111
+        'userEmail': '814930000@qq.com'
       }
     })
     var touser2 = await UserRegister.findOne({
       where: {
-        'userTel': 13587413333
+        'userEmail': '814931111@qq.com'
       }
     })
     await UserRelation.create({
@@ -102,14 +102,5 @@ module.exports = {
       toId: touser2.userId,
       bothStatus: false
     })
-  },
-  'DELETE /api/products/:id': async (ctx, next) => {
-    console.log(`delete product ${ctx.params.id}`)
-    var p = {}
-    if (p) {
-      ctx.rest(p)
-    } else {
-      throw new APIError('product:not_found', 'product not found by id.')
-    }
   }
 }

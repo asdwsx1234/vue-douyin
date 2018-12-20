@@ -9,7 +9,7 @@ function staticFiles (url, dir) {
     if (rpath.startsWith(url)) {
       let fp = path.join(dir, rpath.substring(url.length))
       if (await fs.stat(fp)) {
-        ctx.response.type = mime.lookup(rpath)
+        ctx.response.type = mime.getType(rpath)
         ctx.response.body = await fs.readFile(fp)
       } else {
         ctx.response.status = 404

@@ -1,3 +1,5 @@
+const crypto = require('crypto')
+const hash = crypto.createHash('md5')
 const APIError = require('../rest').APIError
 const UserRegister = require('../models/UserRegister')
 const UserInfo = require('../models/UserInfo')
@@ -26,10 +28,11 @@ module.exports = {
   },
   'GET /api/createUser': async (ctx, next) => {
     let id = db.generateId()
+    let pswd = hash.digest('base64', 'asdwsx1234')
     let ur = await UserRegister.create({
       'userId': id,
       'userTel': '13587416958',
-      'userPassword': 'asdwsx1234'
+      'userPassword': pswd
     })
     let ui = await UserInfo.create({
       'userId': id,
@@ -44,7 +47,7 @@ module.exports = {
     await UserRegister.create({
       'userId': id1,
       'userTel': '13587413333',
-      'userPassword': 'asdwsx1234'
+      'userPassword': pswd
     })
     await UserInfo.create({
       'userId': id1,
@@ -60,7 +63,7 @@ module.exports = {
     await UserRegister.create({
       'userId': id2,
       'userTel': '13587411111',
-      'userPassword': 'asdwsx1234'
+      'userPassword': pswd
     })
     await UserInfo.create({
       'userId': id2,
@@ -89,20 +92,16 @@ module.exports = {
         'userTel': 13587413333
       }
     })
-    await UserRelation.create(
-      {
-        fromId: fromuser.userId,
-        toId: touser1.userId,
-        bothStatus: false
-      }
-    )
-    await UserRelation.create(
-      {
-        fromId: fromuser.userId,
-        toId: touser2.userId,
-        bothStatus: false
-      }
-    )
+    await UserRelation.create({
+      fromId: fromuser.userId,
+      toId: touser1.userId,
+      bothStatus: false
+    })
+    await UserRelation.create({
+      fromId: fromuser.userId,
+      toId: touser2.userId,
+      bothStatus: false
+    })
   },
   'DELETE /api/products/:id': async (ctx, next) => {
     console.log(`delete product ${ctx.params.id}`)

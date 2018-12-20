@@ -18,4 +18,4 @@ app.use(restify())
 app.use(controller())
 app.listen(3000)
 
-// console.log('listening at port 3000...')
+console.log('listening at port 3000...')

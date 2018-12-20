@@ -4,7 +4,24 @@ const APIError = require('../rest').APIError
 const UserRegister = require('../models/UserRegister')
 const UserInfo = require('../models/UserInfo')
 const db = require('../db')
+const nodemailer = require('../utils/nodemailer')
 module.exports = {
+  'GET /api/user/getCode/:email': async (ctx, next) => {
+    const email = ctx.params.email
+    const regEmail = /^([a-zA-Z0-9]+[_|.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/
+    if (regEmail.test(email)) {
+      let code = nodemailer.generateCode()
+      let res = await nodemailer.sendMail(nodemailer.CreateMail(email, code))
+      if (typeof res.code === 'undefined') {
+        // 发送成功
+        ctx.rest(res)
+      } else {
+        throw new APIError('user:email_sent_failed', 'email_sent_failed.')
+      }
+    } else {
+      throw new APIError('user:email_error', 'email_error.')
+    }
+  },
   'GET /api/user/:userId/UserInfo/': async (ctx, next) => {
     const userId = ctx.params.userId
     const user = await UserRegister.findOne({
@@ -61,21 +78,21 @@ module.exports = {
   },
   'POST /api/user/Register': async (ctx, next) => {
     const user = {
-      tel: ctx.request.body.tel,
+      email: ctx.request.body.email,
       password: hash.digest('base64', ctx.request.body.password)
     }
     const result = await UserRegister.findOne({
       where: {
-        'userTel': user.tel
+        'userEmail': user.email
       }
     })
     if (result) {
-      throw new APIError('user:tel_existed', 'The tel is existed')
+      throw new APIError('user:email_existed', 'The email is registed.')
     } else {
       const id = db.generateId()
       const newUser = await UserRegister.create({
         'userId': id,
-        'userTel': user.tel,
+        'userEmail': user.email,
         'userPassword': user.password
       })
       const newUserInfo = await UserInfo.create({
@@ -95,19 +112,19 @@ module.exports = {
   },
   'POST /api/user/LoginByPassword': async (ctx, next) => {
     const user = {
-      tel: ctx.request.body.tel,
+      email: ctx.request.body.email,
       password: ctx.request.body.password
     }
     const result = await UserRegister.findOne({
       where: {
-        'userTel': user.tel,
+        'userEmail': user.email,
         'userPassword': hash.digest('base64', user.password)
       }
     })
     if (result) {
       ctx.rest(result)
     } else {
-      throw new APIError('user:not_found', 'tel or password error')
+      throw new APIError('user:not_found', 'email or password error')
     }
   }
 }

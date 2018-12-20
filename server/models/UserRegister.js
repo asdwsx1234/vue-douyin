@@ -14,8 +14,8 @@ let UserRegister = db.defineModel('UserRegister', {
     type: db.ID,
     allowNull: false
   },
-  userTel: {
-    type: db.STRING(11),
+  userEmail: {
+    type: db.STRING(50),
     unique: true
   },
   userPassword: db.STRING(100)

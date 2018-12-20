@@ -80,6 +80,15 @@ export default new Router({
       name: 'FanList',
       path: '/FanList/:id',
       component: () => import('./views/FanList.vue')
+    },
+    {
+      path: '/contact',
+      component: () => import('./views/Contact.vue')
+    },
+    {
+      name: 'chatwith',
+      path: '/ChatWith/:id',
+      component: () => import('./views/ChatWith.vue')
     }
   ]
 })

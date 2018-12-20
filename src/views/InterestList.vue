@@ -1,5 +1,4 @@
 <template>
-<transition name="right-to-left">
 <div>
   <my-list :Title="title">
     <li v-for="item in Interests" :key="item.id" class="list-item">
@@ -12,7 +11,6 @@
     </li>
   </my-list>
 </div>
-</transition>
 </template>
 
 <script>
@@ -56,11 +54,6 @@ export default {
 
 <style scoped lang='stylus'>
 @import '~@/common/stylus/variable'
-.right-to-left-enter-active, .right-to-left-leave-active
-  transition all .3s
-.right-to-left-enter, .right-to-left-leave-to
-  opacity 0
-  transform scale(0)
 .list-item
   padding 10px 10px
   display flex

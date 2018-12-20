@@ -4,7 +4,7 @@
     <span class="backbtn iconfont icon-left" @click="GoBack"></span>
     <p class="title">{{Title}}</p>
   </div>
-  <scroll class="scroll-wrap">
+  <scroll class="scroll-wrap" :class=" {'scroll-wrap-bottom':needBottomMargin }">
     <ul>
       <slot></slot>
     </ul>
@@ -19,6 +19,10 @@ export default {
     Title: {
       type: String,
       required: true
+    },
+    needBottomMargin: {
+      type: Boolean,
+      default: false
     }
   },
   methods: {
@@ -62,4 +66,6 @@ export default {
     bottom 0
     right 0
     margin-top 44px
+  .scroll-wrap-bottom
+    margin-bottom 44px
 </style>

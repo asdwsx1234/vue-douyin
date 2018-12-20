@@ -8,7 +8,7 @@
         {{title}}
       </span>
     </div>
-    <div class="contact-wrap" v-if="title == '消息'">
+    <div class="contact-wrap" v-if="title == '消息'" @click="$router.push('/contact')">
       <span>联系人</span>
     </div>
   </div>

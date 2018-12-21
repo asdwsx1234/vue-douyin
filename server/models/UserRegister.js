@@ -18,7 +18,8 @@ let UserRegister = db.defineModel('UserRegister', {
     type: db.STRING(50),
     unique: true
   },
-  userPassword: db.STRING(100)
+  userPassword: db.STRING(100),
+  userStatus: db.STRING(20)
 })
 
 UserRegister.hasOne(UserInfo, { foreignKey: 'userId' })
@@ -26,11 +27,11 @@ UserRegister.hasMany(UserRelation, { as: 'Followers', foreignKey: 'fromId' })
 UserRegister.hasMany(UserRelation, { as: 'Fans', foreignKey: 'toId' })
 UserRegister.hasMany(PrivateLetter, { as: 'SentMessages', foreignKey: 'fromId' })
 UserRegister.hasMany(PrivateLetter, { as: 'ReceviedMessages', foreignKey: 'toId' })
-UserRegister.hasMany(VideoInfo, { foreignKey: 'userId' })
-UserRegister.hasMany(Likeinfo, { foreignKey: 'userId' })
-UserRegister.hasMany(ShareInfo, { foreignKey: 'userId' })
-UserRegister.hasMany(WatchInfo, { foreignKey: 'userId' })
-UserRegister.hasMany(CommentInfo, { foreignKey: 'userId' })
+UserRegister.hasMany(VideoInfo, { as: 'Videos', foreignKey: 'userId' })
+UserRegister.hasMany(Likeinfo, { as: 'Likes', foreignKey: 'userId' })
+UserRegister.hasMany(ShareInfo, { as: 'Shares', foreignKey: 'userId' })
+UserRegister.hasMany(WatchInfo, { as: 'Watches', foreignKey: 'userId' })
+UserRegister.hasMany(CommentInfo, { as: 'Commentss', foreignKey: 'userId' })
 VideoInfo.belongsTo(UserRegister, { foreignKey: 'userId' })
 Likeinfo.belongsTo(UserRegister, { foreignKey: 'userId' })
 ShareInfo.belongsTo(UserRegister, { foreignKey: 'userId' })

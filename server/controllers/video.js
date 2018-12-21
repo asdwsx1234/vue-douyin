@@ -2,6 +2,12 @@ const APIError = require('../rest').APIError
 const VideoInfo = require('../models/VideoInfo')
 
 module.exports = {
+  'GET /api/video/getPopularVideo': async (ctx, next) => {
+    let videoList = await VideoInfo.findAll({
+      limit: 10
+    })
+    ctx.rest(videoList)
+  },
   'GET /api/video/:videoId/getVideoInfo': async (ctx, next) => {
     const videoId = ctx.params.videoId
     let vi = await VideoInfo.findOne({

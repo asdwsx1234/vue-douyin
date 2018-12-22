@@ -3,6 +3,7 @@ const crypto = require('crypto')
 const hash = crypto.createHash('md5')
 const redisClient = require('../redis')
 const APIError = require('../rest').APIError
+const utils = require('../utils/utils')
 const UserInfo = require('../models/UserInfo')
 const LikeInfo = require('../models/LikeInfo')
 const ShareInfo = require('../models/ShareInfo')
@@ -13,6 +14,11 @@ const CommentInfo = require('../models/CommentInfo')
 const PrivateLetter = require('../models/PrivateLetter')
 const UserRegister = require('../models/UserRegister')
 const UserRelation = require('../models/UserRelation')
+
+const KEY_WATCH_NUM = 'videoWatchNum'
+const KEY_SHARE_NUM = 'videoShareNum'
+const KEY_LIKE_NUM = 'videoLikeNum'
+const KEY_COMMENT_NUM = 'videoCommentNum'
 
 module.exports = {
   'GET /api/user/getCode/:email': async (ctx, next) => {
@@ -303,9 +309,11 @@ module.exports = {
       }
     })
     if (li) {
+      utils.incrOrCut(KEY_LIKE_NUM, -1, toVideoId)
       await li.destroy()
       ctx.rest('取消喜欢成果')
     } else {
+      utils.incrOrCut(KEY_LIKE_NUM, 1, toVideoId)
       await LikeInfo.create({
         'videoId': toVideoId,
         'userId': fromUserId
@@ -330,6 +338,7 @@ module.exports = {
     if (!user || !video) {
       throw new APIError('user:not_existed', 'fromUser or toVideo is not existed.')
     }
+    utils.incrOrCut(KEY_WATCH_NUM, 1, toVideoId)
     await WatchInfo.create({
       'videoId': toVideoId,
       'userId': fromUserId
@@ -353,6 +362,7 @@ module.exports = {
     if (!user || !video) {
       throw new APIError('user:not_existed', 'fromUser or toVideo is not existed.')
     }
+    utils.incrOrCut(KEY_SHARE_NUM, 1, toVideoId)
     await ShareInfo.create({
       'videoId': toVideoId,
       'userId': fromUserId
@@ -398,6 +408,7 @@ module.exports = {
         throw new APIError('comment:not_existed', 'replyComment is not existed.')
       }
     }
+    utils.incrOrCut(KEY_COMMENT_NUM, 1, comment.videoId)
     const c = await CommentInfo.create(comment)
     ctx.rest(c)
   },

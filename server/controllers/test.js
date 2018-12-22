@@ -9,12 +9,18 @@ const UserRegister = require('../models/UserRegister')
 const UserInfo = require('../models/UserInfo')
 const UserRelation = require('../models/UserRelation')
 const db = require('../db')
-
+const utils = require('../utils/utils')
 const MAX_USER_NUM = 50
 const MAX_VIDEO_NUM = MAX_USER_NUM * 5
 const MAX_USER_RELATION_NUM = MAX_USER_NUM * 2
 const MAX_VIDEO_WSLC_NUM = MAX_USER_NUM * 10
 const USER_PSWD = hash.digest('base64', 'asdwsx1234')
+
+const KEY_WATCH_NUM = 'videoWatchNum'
+const KEY_SHARE_NUM = 'videoShareNum'
+const KEY_LIKE_NUM = 'videoLikeNum'
+const KEY_COMMENT_NUM = 'videoCommentNum'
+
 module.exports = {
   'GET /api/test/createUsers': async (ctx, next) => {
     for (let i = 0; i < MAX_USER_NUM; i++) {
@@ -109,6 +115,7 @@ module.exports = {
       let videoId = videos[VideoRandomIndex].videoId
       let OperationCase = Math.floor(Math.random() * 3)
       if (OperationCase === 0) {
+        utils.incrOrCut(KEY_SHARE_NUM, 1, videoId)
         await ShareInfo.create({
           videoId,
           userId
@@ -121,14 +128,17 @@ module.exports = {
           }
         })
         if (li) {
+          utils.incrOrCut(KEY_LIKE_NUM, -1, videoId)
           await li.destroy()
         } else {
+          utils.incrOrCut(KEY_LIKE_NUM, 1, videoId)
           await LikeInfo.create({
             videoId,
             userId
           })
         }
       } else if (OperationCase === 2) {
+        utils.incrOrCut(KEY_COMMENT_NUM, 1, videoId)
         await CommentInfo.create({
           videoId,
           commentContent: `comment test`,
@@ -136,6 +146,7 @@ module.exports = {
           userId
         })
       }
+      utils.incrOrCut(KEY_WATCH_NUM, 1, videoId)
       await WatchInfo.create({
         videoId,
         userId

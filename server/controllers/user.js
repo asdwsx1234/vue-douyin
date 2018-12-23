@@ -201,6 +201,34 @@ module.exports = {
       throw new APIError('user:not_found', 'user not found by userId.')
     }
   },
+  'GET /api/user/:userId/FansNum': async (ctx, next) => {
+    const userId = ctx.params.userId
+    const user = await UserRegister.findOne({
+      where: {
+        'userId': userId
+      }
+    })
+    if (user) {
+      const fansList = await user.getFans()
+      ctx.rest(fansList.length)
+    } else {
+      throw new APIError('user:not_found', 'user not found by userId.')
+    }
+  },
+  'GET /api/user/:userId/FollowersNum': async (ctx, next) => {
+    const userId = ctx.params.userId
+    const user = await UserRegister.findOne({
+      where: {
+        'userId': userId
+      }
+    })
+    if (user) {
+      const FollowersList = await user.getFollowers()
+      ctx.rest(FollowersList.length)
+    } else {
+      throw new APIError('user:not_found', 'user not found by userId.')
+    }
+  },
   'GET /api/user/:userId/Likes': async (ctx, next) => {
     const userId = ctx.params.userId
     const user = await UserRegister.findOne({
@@ -231,6 +259,34 @@ module.exports = {
     if (user) {
       const VideoList = await user.getVideos()
       ctx.rest(VideoList)
+    } else {
+      throw new APIError('user:not_found', 'user not found by userId.')
+    }
+  },
+  'GET /api/user/:userId/LikesNum': async (ctx, next) => {
+    const userId = ctx.params.userId
+    const user = await UserRegister.findOne({
+      where: {
+        'userId': userId
+      }
+    })
+    if (user) {
+      const LikeList = await user.getLikes()
+      ctx.rest(LikeList.length)
+    } else {
+      throw new APIError('user:not_found', 'user not found by userId.')
+    }
+  },
+  'GET /api/user/:userId/VideosNum': async (ctx, next) => {
+    const userId = ctx.params.userId
+    const user = await UserRegister.findOne({
+      where: {
+        'userId': userId
+      }
+    })
+    if (user) {
+      const VideoList = await user.getVideos()
+      ctx.rest(VideoList.length)
     } else {
       throw new APIError('user:not_found', 'user not found by userId.')
     }
@@ -316,7 +372,7 @@ module.exports = {
     if (li) {
       utils.incrOrCut(KEY_LIKE_NUM, -1, toVideoId)
       await li.destroy()
-      ctx.rest('取消喜欢成果')
+      ctx.rest('取消喜欢成功')
     } else {
       utils.incrOrCut(KEY_LIKE_NUM, 1, toVideoId)
       await LikeInfo.create({

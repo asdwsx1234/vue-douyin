@@ -1,6 +1,5 @@
 const db = require('../db')
 const crypto = require('crypto')
-const hash = crypto.createHash('md5')
 const redisClient = require('../redis')
 const APIError = require('../rest').APIError
 const utils = require('../utils/utils')
@@ -43,7 +42,7 @@ module.exports = {
   'POST /api/common/user/Register': async (ctx, next) => {
     const user = {
       email: ctx.request.body.email,
-      password: hash.digest('base64', ctx.request.body.password),
+      password: crypto.createHash('md5').update(ctx.request.body.password).digest('base64'),
       code: ctx.request.body.code
     }
     const result = await UserRegister.findOne({
@@ -65,7 +64,7 @@ module.exports = {
         })
         const newUserInfo = await UserInfo.create({
           userId: id,
-          userAvatar: 'url:xxxxxxxxx',
+          userAvatar: '/assets/avatar/default.png',
           userNickname: `用户${id}`,
           userAddress: '未知',
           userGender: '男',
@@ -89,7 +88,7 @@ module.exports = {
     let result = await UserRegister.findOne({
       where: {
         'userEmail': user.email,
-        'userPassword': hash.digest('base64', user.password)
+        'userPassword': crypto.createHash('md5').update(user.password).digest('base64')
       }
     })
     if (result) {
@@ -145,7 +144,11 @@ module.exports = {
     }
   },
   'GET /api/user/:userId/getUserInfo': async (ctx, next) => {
-    const userId = ctx.params.userId
+    let userId = ctx.params.userId
+    if (userId === 'persistent') {
+      let session = JSON.parse(await redisClient.get(`SESSION:${ctx.cookies.get('koa:sess')}`))
+      userId = session.userId
+    }
     const user = await UserRegister.findOne({
       where: {
         'userId': userId

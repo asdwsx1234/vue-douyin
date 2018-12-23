@@ -14,7 +14,7 @@ const MAX_USER_NUM = 50
 const MAX_VIDEO_NUM = MAX_USER_NUM * 5
 const MAX_USER_RELATION_NUM = MAX_USER_NUM * 2
 const MAX_VIDEO_WSLC_NUM = MAX_USER_NUM * 10
-const USER_PSWD = hash.digest('base64', 'asdwsx1234')
+const USER_PSWD = hash.update('asdwsx1234').digest('base64')
 
 const KEY_WATCH_NUM = 'videoWatchNum'
 const KEY_SHARE_NUM = 'videoShareNum'
@@ -43,7 +43,7 @@ module.exports = {
       let id = db.generateId()
       await UserRegister.create({
         'userId': id,
-        'userEmail': `${id.slice(0, 9)}@qq.com`,
+        'userEmail': `${id.slice(0, 8)}@qq.com`,
         'userPassword': USER_PSWD,
         'userStatus': '离线'
       })

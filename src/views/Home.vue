@@ -34,6 +34,7 @@ import Scroll from 'base/scroll/scroll'
 import MyVideo from 'components/MyVideo/MyVideo'
 import Login from 'components/Login/Login'
 import CommentList from 'components/CommentList/CommentList'
+import { mapGetters } from 'vuex'
 export default {
   mounted () {
   },
@@ -86,12 +87,21 @@ export default {
     },
     isHome () {
       return this.$route.name === 'home'
+    },
+    ...mapGetters([
+      'isLogged'
+    ])
+  },
+  watch: {
+    isLogged (newVal, oldVal) {
+      if (newVal) {
+        this.showLoginWrap = false
+      }
     }
   },
   beforeRouteLeave (to, from, next) {
-    let logined = false
     if (to.name !== 'home') {
-      if (logined) {
+      if (this.isLogged) {
         next()
       } else {
         this.showLoginWrap = true

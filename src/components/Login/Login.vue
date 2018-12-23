@@ -4,11 +4,11 @@
   <a class="register" @click="showRegister = true">注册账号</a>
   <div class="form-wrap">
     <h1 class="title">登录</h1>
-    <input class="input" type="email" placeholder="输入邮箱" autocomplete="off" name="" id="email">
-    <input class="input" type="password" placeholder="输入密码" name="" id="password">
+    <input class="input" type="email" placeholder="输入邮箱" autocomplete="off" v-model="email" id="email">
+    <input class="input" type="password" placeholder="输入密码" v-model="password" id="password">
     <a class="forget-password" @click="showRetrievePassword=true">忘记了？找回密码</a>
     <div class="login-btn">
-      <i class="iconfont icon-check"></i>
+      <i class="iconfont icon-check" @click="login"></i>
     </div>
   </div>
   <transition name="right-to-left">
@@ -23,19 +23,41 @@
 </template>
 
 <script>
+import { regEmail } from 'common/js/util'
 import Register from 'components/Register/Register'
 import RetrievePassword from 'components/RetrievePassword/RetrievePassword'
+import { mapActions } from 'vuex'
 export default {
   data () {
     return {
       showRegister: false,
-      showRetrievePassword: false
+      showRetrievePassword: false,
+      email: '',
+      password: ''
     }
   },
   methods: {
     close () {
       this.$emit('login-close')
-    }
+    },
+    login () {
+      let user = {
+        email: this.email,
+        password: this.password
+      }
+      if (!regEmail.test(user.email)) {
+        // tip:email
+        return
+      }
+      if (user.password.length < 6) {
+        // tip:password
+        return
+      }
+      this.loginByPassword(user)
+    },
+    ...mapActions([
+      'loginByPassword'
+    ])
   },
   components: {
     Register,

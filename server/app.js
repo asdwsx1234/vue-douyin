@@ -6,6 +6,7 @@ const restify = require('./rest').restify
 const controller = require('./controller')
 let staticFiles = require('./staticFiles')
 const bodyParser = require('koa-bodyparser')
+const cors = require('koa2-cors')
 
 const app = new Koa()
 
@@ -16,6 +17,19 @@ app.use(session({
 app.use(staticFiles('/assets', path.join(__dirname, 'static/assets')))
 app.use(restify())
 app.use(bodyParser())
+app.use(cors({
+  origin: function (ctx) {
+    if (ctx.url === '/test') {
+      return '*' // 允许来自所有域名请求
+    }
+    return 'http://localhost:8080'
+  },
+  exposeHeaders: ['WWW-Authenticate', 'Server-Authorization'],
+  maxAge: 5,
+  credentials: true,
+  allowMethods: ['GET', 'POST', 'DELETE'],
+  allowHeaders: ['Content-Type', 'Authorization', 'Accept']
+}))
 app.use(async (ctx, next) => {
   await next()
   const rt = ctx.response.get('X-Response-Time')

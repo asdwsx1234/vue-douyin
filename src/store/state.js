@@ -1,4 +1,9 @@
 const state = {
-  loginInfo: {}
+  isLogged: false,
+  loginInfo: {},
+  followerList: [],
+  fanList: [],
+  likeList: [],
+  videoList: []
 }
 export default state

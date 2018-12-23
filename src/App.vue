@@ -14,11 +14,20 @@
 
 <script>
 import HomeTab from 'components/HomeTab/HomeTab'
+import { mapActions } from 'vuex'
 export default {
+  mounted () {
+    this.persistentConnection()
+  },
   computed: {
     isHome () {
       return this.$route.name === 'home'
     }
+  },
+  methods: {
+    ...mapActions([
+      'persistentConnection'
+    ])
   },
   components: {
     HomeTab

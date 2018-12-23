@@ -8,12 +8,14 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "axios": "^0.18.0",
     "better-scroll": "^1.13.2",
     "ioredis": "^4.3.0",
     "koa": "^2.6.2",
     "koa-bodyparser": "3.2.0",
     "koa-router": "7.0.0",
     "koa-session2": "^2.2.8",
+    "koa2-cors": "^2.0.6",
     "mime": ">=1.4.1",
     "mysql": "^2.16.0",
     "mysql2": "^1.6.4",

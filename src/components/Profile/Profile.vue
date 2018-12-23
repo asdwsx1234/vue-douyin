@@ -3,7 +3,7 @@
     <me-tab class="fiexedtop" v-show="fiexedtopshow"></me-tab>
     <div class="backbtn-wrap" :class="{showbgcolor: fiexedtopshow}">
       <span class="backbtn iconfont icon-left" @click.stop="GoBack"></span>
-      <p class="name" :class="{showname: fiexedtopshow}">well</p>
+      <p class="name" :class="{showname: fiexedtopshow}" v-text="loginInfo.userNickname"></p>
       <span class="dotbtn iconfont icon-ellipsis"></span>
     </div>
     <div class="background" :style="bgimgStyle" @touchstart.prevent>
@@ -17,22 +17,22 @@
             @click="showCommentList=false">
       <div class="profile">
         <div class="avatar-wrap">
-          <img class="avatar" src="./1.jpg" alt="">
+          <img class="avatar" :src="`${baseURL}${loginInfo.userAvatar}`" alt="">
         </div>
         <div class="name-wrap">
-          <p class="name">well</p>
-          <p class="subname">抖音号：123456</p>
+          <p class="name" v-text="loginInfo.userNickname"></p>
+          <p class="subname">抖音号：{{loginInfo.userId}}</p>
         </div>
         <div class="desc-wrap">
-          <p class="desc">填写个性签名更容易获得别人关注哦</p>
+          <p class="desc" v-text="loginInfo.userDesc"></p>
           <div class="gender">
             <div class="icon iconfont icon-man"></div>
-            21岁
+            {{loginInfo.userAge}}岁
           </div>
           <div class="num-wrap">
             <p>100w获赞</p>
-            <p @click="GoInterestList">100w关注</p>
-            <p @click="GoFanList">100w粉丝</p>
+            <p @click="GoInterestList">{{followerList.length}}关注</p>
+            <p @click="GoFanList">{{fanList.length}}粉丝</p>
           </div>
         </div>
         <div class="wrap">
@@ -55,12 +55,19 @@
 import Scroll from 'base/scroll/scroll'
 import MeTab from 'components/MeTab/MeTab'
 import CommentList from 'components/CommentList/CommentList'
+import { mapGetters, mapActions } from 'vuex'
+import { baseURL } from 'common/js/config'
 export default {
-  activated () {
-    console.log(this.$route)
+  mounted () {
+    const userId = this.loginInfo.userId
+    this.getFanList(userId)
+    this.getFollowerList(userId)
+    this.getLikeList(userId)
+    this.getVideoList(userId)
   },
   data () {
     return {
+      baseURL,
       fiexedtopshow: false,
       bgimgHeight: 150,
       showCommentList: false,
@@ -85,7 +92,12 @@ export default {
         height: height + 'px',
         transform: `scaleX(${scale})`
       }
-    }
+    },
+    ...mapGetters([
+      'loginInfo',
+      'followerList',
+      'fanList'
+    ])
   },
   methods: {
     scrollHandler (pos) {
@@ -110,7 +122,13 @@ export default {
     },
     GoFanList () {
       this.$router.push(`/FanList/${this.$route.params.id}`)
-    }
+    },
+    ...mapActions([
+      'getFanList',
+      'getLikeList',
+      'getVideoList',
+      'getFollowerList'
+    ])
   },
   watch: {
     '$route': function () {
@@ -228,7 +246,7 @@ export default {
           border-radius 5px
           background rgba(67, 51, 63, 0.7)
           font-size $font-size-small-s
-          width 40px
+          max-width 50px
           color $color-desc
           .icon
             display inline-block

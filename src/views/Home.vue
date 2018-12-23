@@ -1,5 +1,5 @@
 <template>
-<div @click="c">
+<div @click.capture="c($event)">
   <div class="back iconfont icon-left" v-show="!isHome" @click="$router.back()"></div>
   <scroll class="wrap"
     ref="scroll"
@@ -21,13 +21,18 @@
       :commentList="commentList"
       @close="showCommentList=false"></comment-list>
   </transition>
-  <!-- <router-view></router-view> -->
+  <transition name="up">
+    <login
+      v-if="showLoginWrap"
+      @login-close="showLoginWrap=false"></login>
+  </transition>
 </div>
 </template>
 
 <script>
 import Scroll from 'base/scroll/scroll'
 import MyVideo from 'components/MyVideo/MyVideo'
+import Login from 'components/Login/Login'
 import CommentList from 'components/CommentList/CommentList'
 export default {
   mounted () {
@@ -36,6 +41,7 @@ export default {
     return {
       currentY: 0,
       showCommentList: false,
+      showLoginWrap: false,
       VideoList: [{ id: 1, video: 'https://mp4.vjshi.com/2017-08-28/ecbc62447fe2f2be561af3ae1a43a6ab.mp4', avatar: '', name: 'well', desc: '与此同时，网络社交一直在努力通过不断丰富的手段和工具，来替代传统社', likenum: '100', commentnum: '2.1w', sharenum: '2.3w' },
         { id: 2, video: 'http://video.pearvideo.com/mp4/adshort/20181118/cont-1478169-13252496_adpkg-ad_hd.mp4', avatar: '', name: 'well1', desc: '与此同时，网络社交一直在努力通过不断丰富的手段和工具，来替代传统社', likenum: '1000', commentnum: '5.1w', sharenum: '5.2w' },
         { id: 3, video: 'http://video.pearvideo.com/mp4/adshort/20181118/cont-1478156-13252863_adpkg-ad_hd.mp4', avatar: '', name: 'well2', desc: '与此同时，网络社交一直在努力通过不断丰富的手段和工具，来替代传统社', likenum: '2323', commentnum: '2.1w', sharenum: '2333' }
@@ -67,8 +73,9 @@ export default {
         this.$refs.scroll.scrollTo(0, -this.currentY) // 下一页
       }
     },
-    c () {
+    c (e) {
       if (this.showCommentList) {
+        e.stopPropagation()
         this.showCommentList = false
       }
     }
@@ -81,10 +88,23 @@ export default {
       return this.$route.name === 'home'
     }
   },
+  beforeRouteLeave (to, from, next) {
+    let logined = false
+    if (to.name !== 'home') {
+      if (logined) {
+        next()
+      } else {
+        this.showLoginWrap = true
+      }
+    }
+    // 导航离开该组件的对应路由时调用
+    // 可以访问组件实例 `this`
+  },
   components: {
     MyVideo,
     Scroll,
-    CommentList
+    CommentList,
+    Login
   }
 }
 </script>

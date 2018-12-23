@@ -22,6 +22,22 @@ const KEY_LIKE_NUM = 'videoLikeNum'
 const KEY_COMMENT_NUM = 'videoCommentNum'
 
 module.exports = {
+  'GET /api/common/testlogin': async (ctx, next) => {
+    ctx.session.userId = 'aaaaaaaa'
+    ctx.rest('login suc!')
+  },
+  'GET /api/common/testupdate': async (ctx, next) => {
+    ctx.session.name = 'haha'
+    ctx.rest('update suc!')
+  },
+  'GET /api/common/testupdate1': async (ctx, next) => {
+    ctx.session.refresh()
+    ctx.rest('update suc!')
+  },
+  'GET /api/common/testlogout': async (ctx, next) => {
+    ctx.session = {}
+    ctx.rest('logout suc!')
+  },
   'GET /api/test/createUsers': async (ctx, next) => {
     for (let i = 0; i < MAX_USER_NUM; i++) {
       let id = db.generateId()

@@ -21,7 +21,7 @@ const KEY_LIKE_NUM = 'videoLikeNum'
 const KEY_COMMENT_NUM = 'videoCommentNum'
 
 module.exports = {
-  'GET /api/user/getCode/:email': async (ctx, next) => {
+  'GET /api/common/user/getCode/:email': async (ctx, next) => {
     const email = ctx.params.email
     const regEmail = /^([a-zA-Z0-9]+[_|.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/
     if (regEmail.test(email)) {
@@ -40,7 +40,7 @@ module.exports = {
       throw new APIError('user:email_format_error', 'email_format_error.')
     }
   },
-  'POST /api/user/Register': async (ctx, next) => {
+  'POST /api/common/user/Register': async (ctx, next) => {
     const user = {
       email: ctx.request.body.email,
       password: hash.digest('base64', ctx.request.body.password),
@@ -81,7 +81,7 @@ module.exports = {
       }
     }
   },
-  'POST /api/user/loginByPassword': async (ctx, next) => {
+  'POST /api/common/user/loginByPassword': async (ctx, next) => {
     const user = {
       email: ctx.request.body.email,
       password: ctx.request.body.password
@@ -95,6 +95,7 @@ module.exports = {
     if (result) {
       result.userStatus = '在线'
       await result.save()
+      ctx.session.userId = result.userId
       ctx.rest(result)
     } else {
       throw new APIError('user:not_found', 'email or password error')
@@ -109,6 +110,7 @@ module.exports = {
     })
     if (ur) {
       ur.userStatus = '离线'
+      ctx.session = {}
       await ur.save()
     } else {
       throw new APIError('user:not_found', 'user not found by userId.')

@@ -38,8 +38,7 @@
         <div class="wrap">
           <me-tab></me-tab>
           <router-view
-          @showCommentList="showCommentList=true"
-          ></router-view>
+          @showCommentList="showCommentList=true"></router-view>
         </div>
       </div>
     </scroll>

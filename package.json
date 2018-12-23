@@ -13,6 +13,7 @@
     "koa": "^2.6.2",
     "koa-bodyparser": "3.2.0",
     "koa-router": "7.0.0",
+    "koa-session2": "^2.2.8",
     "mime": ">=1.4.1",
     "mysql": "^2.16.0",
     "mysql2": "^1.6.4",

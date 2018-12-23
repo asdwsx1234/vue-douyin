@@ -9,7 +9,7 @@ const KEY_COMMENT_NUM = 'videoCommentNum'
 const VIDEO_NUM = 15
 
 module.exports = {
-  'GET /api/video/getPopularVideo': async (ctx, next) => {
+  'GET /api/common/video/getPopularVideo': async (ctx, next) => {
     let key = 'popularVideoList'
     let isExists = await redisClient.exists(key)
     if (!isExists) {

@@ -1,0 +1,1 @@
+export const SET_LOGININFO = 'SET_LOGININFO'

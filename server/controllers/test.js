@@ -15,11 +15,11 @@ const MAX_USER_NUM = 50
 const MAX_VIDEO_NUM = MAX_USER_NUM * 5
 const MAX_USER_RELATION_NUM = MAX_USER_NUM * 2
 
-const MAX_VIDEO_WATCH_NUM = MAX_USER_NUM * 100
+const MAX_VIDEO_WATCH_NUM = MAX_USER_NUM * 50
 const MAX_VIDEO_SHARE_NUM = MAX_USER_NUM * 10
 const MAX_VIDEO_LIKE_NUM = MAX_USER_NUM * 50
 const MAX_VIDEO_COMMENT_NUM = MAX_USER_NUM * 50
-const MAX_COMMENT_LIKE_NUM = MAX_USER_NUM * 100
+const MAX_COMMENT_LIKE_NUM = MAX_USER_NUM * 50
 
 const USER_PSWD = hash.update('asdwsx1234').digest('base64')
 
@@ -131,7 +131,7 @@ module.exports = {
   },
   'GET /api/test/createVideoLike': async (ctx, next) => {
     const users = await UserRegister.findAll()
-    const videos = await CommentInfo.findAll()
+    const videos = await VideoInfo.findAll()
     for (let i = 0; i < MAX_VIDEO_LIKE_NUM; i++) {
       let UserRandomIndex = Math.floor(Math.random() * MAX_USER_NUM)
       let VideoRandomIndex = Math.floor(Math.random() * MAX_VIDEO_NUM)
@@ -158,7 +158,7 @@ module.exports = {
   },
   'GET /api/test/createWatch': async (ctx, next) => {
     const users = await UserRegister.findAll()
-    const videos = await CommentInfo.findAll()
+    const videos = await VideoInfo.findAll()
     for (let i = 0; i < MAX_VIDEO_WATCH_NUM; i++) {
       let UserRandomIndex = Math.floor(Math.random() * MAX_USER_NUM)
       let VideoRandomIndex = Math.floor(Math.random() * MAX_VIDEO_NUM)
@@ -174,7 +174,7 @@ module.exports = {
   },
   'GET /api/test/createShare': async (ctx, next) => {
     const users = await UserRegister.findAll()
-    const videos = await CommentInfo.findAll()
+    const videos = await VideoInfo.findAll()
     for (let i = 0; i < MAX_VIDEO_SHARE_NUM; i++) {
       let UserRandomIndex = Math.floor(Math.random() * MAX_USER_NUM)
       let VideoRandomIndex = Math.floor(Math.random() * MAX_VIDEO_NUM)
@@ -190,7 +190,7 @@ module.exports = {
   },
   'GET /api/test/createComment': async (ctx, next) => {
     const users = await UserRegister.findAll()
-    const videos = await CommentInfo.findAll()
+    const videos = await VideoInfo.findAll()
     for (let i = 0; i < MAX_VIDEO_COMMENT_NUM; i++) {
       let UserRandomIndex = Math.floor(Math.random() * MAX_USER_NUM)
       let VideoRandomIndex = Math.floor(Math.random() * MAX_VIDEO_NUM)

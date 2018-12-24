@@ -26,7 +26,7 @@
         <div class="desc-wrap">
           <p class="desc" v-text="loginInfo.userDesc"></p>
           <div class="gender">
-            <div class="icon iconfont" :class="[loginInfo.userAge === '男' ? 'icon-man': 'icon-woman']"></div>
+            <div class="icon iconfont" :class="[loginInfo.userGender === '男' ? 'icon-man': 'icon-woman']"></div>
             {{loginInfo.userAge}}岁
           </div>
           <div class="num-wrap">

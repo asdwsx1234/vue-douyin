@@ -3,10 +3,13 @@
   <i class="iconfont icon-left" @click="back"></i>
   <div class="form-wrap">
     <h1 class="title">找回密码</h1>
-    <p class="tip">输入<i class="email">814930498@qq.com</i>收到的6位验证码</p>
-    <code-input></code-input>
-    <input class="input" type="password" placeholder="输入新密码" id="password">
-    <div class="login-btn">
+    <p class="tip">输入<i class="email">{{email}}</i>收到的6位验证码</p>
+    <code-input
+      :email="email"
+      ref="codeInput"
+      @code="_code"></code-input>
+    <input class="input" type="password" v-model="password" placeholder="输入新密码" id="password">
+    <div class="login-btn" @click="retrievePassword">
       <i class="iconfont icon-check"></i>
     </div>
   </div>
@@ -15,10 +18,46 @@
 
 <script>
 import CodeInput from 'base/CodeInput/CodeInput'
+import axios from 'axios'
+import { baseURL } from 'common/js/config'
 export default {
+  props: {
+    email: {
+      type: String,
+      required: true
+    }
+  },
+  mounted () {
+    this.$refs.codeInput.setDisabled(false)
+    this.$refs.codeInput.getCode()
+  },
+  data () {
+    return {
+      code: '',
+      password: ''
+    }
+  },
   methods: {
     back () {
       this.$emit('back')
+    },
+    _code (e) {
+      this.code = e
+    },
+    retrievePassword () {
+      let user = {
+        email: this.email,
+        password: this.password,
+        code: this.code
+      }
+      if (this.password.length < 6 || this.code.length !== 6) return
+      axios.post('/api/common/user/retrievePassword', user, {
+        baseURL
+      }).then(() => {
+        this.back()
+      }).catch((e) => {
+        console.log(e)
+      })
     }
   },
   components: {

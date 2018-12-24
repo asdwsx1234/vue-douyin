@@ -6,7 +6,15 @@
 </template>
 
 <script>
+import axios from 'axios'
+import { baseURL } from 'common/js/config'
 export default {
+  props: {
+    email: {
+      type: String,
+      required: true
+    }
+  },
   data () {
     return {
       cutdown: 60,
@@ -23,6 +31,11 @@ export default {
     getCode () {
       if (this.disabled) return
       // getCode
+      axios.get(`/api/common/user/getCode/${this.email}`, {
+        baseURL
+      }).catch((e) => {
+        console.log(e)
+      })
       this.setDisabled(true)
       this.cutdownMethod()
     },

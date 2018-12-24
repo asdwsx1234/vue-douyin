@@ -6,7 +6,7 @@
     <h1 class="title">登录</h1>
     <input class="input" type="email" placeholder="输入邮箱" autocomplete="off" v-model="email" id="email">
     <input class="input" type="password" placeholder="输入密码" v-model="password" id="password">
-    <a class="forget-password" @click="showRetrievePassword=true">忘记了？找回密码</a>
+    <a class="forget-password" @click="retrievePassword">忘记了？找回密码</a>
     <div class="login-btn" @click="login">
       <i class="iconfont icon-check"></i>
     </div>
@@ -15,7 +15,8 @@
     <register
       v-if="showRegister"
       @back="showRegister=false"></register>
-      <retrieve-password
+    <retrieve-password
+      :email="email"
       v-if="showRetrievePassword"
       @back="showRetrievePassword=false"></retrieve-password>
   </transition>
@@ -45,7 +46,6 @@ export default {
         email: this.email,
         password: this.password
       }
-      console.log(this.code)
       if (!regEmail.test(user.email)) {
         // tip:email
         return
@@ -55,6 +55,16 @@ export default {
         return
       }
       this.loginByPassword(user)
+    },
+    retrievePassword () {
+      let user = {
+        email: this.email
+      }
+      if (!regEmail.test(user.email)) {
+        // tip:email
+        return
+      }
+      this.showRetrievePassword = true
     },
     ...mapActions([
       'loginByPassword'

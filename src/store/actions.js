@@ -19,14 +19,6 @@ export const loginByPassword = async ({ commit, state }, user) => {
   }
 }
 
-export const register = async ({ commit, state }, user) => {
-  let res = await instance.post('/api/common/user/Register', user)
-  if (res.data.code === 200) {
-    let newUser = res.data.data.newUser
-    loginByPassword(newUser)
-  }
-}
-
 export const persistentConnection = async ({ commit, state }) => {
   let res = await instance.get('/api/user/persistent/getUserInfo')
   if (res.data.code === 200) {

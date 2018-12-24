@@ -30,7 +30,7 @@ module.exports = {
         // 发送成功 将code存入redis等待验证 60s后自动过期删除
         let key = `register_${email}`
         redisClient.set(key, code)
-        redisClient.expire(key, 60)
+        redisClient.expire(key, 120)
         ctx.rest(res)
       } else {
         throw new APIError('user:email_sent_failed', 'email_sent_failed.')
@@ -39,7 +39,7 @@ module.exports = {
       throw new APIError('user:email_format_error', 'email_format_error.')
     }
   },
-  'POST /api/common/user/Register': async (ctx, next) => {
+  'POST /api/common/user/register': async (ctx, next) => {
     const user = {
       email: ctx.request.body.email,
       password: crypto.createHash('md5').update(ctx.request.body.password).digest('base64'),
@@ -78,6 +78,27 @@ module.exports = {
       } else {
         throw new APIError('user:code_error', 'code_error')
       }
+    }
+  },
+  'POST /api/common/user/retrievePassword': async (ctx, next) => {
+    const user = {
+      email: ctx.request.body.email,
+      password: crypto.createHash('md5').update(ctx.request.body.password).digest('base64'),
+      code: ctx.request.body.code
+    }
+    const code = await redisClient.get(`register_${user.email}`)
+    if (user.code !== code) throw new APIError('user:code_error', 'code_error')
+    let result = await UserRegister.findOne({
+      where: {
+        'userEmail': user.email
+      }
+    })
+    if (result) {
+      result.password = user.password
+      await result.save()
+      ctx.rest('retrieve password suc!')
+    } else {
+      throw new APIError('user:email_error', 'no such email')
     }
   },
   'POST /api/common/user/loginByPassword': async (ctx, next) => {

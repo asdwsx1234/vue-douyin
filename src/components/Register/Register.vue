@@ -6,8 +6,9 @@
     <input class="input" type="email" placeholder="输入邮箱" autocomplete="off" v-model="email" @keyup="listenBtn($event)" id="email">
     <input class="input" type="password" placeholder="输入密码" v-model="password" id="password">
     <code-input
+      :email="email"
       ref="codeInput"
-      @code="code"></code-input>
+      @code="_code"></code-input>
     <div class="login-btn" @click="register">
       <i class="iconfont icon-check"></i>
     </div>
@@ -18,33 +19,29 @@
 <script>
 import { regEmail } from 'common/js/util'
 import CodeInput from 'base/CodeInput/CodeInput'
+import axios from 'axios'
+import { baseURL } from 'common/js/config'
+import { mapActions } from 'vuex'
 export default {
   data () {
     return {
       email: '',
-      password: ''
-    }
-  },
-  computed: {
-    isDisabled () {
-      if (regEmail.test(this.email)) {
-        return false
-      } else {
-        return true
-      }
+      password: '',
+      code: ''
     }
   },
   methods: {
     back () {
       this.$emit('back')
     },
-    code (e) {
-      console.log(e)
+    _code (e) {
+      this.code = e
     },
     register () {
       let user = {
         email: this.email,
-        password: this.password
+        password: this.password,
+        code: this.code
       }
       if (!regEmail.test(user.email)) {
         // tip:email
@@ -54,7 +51,13 @@ export default {
         // tip:password
         return
       }
-      this.loginByPassword(user)
+      axios.post('/api/common/user/register', user, {
+        baseURL
+      }).then(() => {
+        this.loginByPassword(user)
+      }).catch((e) => {
+        console.log(e)
+      })
     },
     listenBtn (e) {
       if (!regEmail.test(this.email)) {
@@ -62,7 +65,10 @@ export default {
         return
       }
       this.$refs.codeInput.setDisabled(false)
-    }
+    },
+    ...mapActions([
+      'loginByPassword'
+    ])
   },
   components: {
     CodeInput

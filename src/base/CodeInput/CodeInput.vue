@@ -1,13 +1,45 @@
 <template>
 <div class="row">
-  <input class="input" type="text" id="code" placeholder="输入邮箱验证码">
-  <div class="code-btn">获取验证码</div>
+  <input class="input" type="text" id="code" @keyup="codeInput($event.target.value)" placeholder="输入邮箱验证码">
+  <div class="code-btn" :class="{'btn-active': !disabled }" @click="getCode" ref="codeBtn">获取验证码</div>
 </div>
 </template>
 
 <script>
 export default {
-
+  data () {
+    return {
+      cutdown: 60,
+      disabled: true
+    }
+  },
+  methods: {
+    setDisabled (flag) {
+      this.disabled = flag
+    },
+    codeInput (e) {
+      this.$emit('code', e)
+    },
+    getCode () {
+      if (this.disabled) return
+      // getCode
+      this.setDisabled(true)
+      this.cutdownMethod()
+    },
+    cutdownMethod () {
+      if (this.cutdown === 0) {
+        this.cutdown = 60
+        this.$refs.codeBtn.innerHTML = '获取验证码'
+        this.setDisabled(false)
+      } else {
+        this.$refs.codeBtn.innerHTML = this.cutdown
+        this.cutdown--
+        setTimeout(() => {
+          this.cutdownMethod()
+        }, 1000)
+      }
+    }
+  }
 }
 </script>
 
@@ -41,4 +73,8 @@ export default {
     background rgba(255, 255, 255, .3)
     border-top-right-radius 4px
     border-bottom-right-radius 4px
+    transition all 1s
+  .btn-active
+    color #fff
+    background rgba(255, 255, 255, .5)
 </style>

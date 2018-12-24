@@ -1,13 +1,13 @@
 <template>
   <div class="tab">
     <router-link tag="div" class="tab-item" to="./video">
-      <span class="tab-link">作品 {{videoList.length}}</span>
+      <span class="tab-link">作品 {{videoNum}}</span>
     </router-link>
     <router-link tag="div" class="tab-item" to="./videoAndDesc">
-      <span class="tab-link">动态 {{videoList.length}}</span>
+      <span class="tab-link">动态 {{videoNum}}</span>
     </router-link>
     <router-link tag="div" class="tab-item" to="./likes">
-      <span class="tab-link">喜欢 {{likeList.length}}</span>
+      <span class="tab-link">喜欢 {{likeNum}}</span>
     </router-link>
   </div>
 </template>
@@ -17,8 +17,8 @@ import { mapGetters } from 'vuex'
 export default {
   computed: {
     ...mapGetters([
-      'videoList',
-      'likeList',
+      'videoNum',
+      'likeNum'
     ])
   }
 }

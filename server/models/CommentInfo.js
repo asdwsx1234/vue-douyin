@@ -1,6 +1,12 @@
 const db = require('../db')
+const LikeInfo = require('./LikeInfo')
 
-module.exports = db.defineModel('CommentInfo', {
+const CommentInfo = db.defineModel('CommentInfo', {
+  commentId: {
+    type: db.ID,
+    allowNull: false,
+    primaryKey: true
+  },
   commentContent: db.STRING(255),
   commentReplyID: db.ID,
   videoId: {
@@ -18,3 +24,8 @@ module.exports = db.defineModel('CommentInfo', {
     }
   }
 })
+
+module.exports = CommentInfo
+
+CommentInfo.hasMany(LikeInfo, { foreignKey: 'commentId' })
+LikeInfo.belongsTo(CommentInfo, { foreignKey: 'commentId' })

@@ -19,6 +19,14 @@ export const loginByPassword = async ({ commit, state }, user) => {
   }
 }
 
+export const register = async ({ commit, state }, user) => {
+  let res = await instance.post('/api/common/user/Register', user)
+  if (res.data.code === 200) {
+    let newUser = res.data.data.newUser
+    loginByPassword(newUser)
+  }
+}
+
 export const persistentConnection = async ({ commit, state }) => {
   let res = await instance.get('/api/user/persistent/getUserInfo')
   if (res.data.code === 200) {
@@ -31,34 +39,42 @@ export const persistentConnection = async ({ commit, state }) => {
   }
 }
 
-export const getFollowerList = async ({ commit, state }, userId) => {
-  let res = await instance.get(`/api/user/${userId}/Followers`)
+export const getFollowerNum = async ({ commit, state }, userId) => {
+  let res = await instance.get(`/api/user/${userId}/FollowersNum`)
   if (res.data.code === 200) {
-    let followerList = res.data.data
-    commit(types.SET_FOLLOWERLIST, followerList)
+    let followerNum = res.data.data
+    commit(types.SET_FOLLOWERNUM, followerNum)
   }
 }
 
-export const getFanList = async ({ commit, state }, userId) => {
-  let res = await instance.get(`/api/user/${userId}/Fans`)
+export const getFanNum = async ({ commit, state }, userId) => {
+  let res = await instance.get(`/api/user/${userId}/FansNum`)
   if (res.data.code === 200) {
-    let fanList = res.data.data
-    commit(types.SET_FANLIST, fanList)
+    let fanNum = res.data.data
+    commit(types.SET_FANNUM, fanNum)
   }
 }
 
-export const getLikeList = async ({ commit, state }, userId) => {
-  let res = await instance.get(`/api/user/${userId}/Likes`)
+export const getLikeNum = async ({ commit, state }, userId) => {
+  let res = await instance.get(`/api/user/${userId}/LikesNum`)
   if (res.data.code === 200) {
-    let likeList = res.data.data
-    commit(types.SET_LIKELIST, likeList)
+    let likeNum = res.data.data
+    commit(types.SET_LIKENUM, likeNum)
   }
 }
 
-export const getVideoList = async ({ commit, state }, userId) => {
-  let res = await instance.get(`/api/user/${userId}/Videos`)
+export const getVideoNum = async ({ commit, state }, userId) => {
+  let res = await instance.get(`/api/user/${userId}/VideosNum`)
   if (res.data.code === 200) {
-    let videoList = res.data.data
-    commit(types.SET_VIDEOLIST, videoList)
+    let videoNum = res.data.data
+    commit(types.SET_VIDEONUM, videoNum)
+  }
+}
+
+export const getPopularVideo = async ({ commit, state }) => {
+  let res = await instance.get('/api/common/video/getPopularVideo')
+  if (res.data.code === 200) {
+    let popularVideo = res.data.data
+    commit(types.SET_POPULARVIDEO, popularVideo)
   }
 }

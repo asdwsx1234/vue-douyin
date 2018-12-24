@@ -26,13 +26,13 @@
         <div class="desc-wrap">
           <p class="desc" v-text="loginInfo.userDesc"></p>
           <div class="gender">
-            <div class="icon iconfont icon-man"></div>
+            <div class="icon iconfont" :class="[loginInfo.userAge === '男' ? 'icon-man': 'icon-woman']"></div>
             {{loginInfo.userAge}}岁
           </div>
           <div class="num-wrap">
             <p>100w获赞</p>
-            <p @click="GoInterestList">{{followerList.length}}关注</p>
-            <p @click="GoFanList">{{fanList.length}}粉丝</p>
+            <p @click="GoInterestList">{{followerNum}}关注</p>
+            <p @click="GoFanList">{{fanNum}}粉丝</p>
           </div>
         </div>
         <div class="wrap">
@@ -60,10 +60,10 @@ import { baseURL } from 'common/js/config'
 export default {
   mounted () {
     const userId = this.loginInfo.userId
-    this.getFanList(userId)
-    this.getFollowerList(userId)
-    this.getLikeList(userId)
-    this.getVideoList(userId)
+    this.getFanNum(userId)
+    this.getFollowerNum(userId)
+    this.getLikeNum(userId)
+    this.getVideoNum(userId)
   },
   data () {
     return {
@@ -95,8 +95,8 @@ export default {
     },
     ...mapGetters([
       'loginInfo',
-      'followerList',
-      'fanList'
+      'followerNum',
+      'fanNum'
     ])
   },
   methods: {
@@ -124,10 +124,10 @@ export default {
       this.$router.push(`/FanList/${this.$route.params.id}`)
     },
     ...mapActions([
-      'getFanList',
-      'getLikeList',
-      'getVideoList',
-      'getFollowerList'
+      'getFanNum',
+      'getLikeNum',
+      'getVideoNum',
+      'getFollowerNum'
     ])
   },
   watch: {
@@ -253,7 +253,10 @@ export default {
             width 10px
             height 10px
             font-size 10px
+          .icon-man
             color #14bae2
+          .icon-woman
+            color #da6969
         .num-wrap
           margin-top 10px
           width 200px

@@ -34,9 +34,10 @@ import Scroll from 'base/scroll/scroll'
 import MyVideo from 'components/MyVideo/MyVideo'
 import Login from 'components/Login/Login'
 import CommentList from 'components/CommentList/CommentList'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 export default {
   mounted () {
+    this.getPopularVideo()
   },
   data () {
     return {
@@ -79,7 +80,10 @@ export default {
         e.stopPropagation()
         this.showCommentList = false
       }
-    }
+    },
+    ...mapActions([
+      'getPopularVideo'
+    ])
   },
   computed: {
     clientHeight () {

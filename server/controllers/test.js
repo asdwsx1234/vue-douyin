@@ -10,10 +10,17 @@ const UserInfo = require('../models/UserInfo')
 const UserRelation = require('../models/UserRelation')
 const db = require('../db')
 const utils = require('../utils/utils')
+
 const MAX_USER_NUM = 50
 const MAX_VIDEO_NUM = MAX_USER_NUM * 5
 const MAX_USER_RELATION_NUM = MAX_USER_NUM * 2
-const MAX_VIDEO_WSLC_NUM = MAX_USER_NUM * 10
+
+const MAX_VIDEO_WATCH_NUM = MAX_USER_NUM * 100
+const MAX_VIDEO_SHARE_NUM = MAX_USER_NUM * 10
+const MAX_VIDEO_LIKE_NUM = MAX_USER_NUM * 50
+const MAX_VIDEO_COMMENT_NUM = MAX_USER_NUM * 50
+const MAX_COMMENT_LIKE_NUM = MAX_USER_NUM * 100
+
 const USER_PSWD = hash.update('asdwsx1234').digest('base64')
 
 const KEY_WATCH_NUM = 'videoWatchNum'
@@ -49,6 +56,7 @@ module.exports = {
       })
       await UserInfo.create({
         'userId': id,
+        'userAvatar': '/assets/avatar/default.png',
         'userNickname': `${id.slice(10, 15)}`,
         'userDesc': 'test111',
         'userAge': 999,
@@ -121,53 +129,107 @@ module.exports = {
     }
     ctx.rest(`create user relations suc.`)
   },
-  'GET /api/test/createVideoWSLC': async (ctx, next) => {
+  'GET /api/test/createVideoLike': async (ctx, next) => {
     const users = await UserRegister.findAll()
-    const videos = await VideoInfo.findAll()
-    for (let i = 0; i < MAX_VIDEO_WSLC_NUM; i++) {
+    const videos = await CommentInfo.findAll()
+    for (let i = 0; i < MAX_VIDEO_LIKE_NUM; i++) {
       let UserRandomIndex = Math.floor(Math.random() * MAX_USER_NUM)
       let VideoRandomIndex = Math.floor(Math.random() * MAX_VIDEO_NUM)
       let userId = users[UserRandomIndex].userId
       let videoId = videos[VideoRandomIndex].videoId
-      let OperationCase = Math.floor(Math.random() * 3)
-      if (OperationCase === 0) {
-        utils.incrOrCut(KEY_SHARE_NUM, 1, videoId)
-        await ShareInfo.create({
+      let li = await LikeInfo.findOne({
+        where: {
           videoId,
           userId
-        })
-      } else if (OperationCase === 1) {
-        let li = await LikeInfo.findOne({
-          where: {
-            videoId,
-            userId
-          }
-        })
-        if (li) {
-          utils.incrOrCut(KEY_LIKE_NUM, -1, videoId)
-          await li.destroy()
-        } else {
-          utils.incrOrCut(KEY_LIKE_NUM, 1, videoId)
-          await LikeInfo.create({
-            videoId,
-            userId
-          })
         }
-      } else if (OperationCase === 2) {
-        utils.incrOrCut(KEY_COMMENT_NUM, 1, videoId)
-        await CommentInfo.create({
+      })
+      if (li) {
+        utils.incrOrCut(KEY_LIKE_NUM, -1, videoId)
+        await li.destroy()
+      } else {
+        utils.incrOrCut(KEY_LIKE_NUM, 1, videoId)
+        await LikeInfo.create({
           videoId,
-          commentContent: `comment test`,
-          commentReplyID: '',
           userId
         })
       }
+    }
+    ctx.rest('createVideoLike suc.')
+  },
+  'GET /api/test/createWatch': async (ctx, next) => {
+    const users = await UserRegister.findAll()
+    const videos = await CommentInfo.findAll()
+    for (let i = 0; i < MAX_VIDEO_WATCH_NUM; i++) {
+      let UserRandomIndex = Math.floor(Math.random() * MAX_USER_NUM)
+      let VideoRandomIndex = Math.floor(Math.random() * MAX_VIDEO_NUM)
+      let userId = users[UserRandomIndex].userId
+      let videoId = videos[VideoRandomIndex].videoId
       utils.incrOrCut(KEY_WATCH_NUM, 1, videoId)
       await WatchInfo.create({
         videoId,
         userId
       })
     }
-    ctx.rest('create VideoWSLC suc.')
+    ctx.rest('createWatch suc.')
+  },
+  'GET /api/test/createShare': async (ctx, next) => {
+    const users = await UserRegister.findAll()
+    const videos = await CommentInfo.findAll()
+    for (let i = 0; i < MAX_VIDEO_SHARE_NUM; i++) {
+      let UserRandomIndex = Math.floor(Math.random() * MAX_USER_NUM)
+      let VideoRandomIndex = Math.floor(Math.random() * MAX_VIDEO_NUM)
+      let userId = users[UserRandomIndex].userId
+      let videoId = videos[VideoRandomIndex].videoId
+      utils.incrOrCut(KEY_SHARE_NUM, 1, videoId)
+      await ShareInfo.create({
+        videoId,
+        userId
+      })
+    }
+    ctx.rest('createShare suc.')
+  },
+  'GET /api/test/createComment': async (ctx, next) => {
+    const users = await UserRegister.findAll()
+    const videos = await CommentInfo.findAll()
+    for (let i = 0; i < MAX_VIDEO_COMMENT_NUM; i++) {
+      let UserRandomIndex = Math.floor(Math.random() * MAX_USER_NUM)
+      let VideoRandomIndex = Math.floor(Math.random() * MAX_VIDEO_NUM)
+      let userId = users[UserRandomIndex].userId
+      let videoId = videos[VideoRandomIndex].videoId
+      utils.incrOrCut(KEY_COMMENT_NUM, 1, videoId)
+      await CommentInfo.create({
+        commentId: db.generateId(),
+        videoId,
+        commentContent: `comment test`,
+        commentReplyID: '',
+        userId
+      })
+    }
+    ctx.rest('createComment suc.')
+  },
+  'GET /api/test/createCommentLike': async (ctx, next) => {
+    const users = await UserRegister.findAll()
+    const comments = await CommentInfo.findAll()
+    for (let i = 0; i < MAX_COMMENT_LIKE_NUM; i++) {
+      let UserRandomIndex = Math.floor(Math.random() * MAX_USER_NUM)
+      let CommentRandomIndex = Math.floor(Math.random() * MAX_VIDEO_COMMENT_NUM)
+      let userId = users[UserRandomIndex].userId
+      let commentId = comments[CommentRandomIndex].commentId
+      let li = await LikeInfo.findOne({
+        where: {
+          commentId,
+          userId
+        }
+      })
+      if (li) {
+        await li.destroy()
+      } else {
+        await LikeInfo.create({
+          commentId,
+          userId
+        })
+      }
+    }
+    ctx.rest('createCommentLike suc.')
   }
 }

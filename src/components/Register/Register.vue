@@ -3,10 +3,12 @@
   <i class="iconfont icon-left" @click="back"></i>
   <div class="form-wrap">
     <h1 class="title">注册</h1>
-    <input class="input" type="email" placeholder="输入邮箱" autocomplete="off" id="email">
-    <input class="input" type="password" placeholder="输入密码" id="password">
-    <code-input></code-input>
-    <div class="login-btn">
+    <input class="input" type="email" placeholder="输入邮箱" autocomplete="off" v-model="email" @keyup="listenBtn($event)" id="email">
+    <input class="input" type="password" placeholder="输入密码" v-model="password" id="password">
+    <code-input
+      ref="codeInput"
+      @code="code"></code-input>
+    <div class="login-btn" @click="register">
       <i class="iconfont icon-check"></i>
     </div>
   </div>
@@ -14,11 +16,52 @@
 </template>
 
 <script>
+import { regEmail } from 'common/js/util'
 import CodeInput from 'base/CodeInput/CodeInput'
 export default {
+  data () {
+    return {
+      email: '',
+      password: ''
+    }
+  },
+  computed: {
+    isDisabled () {
+      if (regEmail.test(this.email)) {
+        return false
+      } else {
+        return true
+      }
+    }
+  },
   methods: {
     back () {
       this.$emit('back')
+    },
+    code (e) {
+      console.log(e)
+    },
+    register () {
+      let user = {
+        email: this.email,
+        password: this.password
+      }
+      if (!regEmail.test(user.email)) {
+        // tip:email
+        return
+      }
+      if (user.password.length < 6) {
+        // tip:password
+        return
+      }
+      this.loginByPassword(user)
+    },
+    listenBtn (e) {
+      if (!regEmail.test(this.email)) {
+        this.$refs.codeInput.setDisabled(true)
+        return
+      }
+      this.$refs.codeInput.setDisabled(false)
     }
   },
   components: {

@@ -7,8 +7,8 @@
     <input class="input" type="email" placeholder="输入邮箱" autocomplete="off" v-model="email" id="email">
     <input class="input" type="password" placeholder="输入密码" v-model="password" id="password">
     <a class="forget-password" @click="showRetrievePassword=true">忘记了？找回密码</a>
-    <div class="login-btn">
-      <i class="iconfont icon-check" @click="login"></i>
+    <div class="login-btn" @click="login">
+      <i class="iconfont icon-check"></i>
     </div>
   </div>
   <transition name="right-to-left">
@@ -45,6 +45,7 @@ export default {
         email: this.email,
         password: this.password
       }
+      console.log(this.code)
       if (!regEmail.test(user.email)) {
         // tip:email
         return

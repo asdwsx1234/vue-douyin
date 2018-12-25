@@ -21,6 +21,9 @@ const mutations = {
   },
   [types.SET_POPULARVIDEO] (state, popularVideo) {
     state.popularVideo = popularVideo
+  },
+  [types.SET_PLAYLIST] (state, playList) {
+    state.playList = playList
   }
 }
 

@@ -1,14 +1,14 @@
 <template>
 <div class="followed-list">
-  <div class="followed-item" v-for="item in list" :key="item.id">
+  <div class="followed-item" v-for="item in list" :key="item.videoInfo.videoId">
     <div class="top">
-      <img class="avatar" src="./logo.png" alt="" width="30" height="30"
-        @click="chooseUser"> <span class="name">@{{item.name}}</span>
+      <img class="avatar" :src="`${baseURL}${item.userInfo.userAvatar}`" alt="" width="30" height="30"
+        @click="chooseUser"> <span class="name">@{{item.userInfo.userNickname}}</span>
     </div>
-    <div class="desc">{{item.desc}}</div>
+    <div class="desc">{{item.videoInfo.videoDesc}}</div>
     <div class="video-wrap">
       <video class="video"
-        :src="item.video"
+        :src="item.videoInfo.videoPath"
         webkit-playsinline
         playsinline
         x5-video-player-type="h5"
@@ -16,16 +16,16 @@
     </div>
     <div class="button-bar">
       <div class="like iconfont icon-heart-fill" :class="{ 'red-heart': like }" @click="toggleLike">
-        <span class="likenum">4.1w</span>
+        <span class="likenum">{{item.WSLCNum.likeNum}}</span>
       </div>
       <div class="comment iconfont icon-message" @click.stop="showCommentList">
-        <span class="commentnum">667</span>
+        <span class="commentnum">{{item.WSLCNum.commentNum}}</span>
       </div>
       <div class="share iconfont icon-share">
-        <span class="sharenum">4765</span>
+        <span class="sharenum">{{item.WSLCNum.shareNum}}</span>
       </div>
     </div>
-    <div class="time">{{item.time}}</div>
+    <div class="time">{{item.videoInfo.createdAt}}</div>
   </div>
   <no-more></no-more>
 </div>
@@ -33,6 +33,7 @@
 
 <script>
 import NoMore from 'base/NoMore/NoMore'
+import { baseURL } from 'common/js/config'
 export default {
   props: {
     list: {
@@ -42,7 +43,8 @@ export default {
   },
   data () {
     return {
-      like: false
+      like: false,
+      baseURL
     }
   },
   methods: {

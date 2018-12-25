@@ -38,11 +38,6 @@ export const getPopularVideo = async ({ commit, state }) => {
     let popularVideo = []
     for (let i = 0; i < list.length; i++) {
       let video = JSON.parse(list[i])
-      let WSLC = await instance.get(`/api/common/video/${video.videoInfo.videoId}/getVideoWSLCNum`)
-      video.commentNum = WSLC.data.data.commentNum
-      video.likeNum = WSLC.data.data.likeNum
-      video.shareNum = WSLC.data.data.shareNum
-      video.watchNum = WSLC.data.data.watchNum
       popularVideo.push(video)
     }
     commit(types.SET_POPULARVIDEO, popularVideo)

@@ -5,3 +5,4 @@ export const fanList = state => state.fanList
 export const likeList = state => state.likeList
 export const videoList = state => state.videoList
 export const popularVideo = state => state.popularVideo
+export const playList = state => state.playList

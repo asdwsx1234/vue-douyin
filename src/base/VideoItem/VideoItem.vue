@@ -5,8 +5,8 @@
         <div v-if="item.type == 1">
           <i class="icon iconfont icon-delete"></i>本地草稿箱
         </div>
-        <div v-else-if="item.type == 2">
-          <i class="icon iconfont icon-heart"></i>4.1w
+        <div v-else>
+          <i class="icon iconfont icon-heart"></i>{{item.WSLCNum.likeNum}}
         </div>
     </div>
   </div>

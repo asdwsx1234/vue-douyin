@@ -5,6 +5,7 @@ const state = {
   fanList: [],
   likeList: [],
   videoList: [],
-  popularVideo: []
+  popularVideo: [],
+  playList: []
 }
 export default state

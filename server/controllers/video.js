@@ -32,9 +32,19 @@ module.exports = {
         })
         let ur = await videoInfo.getUserRegister()
         let userInfo = await ur.getUserInfo()
+        let shareNum = await redisClient.zscore(KEY_SHARE_NUM, videoId)
+        let watchNum = await redisClient.zscore(KEY_WATCH_NUM, videoId)
+        let commentNum = await redisClient.zscore(KEY_COMMENT_NUM, videoId)
+        let likeNum = await redisClient.zscore(KEY_LIKE_NUM, videoId)
         await redisClient.sadd(key, JSON.stringify({
           videoInfo,
-          userInfo
+          userInfo,
+          WSLCNum: {
+            shareNum,
+            watchNum,
+            commentNum,
+            likeNum
+          }
         }))
       }
       // 5分钟超时

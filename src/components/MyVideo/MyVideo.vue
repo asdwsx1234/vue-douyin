@@ -13,13 +13,13 @@
         <div class="follow">+</div>
       </div>
       <div class="like iconfont icon-heart-fill" :class="{ 'red-heart': like }" @click="toggleLike">
-        <span class="likenum">{{VideoItem.likeNum}}</span>
+        <span class="likenum">{{VideoItem.WSLCNum.likeNum}}</span>
       </div>
       <div class="comment iconfont icon-message" @click.stop="showCommentList">
-        <span class="commentnum">{{VideoItem.commentNum}}</span>
+        <span class="commentnum">{{VideoItem.WSLCNum.commentNum}}</span>
       </div>
       <div class="share iconfont icon-share">
-        <span class="sharenum">{{VideoItem.shareNum}}</span>
+        <span class="sharenum">{{VideoItem.WSLCNum.shareNum}}</span>
       </div>
     </div>
     <div class="text-wrap">

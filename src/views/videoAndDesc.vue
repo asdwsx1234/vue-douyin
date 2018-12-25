@@ -2,7 +2,11 @@
   <div>
     <loading v-if="isLoading"></loading>
     <div v-if="!isLoading">
-      <followed-list @close="close" :list="list" @showCommentList="showCommentList"></followed-list>
+      <followed-list
+        @close="close"
+        :list="list"
+        :userInfo="userInfo"
+        @showCommentList="showCommentList"></followed-list>
     </div>
   </div>
 </template>
@@ -10,7 +14,16 @@
 <script>
 import Loading from 'base/loading/loading'
 import FollowedList from 'components/FollowedList/FollowedList'
+import { baseURL } from 'common/js/config'
+import { mapGetters } from 'vuex'
+import axios from 'axios'
 export default {
+  props: {
+    userInfo: {
+      type: Object,
+      required: true
+    }
+  },
   data () {
     return {
       isLoading: true,
@@ -21,10 +34,20 @@ export default {
       ]
     }
   },
+  computed: {
+    ...mapGetters([
+      'loginInfo'
+    ])
+  },
   mounted () {
-    setTimeout(() => {
+    let userId = this.$route.params.id === 'me' ? this.loginInfo.userId : this.$route.params.id
+    axios.get(`/api/user/${userId}/Videos`, {
+      baseURL,
+      withCredentials: true
+    }).then((r) => {
+      this.list = r.data.data
       this.isLoading = false
-    }, 500)
+    })
   },
   methods: {
     showCommentList () {

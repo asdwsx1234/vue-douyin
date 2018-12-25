@@ -240,6 +240,48 @@ module.exports = {
       throw new APIError('user:not_found', 'user not found by userId.')
     }
   },
+  'GET /api/user/:userId/FollowerVideo': async (ctx, next) => {
+    const userId = ctx.params.userId
+    const user = await UserRegister.findOne({
+      where: {
+        'userId': userId
+      }
+    })
+    if (user) {
+      const FollowersList = await user.getFollowers()
+      let res = []
+      for (let i = 0, len = FollowersList.length; i < len; i++) {
+        let ur = FollowersList[i]
+        let userInfo = await ur.getFromUserInfo()
+        let videoInfos = await VideoInfo.findAll({
+          where: {
+            userId: userInfo.userId
+          }
+        })
+        for (let j = 0, len = videoInfos.length; j < len; j++) {
+          let videoInfo = videoInfos[j]
+          if (!videoInfo) continue
+          let shareNum = await redisClient.zscore(KEY_SHARE_NUM, videoInfo.videoId)
+          let watchNum = await redisClient.zscore(KEY_WATCH_NUM, videoInfo.videoId)
+          let commentNum = await redisClient.zscore(KEY_COMMENT_NUM, videoInfo.videoId)
+          let likeNum = await redisClient.zscore(KEY_LIKE_NUM, videoInfo.videoId)
+          res.push({
+            userInfo,
+            videoInfo,
+            WSLCNum: {
+              shareNum,
+              watchNum,
+              commentNum,
+              likeNum
+            }
+          })
+        }
+      }
+      ctx.rest(res)
+    } else {
+      throw new APIError('user:not_found', 'user not found by userId.')
+    }
+  },
   'GET /api/user/:userId/FansNum': async (ctx, next) => {
     const userId = ctx.params.userId
     const user = await UserRegister.findOne({
@@ -276,12 +318,27 @@ module.exports = {
       }
     })
     if (user) {
+      const userInfo = await user.getUserInfo()
       const LikeList = await user.getLikes()
       let VideoinfoList = []
       for (let i = 0, len = LikeList.length; i < len; i++) {
         let temp = LikeList[i]
-        let videoinfo = await temp.getVideoInfo()
-        VideoinfoList.push(videoinfo)
+        let video = await temp.getVideoInfo()
+        if (!video) continue
+        let shareNum = await redisClient.zscore(KEY_SHARE_NUM, video.videoId)
+        let watchNum = await redisClient.zscore(KEY_WATCH_NUM, video.videoId)
+        let commentNum = await redisClient.zscore(KEY_COMMENT_NUM, video.videoId)
+        let likeNum = await redisClient.zscore(KEY_LIKE_NUM, video.videoId)
+        VideoinfoList.push({
+          videoInfo: video,
+          userInfo,
+          WSLCNum: {
+            shareNum,
+            watchNum,
+            commentNum,
+            likeNum
+          }
+        })
       }
       ctx.rest(VideoinfoList)
     } else {
@@ -297,7 +354,26 @@ module.exports = {
     })
     if (user) {
       const VideoList = await user.getVideos()
-      ctx.rest(VideoList)
+      const userInfo = await user.getUserInfo()
+      let res = []
+      for (let i = 0, len = VideoList.length; i < len; i++) {
+        let video = VideoList[i]
+        let shareNum = await redisClient.zscore(KEY_SHARE_NUM, video.videoId)
+        let watchNum = await redisClient.zscore(KEY_WATCH_NUM, video.videoId)
+        let commentNum = await redisClient.zscore(KEY_COMMENT_NUM, video.videoId)
+        let likeNum = await redisClient.zscore(KEY_LIKE_NUM, video.videoId)
+        res.push({
+          videoInfo: video,
+          userInfo,
+          WSLCNum: {
+            shareNum,
+            watchNum,
+            commentNum,
+            likeNum
+          }
+        })
+      }
+      ctx.rest(res)
     } else {
       throw new APIError('user:not_found', 'user not found by userId.')
     }

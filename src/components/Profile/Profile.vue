@@ -39,8 +39,12 @@
           <me-tab
             :videoNum="videoNum"
             :likeNum="likeNum"></me-tab>
-          <router-view
-          @showCommentList="showCommentList=true"></router-view>
+          <keep-alive>
+            <router-view
+              @showCommentList="showCommentList=true"
+              :userInfo="userInfo"
+              @chooseVideo="chooseVideo"></router-view>
+          </keep-alive>
         </div>
       </div>
     </scroll>
@@ -49,6 +53,11 @@
         v-if="showCommentList"
         :commentList="commentList"
         @close="showCommentList=false"></comment-list>
+      <play-list
+        class="play-list"
+        ref="playList"
+        v-show="showPlayList"
+        @close="showPlayList=false"></play-list>
     </transition>
 </div>
 </template>
@@ -60,6 +69,7 @@ import CommentList from 'components/CommentList/CommentList'
 import { baseURL } from 'common/js/config'
 import axios from 'axios'
 import { mapGetters } from 'vuex'
+import PlayList from 'components/PlayList/PlayList'
 
 const instance = axios.create({
   baseURL: baseURL,
@@ -85,19 +95,19 @@ export default {
         this.getVideoNum(userId)
       })
     }
-
   },
   data () {
     return {
       baseURL,
       userInfo: {},
-      fiexedtopshow: false,
-      bgimgHeight: 150,
-      showCommentList: false,
-      followerNum: 0,
       fanNum: 0,
-      videoNum: 0,
       likeNum: 0,
+      videoNum: 0,
+      followerNum: 0,
+      bgimgHeight: 150,
+      showPlayList: false,
+      fiexedtopshow: false,
+      showCommentList: false,
       commentList: [
         { id: '1', avatar: './1.jpg', name: 'Well', content: '测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试', time: '1分钟前', likeNum: '2w' },
         { id: '2', avatar: './1.jpg', name: 'Well', content: '测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试', time: '1分钟前', likeNum: '2w' },
@@ -148,6 +158,10 @@ export default {
     GoFanList () {
       this.$router.push(`/FanList/${this.$route.params.id}`)
     },
+    chooseVideo (index) {
+      this.showPlayList = true
+      this.$refs.playList.scrollToIndex(index)
+    },
     async getFollowerNum (userId) {
       let res = await instance.get(`/api/user/${userId}/FollowersNum`)
       if (res.data.code === 200) {
@@ -187,7 +201,8 @@ export default {
   components: {
     Scroll,
     MeTab,
-    CommentList
+    CommentList,
+    PlayList
   }
 }
 </script>
@@ -199,6 +214,14 @@ export default {
 .up-enter, .up-leave-to
   opacity 0
   transform translateY(100%)
+.play-list
+  position fixed
+  z-index 9999
+  top 0
+  left 0
+  right 0
+  bottom 0
+  background $color-background
 .fiexedtop
   position fixed
   z-index 255

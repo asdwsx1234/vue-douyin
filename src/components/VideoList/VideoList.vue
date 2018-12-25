@@ -3,8 +3,9 @@
     <video-item
       @click.native="chooseVideo(index)"
       :style="VideoItemHeightStyle"
-      class="video-item" v-for="(item, index) in list"
-      :key="item.id"
+      class="video-item"
+      v-for="(item, index) in list"
+      :key="item.videoInfo.videoId"
       :item="item"></video-item>
   </div>
 </template>
@@ -20,8 +21,7 @@ export default {
   },
   methods: {
     chooseVideo (index) {
-      this.$router.push(`/home/${this.$route.params.id}`)
-      console.log(index)
+      this.$emit('chooseVideo', index)
     }
   },
   computed: {

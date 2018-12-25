@@ -12,6 +12,9 @@
 import VideoList from 'components/VideoList/VideoList'
 import NoMore from 'base/NoMore/NoMore'
 import Loading from 'base/loading/loading'
+import { baseURL } from 'common/js/config'
+import axios from 'axios'
+import { mapGetters } from 'vuex'
 export default {
   data () {
     return {
@@ -23,10 +26,19 @@ export default {
         { id: 4, avatar: 'http://www.baidu.com', name: 'hahaha', desc: '一串字符一串字符一串字符', video: 'https://mp4.vjshi.com/2017-08-28/ecbc62447fe2f2be561af3ae1a43a6ab.mp4', likenum: '4.1w', commentnum: '667', sharenum: '4765', time: '2018-11-6', type: '2' }]
     }
   },
+  computed: {
+    ...mapGetters([
+      'loginInfo'
+    ])
+  },
   mounted () {
-    setTimeout(() => {
+    let userId = this.$route.params.id === 'me'? this.loginInfo.userId: this.$route.params.id
+    axios.get(`/api/user/${userId}/Videos`, {
+      baseURL
+    }).then((r)=>{
+      this.list = r.data.data
       this.isLoading = false
-    }, 500)
+    })
   },
   components: {
     VideoList,

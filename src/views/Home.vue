@@ -1,5 +1,6 @@
 <template>
-<div @click.capture="c($event)">
+<div @click.capture="closeCommentList($event)">
+  <tip ref="tip"></tip>
   <div class="back iconfont icon-left" v-show="!isHome" @click="$router.back()"></div>
   <scroll class="wrap"
     ref="scroll"
@@ -9,7 +10,7 @@
     :momentum="false"
     @scrollEnd="scrollEnd">
     <div>
-      <my-video v-for="item in VideoList"
+      <my-video v-for="item in popularVideo"
         :key="item.id"
         :VideoItem="item"
         @showCommentList="showCommentList=true"></my-video>
@@ -24,7 +25,8 @@
   <transition name="up">
     <login
       v-if="showLoginWrap"
-      @login-close="showLoginWrap=false"></login>
+      @login-close="showLoginWrap=false"
+      @login-tip="showTip"></login>
   </transition>
 </div>
 </template>
@@ -75,11 +77,14 @@ export default {
         this.$refs.scroll.scrollTo(0, -this.currentY) // 下一页
       }
     },
-    c (e) {
+    closeCommentList (e) {
       if (this.showCommentList) {
         e.stopPropagation()
         this.showCommentList = false
       }
+    },
+    showTip (message) {
+      this.$refs.tip.show(message)
     },
     ...mapActions([
       'getPopularVideo'
@@ -93,7 +98,8 @@ export default {
       return this.$route.name === 'home'
     },
     ...mapGetters([
-      'isLogged'
+      'isLogged',
+      'popularVideo'
     ])
   },
   watch: {

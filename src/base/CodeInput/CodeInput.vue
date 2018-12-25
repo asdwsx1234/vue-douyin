@@ -30,11 +30,10 @@ export default {
     },
     getCode () {
       if (this.disabled) return
-      // getCode
       axios.get(`/api/common/user/getCode/${this.email}`, {
         baseURL
       }).catch((e) => {
-        console.log(e)
+        this.$emit('code-tip', '验证码发送失败')
       })
       this.setDisabled(true)
       this.cutdownMethod()

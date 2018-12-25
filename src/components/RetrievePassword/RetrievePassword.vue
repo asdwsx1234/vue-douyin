@@ -7,6 +7,7 @@
     <code-input
       :email="email"
       ref="codeInput"
+      @code-tip="_emitTip"
       @code="_code"></code-input>
     <input class="input" type="password" v-model="password" placeholder="输入新密码" id="password">
     <div class="login-btn" @click="retrievePassword">
@@ -44,6 +45,9 @@ export default {
     _code (e) {
       this.code = e
     },
+    _emitTip (message) {
+      this.$emit('retrieve-tip', message)
+    },
     retrievePassword () {
       let user = {
         email: this.email,
@@ -56,7 +60,7 @@ export default {
       }).then(() => {
         this.back()
       }).catch((e) => {
-        console.log(e)
+        this._emitTip('验证码错误')
       })
     }
   },

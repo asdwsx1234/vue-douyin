@@ -18,11 +18,27 @@ const KEY_WATCH_NUM = 'videoWatchNum'
 const KEY_SHARE_NUM = 'videoShareNum'
 const KEY_LIKE_NUM = 'videoLikeNum'
 const KEY_COMMENT_NUM = 'videoCommentNum'
-
+const regEmail = /^([a-zA-Z0-9]+[_|.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/
 module.exports = {
+  'GET /api/common/user/detectEmail/:email': async (ctx, next) => {
+    const email = ctx.params.email
+    if (regEmail.test(email)) {
+      const result = await UserRegister.findOne({
+        where: {
+          'userEmail': email
+        }
+      })
+      if (result) {
+        ctx.rest('ok')
+      } else {
+        throw new APIError('user:not_found', 'user not found by email.')
+      }
+    } else {
+      throw new APIError('user:email_format_error', 'email_format_error.')
+    }
+  },
   'GET /api/common/user/getCode/:email': async (ctx, next) => {
     const email = ctx.params.email
-    const regEmail = /^([a-zA-Z0-9]+[_|.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/
     if (regEmail.test(email)) {
       let code = nodemailer.generateCode()
       let res = await nodemailer.sendMail(nodemailer.CreateMail(email, code))
@@ -51,7 +67,7 @@ module.exports = {
       }
     })
     if (result) {
-      throw new APIError('user:email_existed', 'The email is registed.')
+      throw new APIError('user:email_existed', 'The email is registered.')
     } else {
       const code = await redisClient.get(`register_${user.email}`)
       if (user.code === code) {
@@ -65,10 +81,10 @@ module.exports = {
         const newUserInfo = await UserInfo.create({
           userId: id,
           userAvatar: '/assets/avatar/default.png',
-          userNickname: `用户${id}`,
+          userNickname: `用户${id.slice(0, 6)}`,
           userAddress: '未知',
           userGender: '男',
-          userAge: 0,
+          userAge: 21,
           userDesc: '请设置个性签名'
         })
         ctx.rest({
@@ -76,7 +92,9 @@ module.exports = {
           newUserInfo
         })
       } else {
-        throw new APIError('user:code_error', 'code_error')
+        ctx.rest({
+          message: '验证码错误'
+        })
       }
     }
   },
@@ -94,7 +112,7 @@ module.exports = {
       }
     })
     if (result) {
-      result.password = user.password
+      result.userPassword = user.password
       await result.save()
       ctx.rest('retrieve password suc!')
     } else {
@@ -164,7 +182,7 @@ module.exports = {
       throw new APIError('user:not_found', 'user not found by userId.')
     }
   },
-  'GET /api/user/:userId/getUserInfo': async (ctx, next) => {
+  'GET /api/common/user/:userId/getUserInfo': async (ctx, next) => {
     let userId = ctx.params.userId
     if (userId === 'persistent') {
       let session = JSON.parse(await redisClient.get(`SESSION:${ctx.cookies.get('koa:sess')}`))

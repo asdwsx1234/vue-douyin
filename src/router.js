@@ -57,6 +57,7 @@ export default new Router({
       redirect: '/profile/:id/video',
       children: [
         {
+          name: 'profile/video',
           path: 'video',
           component: () => import('./views/video.vue')
         },

@@ -7,18 +7,6 @@ const mutations = {
   [types.SET_LOGININFO] (state, loginInfo) {
     state.loginInfo = loginInfo
   },
-  [types.SET_FOLLOWERNUM] (state, followerNum) {
-    state.followerNum = followerNum
-  },
-  [types.SET_FANNUM] (state, fanNum) {
-    state.fanNum = fanNum
-  },
-  [types.SET_LIKENUM] (state, likeNum) {
-    state.likeNum = likeNum
-  },
-  [types.SET_VIDEONUM] (state, videoNum) {
-    state.videoNum = videoNum
-  },
   [types.SET_FOLLOWERLIST] (state, followerList) {
     state.followerList = followerList
   },

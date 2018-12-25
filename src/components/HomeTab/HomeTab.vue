@@ -25,9 +25,12 @@ export default {
       return this.$route.name === 'home'
     },
     showHomeTab () {
-      let paths = ['/home', '/followed', '/message', '/profile/me/video', '/profile/me/videoAndDesc', '/profile/me/likes']
-      let route = this.$route
-      return paths.includes(route.path)
+      const paths = ['/home', '/followed', '/message', '/profile/me/video', '/profile/me/videoAndDesc', '/profile/me/likes']
+      const route = this.$route
+      for (let i = 0; i < paths.length; i++) {
+        if (route.path.indexOf(paths[i]) !== -1) return true
+      }
+      return false
     }
   }
 }

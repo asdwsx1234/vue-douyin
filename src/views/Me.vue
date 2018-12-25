@@ -6,14 +6,9 @@
 
 <script>
 import Profile from 'components/Profile/Profile'
+
 export default {
   name: 'me',
-  data () {
-    return {
-    }
-  },
-  methods: {
-  },
   components: {
     Profile
   },

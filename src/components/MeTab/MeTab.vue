@@ -13,13 +13,16 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
 export default {
-  computed: {
-    ...mapGetters([
-      'videoNum',
-      'likeNum'
-    ])
+  props: {
+    videoNum: {
+      type: Number,
+      default: 0
+    },
+    likeNum: {
+      type: Number,
+      default: 0
+    }
   }
 }
 </script>

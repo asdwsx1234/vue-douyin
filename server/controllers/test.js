@@ -76,7 +76,7 @@ module.exports = {
         videoDuration: '222',
         videoCover: 'path:videoCover',
         videoDesc: 'videoDesc',
-        videoPath: 'path:video',
+        videoPath: 'https://mp4.vjshi.com/2017-08-28/ecbc62447fe2f2be561af3ae1a43a6ab.mp4',
         videoStatus: '正常',
         userId
       })

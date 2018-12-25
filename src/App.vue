@@ -5,7 +5,7 @@
         <router-view/>
       </keep-alive>
     </div>
-    <router-view name="side"></router-view>
+    <!-- <router-view name="side"></router-view> -->
     <div class="tab-wrap">
       <home-tab></home-tab>
     </div>
@@ -47,6 +47,13 @@ export default {
     bottom 0
     width 100%
     z-index 100
+  .profile
+    position absolute
+    top 0
+    bottom 0
+    left 0
+    right 0
+    z-index 9998
 .bcBlack
   background #000
 </style>

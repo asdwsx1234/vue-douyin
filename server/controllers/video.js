@@ -23,16 +23,19 @@ module.exports = {
       for (let i of summary) {
         VideoSetId.add(i)
       }
-      let videoInfoList = []
       summary = []
-      for (var videoId of VideoSetId) {
-        var videoInfo = await VideoInfo.findOne({
+      for (let videoId of VideoSetId) {
+        let videoInfo = await VideoInfo.findOne({
           where: {
             videoId
           }
         })
-        await redisClient.sadd(key, JSON.stringify(videoInfo))
-        videoInfoList.push(videoInfo)
+        let ur = await videoInfo.getUserRegister()
+        let userInfo = await ur.getUserInfo()
+        await redisClient.sadd(key, JSON.stringify({
+          videoInfo,
+          userInfo
+        }))
       }
       // 5分钟超时
       redisClient.expire(key, 300)
@@ -119,7 +122,7 @@ module.exports = {
   //     throw new APIError('video:not_found', 'video not found bt videoId.')
   //   }
   // },
-  'GET /api/video/:videoId/getVideoWSLCNum': async (ctx, next) => {
+  'GET /api/common/video/:videoId/getVideoWSLCNum': async (ctx, next) => {
     const videoId = ctx.params.videoId
     let shareNum = await redisClient.zscore(KEY_SHARE_NUM, videoId)
     let watchNum = await redisClient.zscore(KEY_WATCH_NUM, videoId)

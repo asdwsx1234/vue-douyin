@@ -2,8 +2,8 @@
 <div class="profile">
     <me-tab class="fiexedtop" v-show="fiexedtopshow"></me-tab>
     <div class="backbtn-wrap" :class="{showbgcolor: fiexedtopshow}">
-      <span class="backbtn iconfont icon-left" @click.stop="GoBack"></span>
-      <p class="name" :class="{showname: fiexedtopshow}" v-text="loginInfo.userNickname"></p>
+      <span class="backbtn iconfont icon-left" v-show="this.$route.params.id !== 'me'" @click.stop="GoBack"></span>
+      <p class="name" :class="{showname: fiexedtopshow}" v-text="userInfo.userNickname"></p>
       <span class="dotbtn iconfont icon-ellipsis"></span>
     </div>
     <div class="background" :style="bgimgStyle" @touchstart.prevent>
@@ -17,17 +17,17 @@
             @click="showCommentList=false">
       <div class="profile">
         <div class="avatar-wrap">
-          <img class="avatar" :src="`${baseURL}${loginInfo.userAvatar}`" alt="">
+          <img class="avatar" :src="`${baseURL}${userInfo.userAvatar}`" alt="">
         </div>
         <div class="name-wrap">
-          <p class="name" v-text="loginInfo.userNickname"></p>
-          <p class="subname">抖音号：{{loginInfo.userId}}</p>
+          <p class="name" v-text="userInfo.userNickname"></p>
+          <p class="subname">抖音号：{{userInfo.userId}}</p>
         </div>
         <div class="desc-wrap">
-          <p class="desc" v-text="loginInfo.userDesc"></p>
+          <p class="desc" v-text="userInfo.userDesc"></p>
           <div class="gender">
-            <div class="icon iconfont" :class="[loginInfo.userGender === '男' ? 'icon-man': 'icon-woman']"></div>
-            {{loginInfo.userAge}}岁
+            <div class="icon iconfont" :class="[userInfo.userGender === '男' ? 'icon-man': 'icon-woman']"></div>
+            {{userInfo.userAge}}岁
           </div>
           <div class="num-wrap">
             <p>100w获赞</p>
@@ -36,7 +36,9 @@
           </div>
         </div>
         <div class="wrap">
-          <me-tab></me-tab>
+          <me-tab
+            :videoNum="videoNum"
+            :likeNum="likeNum"></me-tab>
           <router-view
           @showCommentList="showCommentList=true"></router-view>
         </div>
@@ -55,22 +57,47 @@
 import Scroll from 'base/scroll/scroll'
 import MeTab from 'components/MeTab/MeTab'
 import CommentList from 'components/CommentList/CommentList'
-import { mapGetters, mapActions } from 'vuex'
 import { baseURL } from 'common/js/config'
+import axios from 'axios'
+import { mapGetters } from 'vuex'
+
+const instance = axios.create({
+  baseURL: baseURL,
+  withCredentials: true
+})
+
 export default {
   mounted () {
-    const userId = this.loginInfo.userId
-    this.getFanNum(userId)
-    this.getFollowerNum(userId)
-    this.getLikeNum(userId)
-    this.getVideoNum(userId)
+    if (this.$route.params.id === 'me') {
+      this.userInfo = this.loginInfo
+      let userId = this.userInfo.userId
+      this.getFollowerNum(userId)
+      this.getFanNum(userId)
+      this.getLikeNum(userId)
+      this.getVideoNum(userId)
+    } else {
+      instance.get(`/api/common/user/${this.$route.params.id}/getUserInfo`).then((r) => {
+        this.userInfo = r.data.data
+        let userId = this.userInfo.userId
+        this.getFollowerNum(userId)
+        this.getFanNum(userId)
+        this.getLikeNum(userId)
+        this.getVideoNum(userId)
+      })
+    }
+
   },
   data () {
     return {
       baseURL,
+      userInfo: {},
       fiexedtopshow: false,
       bgimgHeight: 150,
       showCommentList: false,
+      followerNum: 0,
+      fanNum: 0,
+      videoNum: 0,
+      likeNum: 0,
       commentList: [
         { id: '1', avatar: './1.jpg', name: 'Well', content: '测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试', time: '1分钟前', likeNum: '2w' },
         { id: '2', avatar: './1.jpg', name: 'Well', content: '测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试', time: '1分钟前', likeNum: '2w' },
@@ -94,9 +121,7 @@ export default {
       }
     },
     ...mapGetters([
-      'loginInfo',
-      'followerNum',
-      'fanNum'
+      'loginInfo'
     ])
   },
   methods: {
@@ -123,12 +148,30 @@ export default {
     GoFanList () {
       this.$router.push(`/FanList/${this.$route.params.id}`)
     },
-    ...mapActions([
-      'getFanNum',
-      'getLikeNum',
-      'getVideoNum',
-      'getFollowerNum'
-    ])
+    async getFollowerNum (userId) {
+      let res = await instance.get(`/api/user/${userId}/FollowersNum`)
+      if (res.data.code === 200) {
+        this.followerNum = res.data.data
+      }
+    },
+    async getFanNum (userId) {
+      let res = await instance.get(`/api/user/${userId}/FansNum`)
+      if (res.data.code === 200) {
+        this.fanNum = res.data.data
+      }
+    },
+    async getLikeNum (userId) {
+      let res = await instance.get(`/api/user/${userId}/LikesNum`)
+      if (res.data.code === 200) {
+        this.likeNum = res.data.data
+      }
+    },
+    async getVideoNum (userId) {
+      let res = await instance.get(`/api/user/${userId}/VideosNum`)
+      if (res.data.code === 200) {
+        this.videoNum = res.data.data
+      }
+    }
   },
   watch: {
     '$route': function () {

@@ -4,7 +4,7 @@ async function incrOrCut (key, deltascore, member) {
   let score = await client.zscore(key, member)
   score = score ? Number(score) : 0
   let r = score + deltascore < 0 ? 0 : score + deltascore
-  client.zadd(key, r, member)
+  await client.zadd(key, r, member)
 }
 
 module.exports = {

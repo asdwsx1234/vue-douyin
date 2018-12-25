@@ -7,6 +7,7 @@
     <input class="input" type="password" placeholder="输入密码" v-model="password" id="password">
     <code-input
       :email="email"
+      @code-tip="_emitTip"
       ref="codeInput"
       @code="_code"></code-input>
     <div class="login-btn" @click="register">
@@ -37,6 +38,9 @@ export default {
     _code (e) {
       this.code = e
     },
+    _emitTip (message) {
+      this.$emit('register-tip', message)
+    },
     register () {
       let user = {
         email: this.email,
@@ -44,19 +48,27 @@ export default {
         code: this.code
       }
       if (!regEmail.test(user.email)) {
-        // tip:email
+        this._emitTip('请输入正确的邮箱！')
         return
       }
       if (user.password.length < 6) {
-        // tip:password
+        this._emitTip('密码至少需要6位！')
+        return
+      }
+      if (user.code.length !== 6) {
+        this._emitTip('验证码需要6位！')
         return
       }
       axios.post('/api/common/user/register', user, {
         baseURL
-      }).then(() => {
+      }).then((r) => {
+        if (r.data.data.message === '验证码错误') {
+          this._emitTip('验证码错误！')
+          return
+        }
         this.loginByPassword(user)
       }).catch((e) => {
-        console.log(e)
+        this._emitTip('邮箱已被注册！')
       })
     },
     listenBtn (e) {

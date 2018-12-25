@@ -1,6 +1,6 @@
 <template>
   <div class="my-video">
-    <video class="video" :src="VideoItem.video"
+    <video class="video" :src="VideoItem.videoInfo.videoPath"
       webkit-playsinline
       playsinline
       x5-video-player-type="h5"
@@ -8,23 +8,23 @@
       ref="video"></video>
     <div class="side-bar">
       <div class="avatar">
-        <img src="./logo.png" alt="" width="40" height="40"
+        <img :src="`${baseURL}${VideoItem.userInfo.userAvatar}`" alt="" width="40" height="40"
           @click="chooseUser">
         <div class="follow">+</div>
       </div>
       <div class="like iconfont icon-heart-fill" :class="{ 'red-heart': like }" @click="toggleLike">
-        <span class="likenum">{{VideoItem.likenum}}</span>
+        <span class="likenum">{{VideoItem.likeNum}}</span>
       </div>
       <div class="comment iconfont icon-message" @click.stop="showCommentList">
-        <span class="commentnum">{{VideoItem.commentnum}}</span>
+        <span class="commentnum">{{VideoItem.commentNum}}</span>
       </div>
       <div class="share iconfont icon-share">
-        <span class="sharenum">{{VideoItem.sharenum}}</span>
+        <span class="sharenum">{{VideoItem.shareNum}}</span>
       </div>
     </div>
     <div class="text-wrap">
-      <div class="name">@{{VideoItem.name}}</div>
-      <div class="desc">{{VideoItem.desc}}</div>
+      <div class="name">@{{VideoItem.userInfo.userNickname}}</div>
+      <div class="desc">{{VideoItem.videoInfo.videoDesc}}</div>
     </div>
     <div class="input-bar" v-show="!isHome">
       <input class="input" placeholder="  有爱评论，说点儿好听的~" type="text">
@@ -35,7 +35,7 @@
 </template>
 
 <script>
-
+import { baseURL } from 'common/js/config'
 export default {
   props: {
     VideoItem: {
@@ -45,6 +45,7 @@ export default {
   },
   data () {
     return {
+      baseURL,
       like: false
     }
   },
@@ -65,7 +66,7 @@ export default {
       this.like = !this.like
     },
     chooseUser () {
-      this.$router.push('/profile/123')
+      this.$router.push(`/profile/${this.VideoItem.videoInfo.userId}`)
     }
   },
   components: {

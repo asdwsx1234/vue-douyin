@@ -14,9 +14,11 @@
   <transition name="right-to-left">
     <register
       v-if="showRegister"
-      @back="showRegister=false"></register>
+      @back="showRegister=false"
+      @register-tip="_emitTip"></register>
     <retrieve-password
       :email="email"
+      @retrieve-tip="_emitTip"
       v-if="showRetrievePassword"
       @back="showRetrievePassword=false"></retrieve-password>
   </transition>
@@ -28,6 +30,8 @@ import { regEmail } from 'common/js/util'
 import Register from 'components/Register/Register'
 import RetrievePassword from 'components/RetrievePassword/RetrievePassword'
 import { mapActions } from 'vuex'
+import axios from 'axios'
+import { baseURL } from 'common/js/config'
 export default {
   data () {
     return {
@@ -38,6 +42,9 @@ export default {
     }
   },
   methods: {
+    _emitTip (message) {
+      this.$emit('login-tip', message)
+    },
     close () {
       this.$emit('login-close')
     },
@@ -47,24 +54,35 @@ export default {
         password: this.password
       }
       if (!regEmail.test(user.email)) {
-        // tip:email
+        this._emitTip('请输入正确的邮箱！')
         return
       }
       if (user.password.length < 6) {
-        // tip:password
+        this._emitTip('密码至少需要6位！')
         return
       }
-      this.loginByPassword(user)
+      this.loginByPassword(user).then(() => {
+
+      }).catch((e) => {
+        this.password = ''
+        this._emitTip('账号或密码错误！')
+      })
     },
     retrievePassword () {
       let user = {
         email: this.email
       }
       if (!regEmail.test(user.email)) {
-        // tip:email
+        this._emitTip('请输入正确的邮箱！')
         return
       }
-      this.showRetrievePassword = true
+      axios.get(`/api/common/user/detectEmail/${user.email}`, {
+        baseURL
+      }).then(() => {
+        this.showRetrievePassword = true
+      }).catch(() => {
+        this._emitTip('邮箱未注册！')
+      })
     },
     ...mapActions([
       'loginByPassword'

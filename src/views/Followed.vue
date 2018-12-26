@@ -23,7 +23,7 @@ import { baseURL } from 'common/js/config'
 import { mapGetters } from 'vuex'
 import axios from 'axios'
 export default {
-  mounted () {
+  created () {
     let userId = this.loginInfo.userId
     axios.get(`/api/user/${userId}/FollowerVideo`, {
       baseURL,

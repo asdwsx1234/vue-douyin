@@ -16,7 +16,7 @@
 import HomeTab from 'components/HomeTab/HomeTab'
 import { mapActions } from 'vuex'
 export default {
-  mounted () {
+  created () {
     this.persistentConnection()
   },
   computed: {

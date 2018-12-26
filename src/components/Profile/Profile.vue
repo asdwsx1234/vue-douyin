@@ -77,7 +77,7 @@ const instance = axios.create({
 })
 
 export default {
-  mounted () {
+  created () {
     if (this.$route.params.id === 'me') {
       this.userInfo = this.loginInfo
       let userId = this.userInfo.userId

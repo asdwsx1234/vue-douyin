@@ -37,7 +37,7 @@ import Login from 'components/Login/Login'
 import CommentList from 'components/CommentList/CommentList'
 import { mapGetters, mapActions } from 'vuex'
 export default {
-  mounted () {
+  created () {
     this.getPopularVideo()
   },
   data () {

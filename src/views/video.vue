@@ -29,7 +29,7 @@ export default {
       'loginInfo'
     ])
   },
-  mounted () {
+  created () {
     let userId = this.$route.params.id === 'me' ? this.loginInfo.userId : this.$route.params.id
     axios.get(`/api/user/${userId}/Videos`, {
       baseURL,

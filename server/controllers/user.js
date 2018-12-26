@@ -18,6 +18,8 @@ const KEY_WATCH_NUM = 'videoWatchNum'
 const KEY_SHARE_NUM = 'videoShareNum'
 const KEY_LIKE_NUM = 'videoLikeNum'
 const KEY_COMMENT_NUM = 'videoCommentNum'
+const PER_PAGE_LIMIT_NUM = 21
+
 const regEmail = /^([a-zA-Z0-9]+[_|.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/
 module.exports = {
   'GET /api/common/user/detectEmail/:email': async (ctx, next) => {
@@ -220,15 +222,20 @@ module.exports = {
       throw new APIError('user:not_found', 'user not found by userId.')
     }
   },
-  'GET /api/user/:userId/Followers': async (ctx, next) => {
+  'GET /api/user/:userId/Followers/page/:page': async (ctx, next) => {
     const userId = ctx.params.userId
+    let page = ctx.params.page
+    if (page < 0 || !page) page = 1
     const user = await UserRegister.findOne({
       where: {
         'userId': userId
       }
     })
     if (user) {
-      const FollowersList = await user.getFollowers()
+      const FollowersList = await user.getFollowers({
+        limit: PER_PAGE_LIMIT_NUM,
+        offset: (page - 1) * PER_PAGE_LIMIT_NUM
+      })
       let UserinfoList = []
       for (let i = 0, len = FollowersList.length; i < len; i++) {
         let temp = FollowersList[i]
@@ -345,8 +352,10 @@ module.exports = {
       throw new APIError('user:not_found', 'user not found by userId.')
     }
   },
-  'GET /api/user/:userId/Likes': async (ctx, next) => {
+  'GET /api/user/:userId/Likes/page/:page': async (ctx, next) => {
     const userId = ctx.params.userId
+    let page = ctx.params.page
+    if (page < 0 || !page) page = 1
     const user = await UserRegister.findOne({
       where: {
         'userId': userId
@@ -354,7 +363,13 @@ module.exports = {
     })
     if (user) {
       const userInfo = await user.getUserInfo()
-      const LikeList = await user.getLikes()
+      const LikeList = await user.getLikes({
+        where: {
+          commentId: null
+        },
+        limit: PER_PAGE_LIMIT_NUM,
+        offset: (page - 1) * PER_PAGE_LIMIT_NUM
+      })
       let VideoinfoList = []
       for (let i = 0, len = LikeList.length; i < len; i++) {
         let temp = LikeList[i]
@@ -421,7 +436,11 @@ module.exports = {
       }
     })
     if (user) {
-      const LikeList = await user.getLikes()
+      const LikeList = await user.getLikes({
+        where: {
+          commentId: null
+        }
+      })
       ctx.rest(LikeList.length)
     } else {
       throw new APIError('user:not_found', 'user not found by userId.')

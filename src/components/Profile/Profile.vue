@@ -1,6 +1,9 @@
 <template>
 <div class="profile">
-    <me-tab class="fiexedtop" v-show="fiexedtopshow"></me-tab>
+    <me-tab class="fiexedtop"
+      :videoNum="videoNum"
+      :likeNum="likeNum"
+      v-show="fiexedtopshow"></me-tab>
     <div class="backbtn-wrap" :class="{showbgcolor: fiexedtopshow}">
       <span class="backbtn iconfont icon-left" v-show="this.$route.params.id !== 'me'" @click.stop="GoBack"></span>
       <p class="name" :class="{showname: fiexedtopshow}" v-text="userInfo.userNickname"></p>

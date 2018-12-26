@@ -21,7 +21,8 @@ export default {
   data () {
     return {
       isLoading: true,
-      list: []
+      list: [],
+      page: 0
     }
   },
   computed: {
@@ -30,19 +31,23 @@ export default {
     ])
   },
   created () {
-    let userId = this.$route.params.id === 'me' ? this.loginInfo.userId : this.$route.params.id
-    axios.get(`/api/user/${userId}/Likes`, {
-      baseURL,
-      withCredentials: true
-    }).then((r) => {
-      this.list = r.data.data
-      this.isLoading = false
-    })
+    this.fetchLikeList()
   },
   methods: {
     chooseVideo (index) {
       this.SET_PLAYLIST(this.list)
       this.$emit('chooseVideo', index)
+    },
+    fetchLikeList () {
+      let userId = this.$route.params.id === 'me' ? this.loginInfo.userId : this.$route.params.id
+      this.page++
+      axios.get(`/api/user/${userId}/Likes/page/${this.page}`, {
+        baseURL,
+        withCredentials: true
+      }).then((r) => {
+        this.list = [].concat(r.data.data)
+        this.isLoading = false
+      })
     },
     ...mapMutations([
       'SET_PLAYLIST'

@@ -8,6 +8,7 @@
     <div class="desc">{{item.videoInfo.videoDesc}}</div>
     <div class="video-wrap">
       <video class="video"
+        :poster="item.videoInfo.videoCover"
         :src="item.videoInfo.videoPath"
         webkit-playsinline
         playsinline
@@ -25,7 +26,7 @@
         <span class="sharenum">{{item.WSLCNum.shareNum}}</span>
       </div>
     </div>
-    <div class="time">{{item.videoInfo.createdAt}}</div>
+    <div class="time">{{formatTime(item.videoInfo.createdAt)}}</div>
   </div>
   <no-more class="no-more"></no-more>
 </div>
@@ -34,6 +35,7 @@
 <script>
 import NoMore from 'base/NoMore/NoMore'
 import { baseURL } from 'common/js/config'
+import { formatTime } from 'common/js/util'
 export default {
   props: {
     list: {
@@ -62,7 +64,8 @@ export default {
       if (this.$route.path === '/followed') {
         this.$router.push('/profile/456')
       }
-    }
+    },
+    formatTime
   },
   components: {
     NoMore

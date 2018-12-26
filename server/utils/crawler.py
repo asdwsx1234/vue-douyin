@@ -100,7 +100,6 @@ while i < 250:
   video_desc = result[i]['video_desc'][0]
   video_cover = result[i]['video_cover'][0]
   sql = "UPDATE VideoInfo SET videoPath = '%s', videoDesc = '%s',videoCover = '%s' where videoId = '%s'" % (playurl, video_desc, video_cover, videoId)
-  print sql
   try:
     cursor.execute(sql)
     db.commit()

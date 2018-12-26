@@ -58,7 +58,7 @@ module.exports = {
         'userAvatar': '/assets/avatar/default.png',
         'userNickname': `${id.slice(10, 15)}`,
         'userDesc': 'test111',
-        'userAge': 999,
+        'userAge': 21,
         'userGender': '男',
         'userAddress': '测试'
       })

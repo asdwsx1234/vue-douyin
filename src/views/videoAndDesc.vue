@@ -5,7 +5,6 @@
       <followed-list
         @close="close"
         :list="list"
-        :userInfo="userInfo"
         @showCommentList="showCommentList"></followed-list>
     </div>
   </div>
@@ -18,12 +17,6 @@ import { baseURL } from 'common/js/config'
 import { mapGetters } from 'vuex'
 import axios from 'axios'
 export default {
-  props: {
-    userInfo: {
-      type: Object,
-      required: true
-    }
-  },
   data () {
     return {
       isLoading: true,

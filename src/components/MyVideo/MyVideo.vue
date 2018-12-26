@@ -1,6 +1,7 @@
 <template>
   <div class="my-video">
     <video class="video" :src="VideoItem.videoInfo.videoPath"
+      :poster="VideoItem.videoInfo.videoCover"
       webkit-playsinline
       playsinline
       x5-video-player-type="h5"

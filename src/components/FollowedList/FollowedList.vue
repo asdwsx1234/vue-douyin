@@ -27,7 +27,7 @@
     </div>
     <div class="time">{{item.videoInfo.createdAt}}</div>
   </div>
-  <no-more></no-more>
+  <no-more class="no-more"></no-more>
 </div>
 </template>
 
@@ -74,6 +74,8 @@ export default {
 @import '~@/common/stylus/variable'
 .followed-list
   margin 10px 10px 0 10px
+  .no-more
+    margin-top 12px
   .followed-item
     margin-top 10px
     display flex

@@ -10,7 +10,6 @@ const UserInfo = require('../models/UserInfo')
 const UserRelation = require('../models/UserRelation')
 const db = require('../db')
 const utils = require('../utils/utils')
-
 const MAX_USER_NUM = 50
 const MAX_VIDEO_NUM = MAX_USER_NUM * 5
 const MAX_USER_RELATION_NUM = MAX_USER_NUM * 2

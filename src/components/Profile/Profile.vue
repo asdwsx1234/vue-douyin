@@ -30,7 +30,7 @@
             {{userInfo.userAge}}岁
           </div>
           <div class="num-wrap">
-            <p>100w获赞</p>
+            <p>{{byLikeNum}}获赞</p>
             <p @click="GoInterestList">{{followerNum}}关注</p>
             <p @click="GoFanList">{{fanNum}}粉丝</p>
           </div>
@@ -91,6 +91,7 @@ export default {
         let userId = this.userInfo.userId
         this.getFollowerNum(userId)
         this.getFanNum(userId)
+        this.getByLikeNum(userId)
         this.getLikeNum(userId)
         this.getVideoNum(userId)
       })
@@ -103,6 +104,7 @@ export default {
       fanNum: 0,
       likeNum: 0,
       videoNum: 0,
+      byLikeNum: 0,
       followerNum: 0,
       bgimgHeight: 150,
       showPlayList: false,
@@ -172,6 +174,12 @@ export default {
       let res = await instance.get(`/api/user/${userId}/FansNum`)
       if (res.data.code === 200) {
         this.fanNum = res.data.data
+      }
+    },
+    async getByLikeNum (userId) {
+      let res = await instance.get(`/api/user/${userId}/byLikesNum`)
+      if (res.data.code === 200) {
+        this.byLikeNum = res.data.data
       }
     },
     async getLikeNum (userId) {

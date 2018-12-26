@@ -310,6 +310,41 @@ module.exports = {
       throw new APIError('user:not_found', 'user not found by userId.')
     }
   },
+  'GET /api/user/:userId/byLikesNum': async (ctx, next) => {
+    const userId = ctx.params.userId
+    const user = await UserRegister.findOne({
+      where: {
+        'userId': userId
+      }
+    })
+    if (user) {
+      const userVideos = await user.getVideos()
+      const userComments = await user.getComments()
+      let videoLikeSumNum = 0
+      let commentLikeSumNum = 0
+      for (let i = 0, len = userVideos.length; i < len; i++) {
+        let videoInfo = userVideos[i]
+        let videoLikeNum = await LikeInfo.findAndCount({
+          where: {
+            videoId: videoInfo.videoId
+          }
+        })
+        videoLikeSumNum += videoLikeNum.count
+      }
+      for (let i = 0, len = userComments.length; i < len; i++) {
+        let commentInfo = userComments[i]
+        let commentLikeNum = await LikeInfo.findAndCount({
+          where: {
+            commentId: commentInfo.commentId
+          }
+        })
+        commentLikeSumNum += commentLikeNum.count
+      }
+      ctx.rest(videoLikeSumNum + commentLikeSumNum)
+    } else {
+      throw new APIError('user:not_found', 'user not found by userId.')
+    }
+  },
   'GET /api/user/:userId/Likes': async (ctx, next) => {
     const userId = ctx.params.userId
     const user = await UserRegister.findOne({

@@ -20,5 +20,5 @@ export function formatTime (Timestamp) {
   else if (minutes < 60) return `${Math.floor(minutes)}分钟前`
   else if (minutes < 1440) return `${Math.floor(minutes / 60)}小时前`
   else if (minutes < 2880) return `昨天 ${CreatedAt.getHours()}:${CreatedAt.getMinutes()}`
-  else return `${CreatedAt.getFullYear()}-${CreatedAt.getMonth() + 1}-${CreatedAt.CreatedAt.getDate()}`
+  else return `${CreatedAt.getFullYear()}-${CreatedAt.getMonth() + 1}-${CreatedAt.getDate()}`
 }

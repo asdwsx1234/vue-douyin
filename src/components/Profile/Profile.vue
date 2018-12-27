@@ -17,7 +17,9 @@
             :listenScroll="true"
             @scroll="scrollHandler"
             ref="scroll"
-            @click="showCommentList=false">
+            @click="showCommentList=false"
+            :pullup="true"
+            @scrollToEnd="scrollToEnd">
       <div class="profile">
         <div class="avatar-wrap">
           <img class="avatar" :src="`${baseURL}${userInfo.userAvatar}`" alt="">
@@ -44,6 +46,7 @@
             :likeNum="likeNum"></me-tab>
           <keep-alive>
             <router-view
+              ref="routerView"
               @showCommentList="showCommentList=true"
               :userInfo="userInfo"
               @chooseVideo="chooseVideo"></router-view>
@@ -151,6 +154,11 @@ export default {
         this.fiexedtopshow = true
       } else {
         this.fiexedtopshow = false
+      }
+    },
+    scrollToEnd () {
+      if (this.$route.name === 'profile/likes') {
+        this.$refs.routerView.fetchLikeList()
       }
     },
     GoBack () {

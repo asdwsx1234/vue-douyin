@@ -62,10 +62,12 @@ export default new Router({
           component: () => import('./views/video.vue')
         },
         {
+          name: 'profile/videoDesc',
           path: 'videoAndDesc',
           component: () => import('./views/videoAndDesc.vue')
         },
         {
+          name: 'profile/likes',
           path: 'likes',
           component: () => import('./views/likes.vue')
         }

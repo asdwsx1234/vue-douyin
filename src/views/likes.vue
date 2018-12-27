@@ -1,12 +1,12 @@
 <template>
   <div class="video">
-    <loading v-if="isLoading"></loading>
-    <div v-if="!isLoading">
+    <div>
       <video-list
         :list="list"
         @chooseVideo="chooseVideo"></video-list>
       <no-more class="no-more"></no-more>
     </div>
+    <loading v-if="isLoading"></loading>
   </div>
 </template>
 
@@ -40,12 +40,13 @@ export default {
     },
     fetchLikeList () {
       let userId = this.$route.params.id === 'me' ? this.loginInfo.userId : this.$route.params.id
+      this.isLoading = true
       this.page++
       axios.get(`/api/user/${userId}/Likes/page/${this.page}`, {
         baseURL,
         withCredentials: true
       }).then((r) => {
-        this.list = [].concat(r.data.data)
+        this.list = this.list.concat(r.data.data)
         this.isLoading = false
       })
     },

@@ -21,6 +21,7 @@
             :pullup="true"
             @scrollToEnd="scrollToEnd">
       <div class="profile">
+        <a class="logout" v-show="this.$route.params.id === 'me'" @click="logout">logout</a>
         <div class="avatar-wrap">
           <img class="avatar" :src="`${baseURL}${userInfo.userAvatar}`" alt="">
         </div>
@@ -74,13 +75,15 @@ import MeTab from 'components/MeTab/MeTab'
 import CommentList from 'components/CommentList/CommentList'
 import { baseURL } from 'common/js/config'
 import axios from 'axios'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
 import PlayList from 'components/PlayList/PlayList'
 
 const instance = axios.create({
   baseURL: baseURL,
   withCredentials: true
 })
+
+const VIDEO_NUM_PER_REQUEST = 21
 
 export default {
   created () {
@@ -158,7 +161,11 @@ export default {
     },
     scrollToEnd () {
       if (this.$route.name === 'profile/likes') {
-        this.$refs.routerView.fetchLikeList()
+        let page = this.$refs.routerView.page
+        if (page * VIDEO_NUM_PER_REQUEST < this.likeNum) this.$refs.routerView.fetchLikeList()
+      } else {
+        let page = this.$refs.routerView.page
+        if (page * VIDEO_NUM_PER_REQUEST < this.videoNum) this.$refs.routerView.fetchLikeList()
       }
     },
     GoBack () {
@@ -174,6 +181,14 @@ export default {
     chooseVideo (index) {
       this.showPlayList = true
       this.$refs.playList.scrollToIndex(index)
+    },
+    async logout () {
+      let res = await instance.get(`/api/user/${this.loginInfo.userId}/logout`)
+      if (res.data.code === 200) {
+        this.SET_ISLOGGED(false)
+        this.SET_LOGININFO({})
+        this.$router.push('/home')
+      }
     },
     async getFollowerNum (userId) {
       let res = await instance.get(`/api/user/${userId}/FollowersNum`)
@@ -204,7 +219,11 @@ export default {
       if (res.data.code === 200) {
         this.videoNum = res.data.data
       }
-    }
+    },
+    ...mapMutations([
+      'SET_ISLOGGED',
+      'SET_LOGININFO'
+    ])
   },
   watch: {
     '$route': function () {
@@ -296,6 +315,12 @@ export default {
       position relative
       width 100%
       background $color-background
+      .logout
+        position absolute
+        top 20px
+        right 20px
+        padding 5px
+        color $color-text
       .avatar-wrap
         position absolute
         left 10px

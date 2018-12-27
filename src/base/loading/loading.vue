@@ -28,7 +28,7 @@ export default {
 
 <style scoped lang="stylus">
 .spinner7
-  margin 100px auto
+  margin 40px auto
   width 20px
   height 20px
   position relative

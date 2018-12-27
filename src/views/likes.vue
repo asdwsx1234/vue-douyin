@@ -4,9 +4,9 @@
       <video-list
         :list="list"
         @chooseVideo="chooseVideo"></video-list>
-      <no-more class="no-more"></no-more>
+      <no-more v-if="!isLoading" class="no-more"></no-more>
+      <loading v-else></loading>
     </div>
-    <loading v-if="isLoading"></loading>
   </div>
 </template>
 
@@ -15,8 +15,8 @@ import Loading from 'base/loading/loading'
 import VideoList from 'components/VideoList/VideoList'
 import NoMore from 'base/NoMore/NoMore'
 import { baseURL } from 'common/js/config'
-import { mapGetters, mapMutations } from 'vuex'
 import axios from 'axios'
+import { mapGetters, mapMutations } from 'vuex'
 export default {
   data () {
     return {
@@ -46,8 +46,8 @@ export default {
         baseURL,
         withCredentials: true
       }).then((r) => {
-        this.list = this.list.concat(r.data.data)
         this.isLoading = false
+        this.list = this.list.concat(r.data.data)
       })
     },
     ...mapMutations([

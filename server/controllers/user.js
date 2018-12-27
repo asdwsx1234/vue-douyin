@@ -141,9 +141,9 @@ module.exports = {
       throw new APIError('user:not_found', 'email or password error')
     }
   },
-  'PUT /api/user/:userId/logout': async (ctx, next) => {
+  'GET /api/user/:userId/logout': async (ctx, next) => {
     const userId = ctx.params.userId
-    let ur = UserRegister.findOne({
+    let ur = await UserRegister.findOne({
       where: {
         userId
       }
@@ -152,6 +152,7 @@ module.exports = {
       ur.userStatus = '离线'
       ctx.session = {}
       await ur.save()
+      ctx.rest('ok')
     } else {
       throw new APIError('user:not_found', 'user not found by userId.')
     }
@@ -202,19 +203,24 @@ module.exports = {
       throw new APIError('user:not_found', 'user not found by userId.')
     }
   },
-  'GET /api/user/:userId/Fans': async (ctx, next) => {
+  'GET /api/user/:userId/Fans/page/:page': async (ctx, next) => {
     const userId = ctx.params.userId
+    let page = ctx.params.page
+    if (page < 0 || !page) page = 1
     const user = await UserRegister.findOne({
       where: {
         'userId': userId
       }
     })
     if (user) {
-      const fansList = await user.getFans()
+      const fansList = await user.getFans({
+        limit: PER_PAGE_LIMIT_NUM,
+        offset: (page - 1) * PER_PAGE_LIMIT_NUM
+      })
       let UserinfoList = []
       for (let i = 0, len = fansList.length; i < len; i++) {
         let temp = fansList[i]
-        let userinfo = await temp.getToUserInfo()
+        let userinfo = await temp.getFromUserInfo()
         UserinfoList.push(userinfo)
       }
       ctx.rest(UserinfoList)
@@ -239,7 +245,7 @@ module.exports = {
       let UserinfoList = []
       for (let i = 0, len = FollowersList.length; i < len; i++) {
         let temp = FollowersList[i]
-        let userinfo = await temp.getFromUserInfo()
+        let userinfo = await temp.getToUserInfo()
         UserinfoList.push(userinfo)
       }
       ctx.rest(UserinfoList)
@@ -395,15 +401,20 @@ module.exports = {
       throw new APIError('user:not_found', 'user not found by userId.')
     }
   },
-  'GET /api/user/:userId/Videos': async (ctx, next) => {
+  'GET /api/user/:userId/Videos/page/:page': async (ctx, next) => {
     const userId = ctx.params.userId
+    let page = ctx.params.page
+    if (page < 0 || !page) page = 1
     const user = await UserRegister.findOne({
       where: {
         'userId': userId
       }
     })
     if (user) {
-      const VideoList = await user.getVideos()
+      const VideoList = await user.getVideos({
+        limit: PER_PAGE_LIMIT_NUM,
+        offset: (page - 1) * PER_PAGE_LIMIT_NUM
+      })
       const userInfo = await user.getUserInfo()
       let res = []
       for (let i = 0, len = VideoList.length; i < len; i++) {

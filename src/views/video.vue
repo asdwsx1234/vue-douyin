@@ -20,6 +20,7 @@ import { mapGetters, mapMutations } from 'vuex'
 export default {
   data () {
     return {
+      page: 0,
       isLoading: true,
       list: []
     }
@@ -30,19 +31,24 @@ export default {
     ])
   },
   created () {
-    let userId = this.$route.params.id === 'me' ? this.loginInfo.userId : this.$route.params.id
-    axios.get(`/api/user/${userId}/Videos`, {
-      baseURL,
-      withCredentials: true
-    }).then((r) => {
-      this.list = r.data.data
-      this.isLoading = false
-    })
+    this.fetchVideoList()
   },
   methods: {
     chooseVideo (index) {
       this.SET_PLAYLIST(this.list)
       this.$emit('chooseVideo', index)
+    },
+    fetchVideoList () {
+      let userId = this.$route.params.id === 'me' ? this.loginInfo.userId : this.$route.params.id
+      this.isLoading = true
+      this.page++
+      axios.get(`/api/user/${userId}/Videos/page/${this.page}`, {
+        baseURL,
+        withCredentials: true
+      }).then((r) => {
+        this.list = this.list.concat(r.data.data)
+        this.isLoading = false
+      })
     },
     ...mapMutations([
       'SET_PLAYLIST'

@@ -5,7 +5,6 @@
         <router-view/>
       </keep-alive>
     </div>
-    <!-- <router-view name="side"></router-view> -->
     <div class="tab-wrap">
       <home-tab></home-tab>
     </div>

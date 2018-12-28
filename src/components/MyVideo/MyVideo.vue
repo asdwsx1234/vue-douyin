@@ -37,7 +37,6 @@
 
 <script>
 import { baseURL } from 'common/js/config'
-import axios from 'axios'
 export default {
   props: {
     VideoItem: {
@@ -62,17 +61,7 @@ export default {
       v.paused ? v.play() : v.pause()
     },
     showCommentList (videoId) {
-      
-    },
-    fetchCommentsAndShowList (videoId) {
-      this.page++
-      axios.get(`/api/video/${videoId}/getVideoComment/page/1`,{
-        baseURL,
-        withCredentials: true
-      }).then((res) => {
-        this.commentList = res.data.data
-        this.$emit('showCommentList')
-      })
+      this.$emit('showCommentList', videoId)
     },
     toggleLike () {
       this.like = !this.like

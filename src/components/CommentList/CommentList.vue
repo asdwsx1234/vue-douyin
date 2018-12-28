@@ -2,12 +2,14 @@
   <div class="comment-list">
     <div class="top">
       {{commentList.length}}条评论
-      <span class="iconfont icon-close" @click.stop="close"></span>
+      <span class="iconfont icon-close" @click.stop="close($event)"></span>
     </div>
     <scroll
       @click.stop.native
       class="comment-item-wrap"
-      :data="commentList">
+      :data="commentList"
+      :pullup="true"
+      @scrollToEnd="scrollToEnd">
       <div>
         <div class="comment-item" v-for="(item, index) in commentList" :key="index">
           <img class="avatar" :src="`${baseURL}${item.userInfo.userAvatar}`" alt="" width="40" height="40">
@@ -57,12 +59,17 @@ export default {
     }
   },
   methods: {
-    close () {
-      this.$emit('close')
+    close (e) {
+      this.$emit('close', e)
     },
     toggleLike (index) {
       this.likes[index] = !this.likes[index]
       this.likes = [].concat(this.likes)
+    },
+    scrollToEnd () {
+      if (this.commentList.length > 0) {
+        this.$emit('scrollToEnd', this.commentList[0].Comment.videoId)
+      }
     },
     formatTime
   },

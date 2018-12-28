@@ -19,7 +19,8 @@
     <comment-list
       v-if="showCommentList"
       :commentList="commentList"
-      @close="showCommentList=false"></comment-list>
+      @close="closeCommentList"
+      @scrollToEnd="fetchCommentsAndShowList"></comment-list>
   </transition>
   <transition name="up">
     <login
@@ -48,7 +49,9 @@ export default {
       showCommentList: false,
       showLoginWrap: false,
       commentList: [],
-      page: 0
+      page: 0,
+      currentCommentVideoId: '',
+      isEnd: false
     }
   },
   methods: {
@@ -66,21 +69,43 @@ export default {
       }
     },
     fetchCommentsAndShowList (videoId) {
-      this.page++
-      axios.get(`/api/video/${videoId}/getVideoComment/page/1`,{
-        baseURL,
-        withCredentials: true
-      }).then((res) => {
-        this.commentList = res.data.data
-        this.showCommentList = true
-      })
+      if (this.currentCommentVideoId !== videoId) {
+        this.isEnd = false
+        this.page = 1
+        this.currentCommentVideoId = videoId
+        axios.get(`/api/video/${videoId}/getVideoComment/page/${this.page}`, {
+          baseURL,
+          withCredentials: true
+        }).then((res) => {
+          if (res.data.data.length < 20) {
+            this.isEnd = true
+          }
+          this.commentList = res.data.data
+          this.showCommentList = true
+        })
+      } else {
+        this.page++
+        if (this.isEnd) return
+        axios.get(`/api/video/${videoId}/getVideoComment/page/${this.page}`, {
+          baseURL,
+          withCredentials: true
+        }).then((res) => {
+          if (res.data.data.length < 20) {
+            this.isEnd = true
+          }
+          this.commentList = this.commentList.concat(res.data.data)
+          this.showCommentList = true
+        })
+      }
     },
     closeCommentList (e) {
-      if (this.showCommentList) {
+      if (this.showCommentList && (e.target.nodeName === 'VIDEO' || e.target.className.includes('icon-close'))) {
+        this.currentCommentVideoId = ''
         e.stopPropagation()
         this.showCommentList = false
       }
     },
+
     showTip (message) {
       this.$refs.tip.show(message)
     },

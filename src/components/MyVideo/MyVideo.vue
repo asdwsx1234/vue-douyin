@@ -16,7 +16,7 @@
       <div class="like iconfont icon-heart-fill" :class="{ 'red-heart': like }" @click="toggleLike">
         <span class="likenum">{{VideoItem.WSLCNum.likeNum}}</span>
       </div>
-      <div class="comment iconfont icon-message" @click.stop="showCommentList">
+      <div class="comment iconfont icon-message" @click.stop="showCommentList(VideoItem.videoInfo.videoId)">
         <span class="commentnum">{{VideoItem.WSLCNum.commentNum}}</span>
       </div>
       <div class="share iconfont icon-share">
@@ -37,6 +37,7 @@
 
 <script>
 import { baseURL } from 'common/js/config'
+import axios from 'axios'
 export default {
   props: {
     VideoItem: {
@@ -60,8 +61,18 @@ export default {
       const v = this.$refs.video
       v.paused ? v.play() : v.pause()
     },
-    showCommentList () {
-      this.$emit('showCommentList')
+    showCommentList (videoId) {
+      
+    },
+    fetchCommentsAndShowList (videoId) {
+      this.page++
+      axios.get(`/api/video/${videoId}/getVideoComment/page/1`,{
+        baseURL,
+        withCredentials: true
+      }).then((res) => {
+        this.commentList = res.data.data
+        this.$emit('showCommentList')
+      })
     },
     toggleLike () {
       this.like = !this.like

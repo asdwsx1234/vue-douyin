@@ -1,5 +1,7 @@
 const APIError = require('../rest').APIError
 const VideoInfo = require('../models/VideoInfo')
+const CommentInfo = require('../models/CommentInfo')
+const UserInfo = require('../models/UserInfo')
 const redisClient = require('../redis')
 
 const KEY_WATCH_NUM = 'videoWatchNum'
@@ -7,6 +9,7 @@ const KEY_SHARE_NUM = 'videoShareNum'
 const KEY_LIKE_NUM = 'videoLikeNum'
 const KEY_COMMENT_NUM = 'videoCommentNum'
 const VIDEO_NUM = 15
+const KEY_COMMENT_LIKE_NUM = 'commmentLikeNum'
 const PER_PAGE_LIMIT_NUM = 20
 const TOP_LIKE_COMMENT_NUM = 3
 module.exports = {
@@ -108,30 +111,77 @@ module.exports = {
       throw new APIError('video:not_found', 'video not found bt videoId.')
     }
   },
-  // 'GET /api/video/:videoId/getVideoComment/:page': async (ctx, next) => {
-  //   const videoId = ctx.params.videoId
-  //   const page = ctx.params.page || 0
-  //   let vi = await VideoInfo.findOne({
-  //     where: {
-  //       videoId
-  //     }
-  //   })
-  //   if (vi) {
-  //     let result = []
-  //     if (page === 0) {
-  //       const commentInfolist = await vi.getCommentInfos({
-  //         where: {
-
-  //         },
-  //         limit: TOP_LIKE_COMMENT_NUM
-  //       })
-  //     }
-
-  //     ctx.rest(commentInfolist)
-  //   } else {
-  //     throw new APIError('video:not_found', 'video not found bt videoId.')
-  //   }
-  // },
+  'GET /api/video/:videoId/getVideoComment/page/:page': async (ctx, next) => {
+    const videoId = ctx.params.videoId
+    let page = ctx.params.page
+    if (page < 0 || !page) page = 1
+    let vi = await VideoInfo.findOne({
+      where: {
+        videoId
+      }
+    })
+    if (vi) {
+      let result = []
+      if (Number(page) === 1) {
+        let topCommentId = await redisClient.zrevrange(`${KEY_COMMENT_LIKE_NUM}:${vi.videoId}`, 0, TOP_LIKE_COMMENT_NUM - 1)
+        for (let i = 0, len = topCommentId.length; i < len; i++) {
+          let topComment = await CommentInfo.findOne({
+            where: {
+              commentId: topCommentId[i]
+            }
+          })
+          let userInfo = await UserInfo.findOne({
+            where: {
+              userId: topComment.userId
+            }
+          })
+          let likeNum = await redisClient.zscore(`${KEY_COMMENT_LIKE_NUM}:${vi.videoId}`, topCommentId[i])
+          result.push({
+            Comment: topComment,
+            likeNum,
+            userInfo
+          })
+        }
+        const commentInfolist = await vi.getCommentInfos({
+          limit: PER_PAGE_LIMIT_NUM - TOP_LIKE_COMMENT_NUM
+        })
+        for (let i = 0, len = commentInfolist.length; i < len; i++) {
+          let likeNum = await redisClient.zscore(`${KEY_COMMENT_LIKE_NUM}:${vi.videoId}`, commentInfolist[i].commentId)
+          let userInfo = await UserInfo.findOne({
+            where: {
+              userId: commentInfolist[i].userId
+            }
+          })
+          result.push({
+            Comment: commentInfolist[i],
+            likeNum,
+            userInfo
+          })
+        }
+      } else {
+        const commentInfolist = await vi.getCommentInfos({
+          limit: PER_PAGE_LIMIT_NUM,
+          offset: PER_PAGE_LIMIT_NUM * page
+        })
+        for (let i = 0, len = commentInfolist.length; i < len; i++) {
+          let likeNum = await redisClient.zscore(`${KEY_COMMENT_LIKE_NUM}:${vi.videoId}`, commentInfolist[i].commentId)
+          let userInfo = await UserInfo.findOne({
+            where: {
+              userId: commentInfolist[i].userId
+            }
+          })
+          result.push({
+            Comment: commentInfolist[i],
+            likeNum,
+            userInfo
+          })
+        }
+      }
+      ctx.rest(result)
+    } else {
+      throw new APIError('video:not_found', 'video not found bt videoId.')
+    }
+  },
   'GET /api/common/video/:videoId/getVideoWSLCNum': async (ctx, next) => {
     const videoId = ctx.params.videoId
     let shareNum = await redisClient.zscore(KEY_SHARE_NUM, videoId)

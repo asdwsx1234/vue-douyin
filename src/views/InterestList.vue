@@ -22,10 +22,12 @@ import axios from 'axios'
 import NoMore from 'base/NoMore/NoMore'
 import { mapGetters } from 'vuex'
 import Loading from 'base/loading/loading'
+const PER_PAGE_LIMIT_NUM = 21
 export default {
   activated () {
     this.list = []
     this.page = 0
+    this.isEnd = false
     this.fetchInterestList()
   },
   data () {
@@ -33,11 +35,13 @@ export default {
       list: [],
       isLoading: false,
       page: 0,
+      isEnd: false,
       baseURL
     }
   },
   methods: {
     fetchInterestList () {
+      if (this.isEnd) return
       let userId = this.$route.params.id === 'me' ? this.loginInfo.userId : this.$route.params.id
       this.isLoading = true
       this.page++
@@ -46,6 +50,9 @@ export default {
         withCredentials: true
       }).then((r) => {
         this.isLoading = false
+        if (r.data.data.length < PER_PAGE_LIMIT_NUM) {
+          this.isEnd = true
+        }
         this.list = this.list.concat(r.data.data)
       })
     },

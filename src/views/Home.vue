@@ -12,7 +12,7 @@
       <my-video v-for="item in popularVideo"
         :key="item.id"
         :VideoItem="item"
-        @showCommentList="showCommentList=true"></my-video>
+        @showCommentList="fetchCommentsAndShowList"></my-video>
     </div>
   </scroll>
   <transition name="up">
@@ -36,6 +36,8 @@ import MyVideo from 'components/MyVideo/MyVideo'
 import Login from 'components/Login/Login'
 import CommentList from 'components/CommentList/CommentList'
 import { mapGetters, mapActions } from 'vuex'
+import { baseURL } from 'common/js/config'
+import axios from 'axios'
 export default {
   created () {
     this.getPopularVideo()
@@ -45,21 +47,8 @@ export default {
       currentY: 0,
       showCommentList: false,
       showLoginWrap: false,
-      VideoList: [{ id: 1, video: 'https://mp4.vjshi.com/2017-08-28/ecbc62447fe2f2be561af3ae1a43a6ab.mp4', avatar: '', name: 'well', desc: '与此同时，网络社交一直在努力通过不断丰富的手段和工具，来替代传统社', likenum: '100', commentnum: '2.1w', sharenum: '2.3w' },
-        { id: 2, video: 'http://video.pearvideo.com/mp4/adshort/20181118/cont-1478169-13252496_adpkg-ad_hd.mp4', avatar: '', name: 'well1', desc: '与此同时，网络社交一直在努力通过不断丰富的手段和工具，来替代传统社', likenum: '1000', commentnum: '5.1w', sharenum: '5.2w' },
-        { id: 3, video: 'http://video.pearvideo.com/mp4/adshort/20181118/cont-1478156-13252863_adpkg-ad_hd.mp4', avatar: '', name: 'well2', desc: '与此同时，网络社交一直在努力通过不断丰富的手段和工具，来替代传统社', likenum: '2323', commentnum: '2.1w', sharenum: '2333' }
-      ],
-      commentList: [
-        { id: '1', avatar: './1.jpg', name: 'Well', content: '测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试', time: '1分钟前', likeNum: '2w' },
-        { id: '2', avatar: './1.jpg', name: 'Well', content: '测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试', time: '1分钟前', likeNum: '2w' },
-        { id: '3', avatar: './1.jpg', name: 'Well', content: '测试测试测试测试测试测试测试测试测试测试测试测试测试', time: '1分钟前', likeNum: '2w' },
-        { id: '4', avatar: './1.jpg', name: 'Well', content: '测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试', time: '1分钟前', likeNum: '2w' },
-        { id: '5', avatar: './1.jpg', name: 'Well', content: '测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试', time: '1分钟前', likeNum: '2w' },
-        { id: '6', avatar: './1.jpg', name: 'Well', content: '测试测试测试测试测试测试测试测试测试测试测试测试测试', time: '1分钟前', likeNum: '2w' },
-        { id: '7', avatar: './1.jpg', name: 'Well', content: '测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试', time: '1分钟前', likeNum: '2w' },
-        { id: '8', avatar: './1.jpg', name: 'Well', content: '测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试', time: '1分钟前', likeNum: '2w' },
-        { id: '9', avatar: './1.jpg', name: 'Well', content: '测试测试测试测试测试测试测试测试测试测试测试测试测试', time: '1分钟前', likeNum: '2w' }
-      ]
+      commentList: [],
+      page: 0
     }
   },
   methods: {
@@ -75,6 +64,16 @@ export default {
         this.currentY += clientHeight
         this.$refs.scroll.scrollTo(0, -this.currentY) // 下一页
       }
+    },
+    fetchCommentsAndShowList (videoId) {
+      this.page++
+      axios.get(`/api/video/${videoId}/getVideoComment/page/1`,{
+        baseURL,
+        withCredentials: true
+      }).then((res) => {
+        this.commentList = res.data.data
+        this.showCommentList = true
+      })
     },
     closeCommentList (e) {
       if (this.showCommentList) {

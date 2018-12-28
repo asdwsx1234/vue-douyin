@@ -9,12 +9,12 @@
       class="comment-item-wrap"
       :data="commentList">
       <div>
-        <div class="comment-item" v-for="(item, index) in commentList" :key="item.id">
-          <img class="avatar" src="./1.jpg" alt="" width="40" height="40">
+        <div class="comment-item" v-for="(item, index) in commentList" :key="index">
+          <img class="avatar" :src="`${baseURL}${item.userInfo.userAvatar}`" alt="" width="40" height="40">
           <div class="main">
-            <p class="name">@{{item.name}}</p>
-            <p class="content">{{item.content}}</p>
-            <p class="time">{{item.time}}</p>
+            <p class="name">@{{item.userInfo.userNickname}}</p>
+            <p class="content">{{item.Comment.commentContent}}</p>
+            <p class="time">{{formatTime(item.Comment.createdAt)}}</p>
           </div>
           <div class="like" :class="{ 'red-heart': likes[index] }" @click.stop="toggleLike(index)">
             <i class="iconfont icon-heart-fill"></i>
@@ -35,6 +35,8 @@
 <script>
 import Scroll from 'base/scroll/scroll'
 import NoMore from 'base/NoMore/NoMore'
+import { formatTime } from 'common/js/util'
+import { baseURL } from 'common/js/config'
 export default {
   props: {
     commentList: {
@@ -50,7 +52,8 @@ export default {
   },
   data () {
     return {
-      likes: []
+      likes: [],
+      baseURL
     }
   },
   methods: {
@@ -60,7 +63,8 @@ export default {
     toggleLike (index) {
       this.likes[index] = !this.likes[index]
       this.likes = [].concat(this.likes)
-    }
+    },
+    formatTime
   },
   components: {
     Scroll,
@@ -95,6 +99,7 @@ export default {
     top 32px
     bottom 44px
     overflow hidden
+    width 100%
   .comment-item
     display flex
     padding 0 0 0 10px

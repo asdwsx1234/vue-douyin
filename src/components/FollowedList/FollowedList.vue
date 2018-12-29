@@ -19,7 +19,7 @@
       <div class="like iconfont icon-heart-fill" :class="{ 'red-heart': like }" @click="toggleLike">
         <span class="likenum">{{item.WSLCNum.likeNum}}</span>
       </div>
-      <div class="comment iconfont icon-message" @click.stop="showCommentList">
+      <div class="comment iconfont icon-message" @click.stop="showCommentList(item.videoInfo.videoId, item.WSLCNum.commentNum)">
         <span class="commentnum">{{item.WSLCNum.commentNum}}</span>
       </div>
       <div class="share iconfont icon-share">
@@ -50,8 +50,8 @@ export default {
     }
   },
   methods: {
-    showCommentList () {
-      this.$emit('showCommentList')
+    showCommentList (videoId, commentNum) {
+      this.$emit('showCommentList', videoId, commentNum)
     },
     playHandler (e) {
       const v = e.target

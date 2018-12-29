@@ -33,8 +33,8 @@ export default {
     this.fetchVideoList()
   },
   methods: {
-    showCommentList () {
-      this.$emit('showCommentList')
+    showCommentList (videoId, commentNum) {
+      this.$emit('showCommentList', videoId, commentNum)
     },
     fetchVideoList () {
       let userId = this.$route.params.id === 'me' ? this.loginInfo.userId : this.$route.params.id

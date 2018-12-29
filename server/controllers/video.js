@@ -161,7 +161,7 @@ module.exports = {
       } else {
         const commentInfolist = await vi.getCommentInfos({
           limit: PER_PAGE_LIMIT_NUM,
-          offset: PER_PAGE_LIMIT_NUM * page
+          offset: PER_PAGE_LIMIT_NUM * (page - 1)
         })
         for (let i = 0, len = commentInfolist.length; i < len; i++) {
           let likeNum = await redisClient.zscore(`${KEY_COMMENT_LIKE_NUM}:${vi.videoId}`, commentInfolist[i].commentId)

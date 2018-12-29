@@ -48,7 +48,8 @@
           <keep-alive>
             <router-view
               ref="routerView"
-              @showCommentList="showCommentList=true"
+              @click.native.capture="closeCommentList"
+              @showCommentList="fetchCommentsAndShowList"
               :userInfo="userInfo"
               @chooseVideo="chooseVideo"></router-view>
           </keep-alive>
@@ -59,7 +60,11 @@
       <comment-list
         v-if="showCommentList"
         :commentList="commentList"
-        @close="showCommentList=false"></comment-list>
+        :commentNum="commentNum"
+        @close="closeCommentList"
+        @scrollToEnd="fetchCommentsAndShowList"></comment-list>
+    </transition>
+    <transition name="up">
       <play-list
         class="play-list"
         ref="playList"
@@ -119,17 +124,8 @@ export default {
       showPlayList: false,
       fiexedtopshow: false,
       showCommentList: false,
-      commentList: [
-        { id: '1', avatar: './1.jpg', name: 'Well', content: '测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试', time: '1分钟前', likeNum: '2w' },
-        { id: '2', avatar: './1.jpg', name: 'Well', content: '测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试', time: '1分钟前', likeNum: '2w' },
-        { id: '3', avatar: './1.jpg', name: 'Well', content: '测试测试测试测试测试测试测试测试测试测试测试测试测试', time: '1分钟前', likeNum: '2w' },
-        { id: '4', avatar: './1.jpg', name: 'Well', content: '测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试', time: '1分钟前', likeNum: '2w' },
-        { id: '5', avatar: './1.jpg', name: 'Well', content: '测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试', time: '1分钟前', likeNum: '2w' },
-        { id: '6', avatar: './1.jpg', name: 'Well', content: '测试测试测试测试测试测试测试测试测试测试测试测试测试', time: '1分钟前', likeNum: '2w' },
-        { id: '7', avatar: './1.jpg', name: 'Well', content: '测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试', time: '1分钟前', likeNum: '2w' },
-        { id: '8', avatar: './1.jpg', name: 'Well', content: '测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试', time: '1分钟前', likeNum: '2w' },
-        { id: '9', avatar: './1.jpg', name: 'Well', content: '测试测试测试测试测试测试测试测试测试测试测试测试测试', time: '1分钟前', likeNum: '2w' }
-      ]
+      commentList: [],
+      currentCommentVideoId: ''
     }
   },
   computed: {
@@ -149,6 +145,8 @@ export default {
     scrollHandler (pos) {
       if (this.showCommentList) {
         this.showCommentList = false
+        currentCommentVideoId: ''
+        this.isEnd = false
       }
       if (pos.y > 0) {
         this.bgimgHeight = pos.y + 150
@@ -166,6 +164,44 @@ export default {
       } else {
         let page = this.$refs.routerView.page
         if (page * VIDEO_NUM_PER_REQUEST < this.videoNum) this.$refs.routerView.fetchLikeList()
+      }
+    },
+    closeCommentList (e) {
+      if (this.showCommentList) {
+        this.currentCommentVideoId = ''
+        e.stopPropagation()
+        this.showCommentList = false
+      }
+    },
+    fetchCommentsAndShowList (videoId, commentNum) {
+      if (this.currentCommentVideoId !== videoId) {
+        this.isEnd = false
+        this.page = 1
+        this.currentCommentVideoId = videoId
+        this.commentNum = commentNum
+        axios.get(`/api/video/${videoId}/getVideoComment/page/${this.page}`, {
+          baseURL,
+          withCredentials: true
+        }).then((res) => {
+          if (res.data.data.length < 20) {
+            this.isEnd = true
+          }
+          this.commentList = res.data.data
+          this.showCommentList = true
+        })
+      } else {
+        this.page++
+        if (this.isEnd) return
+        axios.get(`/api/video/${videoId}/getVideoComment/page/${this.page}`, {
+          baseURL,
+          withCredentials: true
+        }).then((res) => {
+          if (res.data.data.length < 20) {
+            this.isEnd = true
+          }
+          this.commentList = this.commentList.concat(res.data.data)
+          this.showCommentList = true
+        })
       }
     },
     GoBack () {

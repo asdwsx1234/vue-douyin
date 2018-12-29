@@ -46,6 +46,8 @@ export default {
 
 <style scoped lang='stylus'>
 @import '~@/common/stylus/variable'
+.message
+  width 100vw
 .tab-wrap
   margin 10px
   padding-bottom 20px

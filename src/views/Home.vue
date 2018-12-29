@@ -1,7 +1,7 @@
 <template>
-<div @click.capture="closeCommentList($event)">
+<div class="wrap" @click.capture="closeCommentList($event)">
   <tip ref="tip"></tip>
-  <scroll class="wrap"
+  <scroll class="scroll-wrap"
     ref="scroll"
     :probeType="3"
     :data="popularVideo"
@@ -156,9 +156,17 @@ export default {
   opacity 0
   transform translateY(100%)
 .wrap
-  position relative
-  height 100vh
-  width 100vw
+  position absolute
+  top 0
+  bottom 0
+  left 0
+  right 0
+  .scroll-wrap
+    position absolute
+    top 0
+    bottom 0
+    left 0
+    right 0
 .back
   position absolute
   left 10px

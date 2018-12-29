@@ -1,7 +1,7 @@
 <template>
   <div class="comment-list">
     <div class="top">
-      {{commentList.length}}条评论
+      {{commentNum}}条评论
       <span class="iconfont icon-close" @click.stop="close($event)"></span>
     </div>
     <scroll
@@ -43,6 +43,10 @@ export default {
   props: {
     commentList: {
       type: Array,
+      required: true
+    },
+    commentNum: {
+      type: String,
       required: true
     }
   },

@@ -16,7 +16,7 @@
       <div class="like iconfont icon-heart-fill" :class="{ 'red-heart': like }" @click="toggleLike">
         <span class="likenum">{{VideoItem.WSLCNum.likeNum}}</span>
       </div>
-      <div class="comment iconfont icon-message" @click.stop="showCommentList(VideoItem.videoInfo.videoId)">
+      <div class="comment iconfont icon-message" @click.stop="showCommentList(VideoItem.videoInfo.videoId, VideoItem.WSLCNum.commentNum)">
         <span class="commentnum">{{VideoItem.WSLCNum.commentNum}}</span>
       </div>
       <div class="share iconfont icon-share">
@@ -60,8 +60,8 @@ export default {
       const v = this.$refs.video
       v.paused ? v.play() : v.pause()
     },
-    showCommentList (videoId) {
-      this.$emit('showCommentList', videoId)
+    showCommentList (videoId, commentNum) {
+      this.$emit('showCommentList', videoId, commentNum)
     },
     toggleLike () {
       this.like = !this.like

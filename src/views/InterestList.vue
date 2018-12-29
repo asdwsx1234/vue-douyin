@@ -1,7 +1,7 @@
 <template>
 <div>
   <my-list :Title="title" @scrollToEnd="scrollToEnd">
-    <li v-for="item in list" :key="item.id" class="list-item" @click="chooseUser(item.userId)">
+    <li v-for="item in list" :key="item.id" class="list-item" @click="chooseUser($event, item.userId)">
       <img :src="`${baseURL}${item.userAvatar}`" width="45" height="45" alt="" class="avatar">
       <div class="main">
         <p class="name">{{item.userNickname}}</p>
@@ -56,7 +56,8 @@ export default {
         this.list = this.list.concat(r.data.data)
       })
     },
-    chooseUser (userId) {
+    chooseUser (e, userId) {
+      if (e.target.className.includes('btn')) return
       this.$router.push(`/profile/${userId}`)
     },
     scrollToEnd () {

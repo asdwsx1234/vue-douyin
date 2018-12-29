@@ -8,7 +8,7 @@ const KEY_WATCH_NUM = 'videoWatchNum'
 const KEY_SHARE_NUM = 'videoShareNum'
 const KEY_LIKE_NUM = 'videoLikeNum'
 const KEY_COMMENT_NUM = 'videoCommentNum'
-const VIDEO_NUM = 15
+const VIDEO_NUM = 30
 const KEY_COMMENT_LIKE_NUM = 'commmentLikeNum'
 const PER_PAGE_LIMIT_NUM = 20
 const TOP_LIKE_COMMENT_NUM = 3
@@ -161,7 +161,7 @@ module.exports = {
       } else {
         const commentInfolist = await vi.getCommentInfos({
           limit: PER_PAGE_LIMIT_NUM,
-          offset: PER_PAGE_LIMIT_NUM * page
+          offset: PER_PAGE_LIMIT_NUM * (page - 1)
         })
         for (let i = 0, len = commentInfolist.length; i < len; i++) {
           let likeNum = await redisClient.zscore(`${KEY_COMMENT_LIKE_NUM}:${vi.videoId}`, commentInfolist[i].commentId)

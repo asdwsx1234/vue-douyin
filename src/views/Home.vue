@@ -19,6 +19,7 @@
     <comment-list
       v-if="showCommentList"
       :commentList="commentList"
+      :commentNum="commentNum"
       @close="closeCommentList"
       @scrollToEnd="fetchCommentsAndShowList"></comment-list>
   </transition>
@@ -48,6 +49,7 @@ export default {
       currentY: 0,
       showCommentList: false,
       showLoginWrap: false,
+      commentNum: 0,
       commentList: [],
       page: 0,
       currentCommentVideoId: '',
@@ -68,11 +70,13 @@ export default {
         this.$refs.scroll.scrollTo(0, -this.currentY) // 下一页
       }
     },
-    fetchCommentsAndShowList (videoId) {
+    fetchCommentsAndShowList (videoId, commentNum) {
+      if (!this.isLogged) this.showLoginWrap = true
       if (this.currentCommentVideoId !== videoId) {
         this.isEnd = false
         this.page = 1
         this.currentCommentVideoId = videoId
+        this.commentNum = commentNum
         axios.get(`/api/video/${videoId}/getVideoComment/page/${this.page}`, {
           baseURL,
           withCredentials: true
@@ -105,7 +109,6 @@ export default {
         this.showCommentList = false
       }
     },
-
     showTip (message) {
       this.$refs.tip.show(message)
     },

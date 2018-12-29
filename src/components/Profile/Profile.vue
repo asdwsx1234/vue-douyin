@@ -145,7 +145,7 @@ export default {
     scrollHandler (pos) {
       if (this.showCommentList) {
         this.showCommentList = false
-        currentCommentVideoId: ''
+        this.currentCommentVideoId = ''
         this.isEnd = false
       }
       if (pos.y > 0) {

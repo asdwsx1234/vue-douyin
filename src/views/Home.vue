@@ -129,6 +129,7 @@ export default {
     isLogged (newVal, oldVal) {
       if (newVal) {
         this.showLoginWrap = false
+        this.showTip('登陆成功')
       }
     }
   },

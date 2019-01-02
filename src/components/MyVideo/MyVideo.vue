@@ -5,6 +5,7 @@
       webkit-playsinline
       playsinline
       x5-video-player-type="h5"
+      preload="none"
       @click="playHandler"
       ref="video"></video>
     <div class="side-bar">

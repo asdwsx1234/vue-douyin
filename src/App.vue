@@ -17,6 +17,16 @@ import { mapActions } from 'vuex'
 export default {
   created () {
     this.persistentConnection()
+    console.log(this)
+    this.$socket.emit('haha', 'nishizhu')
+  },
+  sockets: {
+    connect: function () {
+      console.log('socket connected')
+    },
+    haha1111: function (data) {
+      console.log('this method was fired by the socket server. eg: io.emit("haha", data)')
+    }
   },
   computed: {
     isHome () {

@@ -4,14 +4,24 @@ const session = require('koa-session2')
 const Store = require('./Store')
 const restify = require('./rest').restify
 const controller = require('./controller')
-let staticFiles = require('./staticFiles')
+const staticFiles = require('./staticFiles')
 const bodyParser = require('koa-bodyparser')
 const cors = require('koa2-cors')
 
 const app = new Koa()
+const server = require('http').createServer(app.callback())
+const io = require('socket.io')(server)
+
+io.on('connection', function (socket) {
+  console.log('a user connected')
+  socket.on('haha', function (r) {
+    console.log('haha')
+  })
+})
 
 app.use(session({
-  store: new Store()
+  store: new Store(),
+  maxAge: 8 * 60 * 60 * 1000 + 1000000
 }))
 
 app.use(staticFiles('/assets', path.join(__dirname, 'static/assets')))
@@ -60,5 +70,6 @@ app.use(async (ctx, next) => {
 
 app.use(controller())
 
-app.listen(3000)
+server.listen(3000)
+
 console.log('listening at port 3000...')

@@ -40,6 +40,7 @@ export const getPopularVideo = async ({ commit, state }) => {
       let video = JSON.parse(list[i])
       popularVideo.push(video)
     }
-    commit(types.SET_POPULARVIDEO, popularVideo)
+    let resultList = state.popularVideo
+    commit(types.SET_POPULARVIDEO, resultList.concat(popularVideo))
   }
 }

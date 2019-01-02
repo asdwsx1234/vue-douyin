@@ -12,10 +12,18 @@ const app = new Koa()
 const server = require('http').createServer(app.callback())
 const io = require('socket.io')(server)
 
-io.on('connection', function (socket) {
-  console.log('a user connected')
-  socket.on('haha', function (r) {
-    console.log('haha')
+io.on('connection', socket => {
+  const socketId = socket.id
+  socket.on('login', userId => {
+    // 保存userid： sockeId
+  })
+  socket.on('sendPrivateLetter', async data => {
+    const { toUser } = data
+    // const sockeId   拿出toUser的socketId
+    // io.to(socketId).emit('receivePrivateLetter', data)
+  })
+  socket.on('logout', userId => {
+    // 删除
   })
 })
 

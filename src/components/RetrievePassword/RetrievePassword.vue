@@ -19,8 +19,6 @@
 
 <script>
 import CodeInput from 'base/CodeInput/CodeInput'
-import axios from 'axios'
-import { baseURL } from 'common/js/config'
 export default {
   props: {
     email: {
@@ -55,9 +53,7 @@ export default {
         code: this.code
       }
       if (this.password.length < 6 || this.code.length !== 6) return
-      axios.post('/api/common/user/retrievePassword', user, {
-        baseURL
-      }).then(() => {
+      this.$axios.post('/api/common/user/retrievePassword', user).then(() => {
         this.back()
       }).catch((e) => {
         this._emitTip('验证码错误')

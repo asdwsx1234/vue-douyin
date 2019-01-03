@@ -104,8 +104,9 @@ export default {
       width 70%
       height 400px
       .video
+        background #000
         display block
-        object-fit cover
+        object-fit contain
         width 100%
         height 100%
         border-radius 5px

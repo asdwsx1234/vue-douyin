@@ -15,5 +15,10 @@ module.exports = db.defineModel('UserRelation', {
       key: 'userId'
     }
   },
-  bothStatus: db.BOOLEAN
+  bothStatus: db.BOOLEAN,
+  isRead: {
+    type: db.BOOLEAN,
+    allowNull: false,
+    default: false
+  }
 })

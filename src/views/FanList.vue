@@ -1,13 +1,14 @@
 <template>
 <div>
+  <tip ref="tip"></tip>
   <my-list :Title="title" @scrollToEnd="scrollToEnd">
-    <li v-for="item in list" :key="item.id" class="list-item" @click="chooseUser($event, item.userId)">
-      <img :src="`${baseURL}${item.userAvatar}`" width="45" height="45" alt="" class="avatar">
+    <li v-for="item in list" :key="item.userinfo.id" class="list-item" @click="chooseUser($event, item.userinfo.userId)">
+      <img :src="`${baseURL}${item.userinfo.userAvatar}`" width="45" height="45" alt="" class="avatar">
       <div class="main">
-        <p class="name">{{item.userNickname}}</p>
-        <p class="desc">{{item.userDesc}}</p>
+        <p class="name">{{item.userinfo.userNickname}}</p>
+        <p class="desc">{{item.userinfo.userDesc}}</p>
       </div>
-      <div class="btn">关注</div>
+      <div class="btn" :class="{'btn-inactive': item.bothStatus}" @click="triggerFollow(item)" v-html="item.bothStatus? '互相关注': '关注'"></div>
     </li>
     <no-more class="no-more" v-if="!isLoading"></no-more>
     <loading v-else></loading>
@@ -18,7 +19,6 @@
 <script>
 import MyList from 'base/myList/myList'
 import { baseURL } from 'common/js/config'
-import axios from 'axios'
 import NoMore from 'base/NoMore/NoMore'
 import { mapGetters } from 'vuex'
 import Loading from 'base/loading/loading'
@@ -28,7 +28,7 @@ export default {
     this.list = []
     this.page = 0
     this.isEnd = false
-    this.fetchInterestList()
+    this.fetchFansList()
   },
   data () {
     return {
@@ -36,19 +36,17 @@ export default {
       isLoading: false,
       page: 0,
       isEnd: false,
-      baseURL
+      baseURL,
+      timer: null
     }
   },
   methods: {
-    fetchInterestList () {
+    fetchFansList () {
       if (this.isEnd) return
       let userId = this.$route.params.id === 'me' ? this.loginInfo.userId : this.$route.params.id
       this.isLoading = true
       this.page++
-      axios.get(`/api/user/${userId}/Fans/page/${this.page}`, {
-        baseURL,
-        withCredentials: true
-      }).then((r) => {
+      this.$axios.get(`/api/user/${userId}/Fans/page/${this.page}`).then((r) => {
         this.isLoading = false
         if (r.data.data.length < PER_PAGE_LIMIT_NUM) {
           this.isEnd = true
@@ -56,12 +54,25 @@ export default {
         this.list = this.list.concat(r.data.data)
       })
     },
+    triggerFollow (item) {
+      if (this.timer) return
+      this.timer = setTimeout(() => {
+        this.$axios.get(`/api/user/${this.loginInfo.userId}/triggerFollow/${item.userinfo.userId}`).then(res => {
+          item.bothStatus = !item.bothStatus
+          item.bothStatus? this.$refs.tip.show('关注成功'): this.$refs.tip.show('取关成功')
+          this.timer = null
+        }).catch(e => {
+          this.$refs.tip.show('网络错误')
+          this.timer = null
+        })
+      }, 300)
+    },
     chooseUser (e, userId) {
       if (e.target.className.includes('btn')) return
       this.$router.push(`/profile/${userId}`)
     },
     scrollToEnd () {
-      this.fetchInterestList()
+      this.fetchFansList()
     }
   },
   computed: {
@@ -109,7 +120,9 @@ export default {
     line-height 25px
     font-size $font-size-small
     margin-right 5px
-    width 60px
+    width 70px
     height 25px
     background rgb(248, 53, 95)
+  .btn-inactive
+    background rgb(56, 59, 68)
 </style>

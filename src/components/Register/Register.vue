@@ -20,8 +20,6 @@
 <script>
 import { regEmail } from 'common/js/util'
 import CodeInput from 'base/CodeInput/CodeInput'
-import axios from 'axios'
-import { baseURL } from 'common/js/config'
 import { mapActions } from 'vuex'
 export default {
   data () {
@@ -59,9 +57,7 @@ export default {
         this._emitTip('验证码需要6位！')
         return
       }
-      axios.post('/api/common/user/register', user, {
-        baseURL
-      }).then((r) => {
+      this.$axios.post('/api/common/user/register', user).then((r) => {
         if (r.data.data.message === '验证码错误') {
           this._emitTip('验证码错误！')
           return

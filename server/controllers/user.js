@@ -221,7 +221,10 @@ module.exports = {
       for (let i = 0, len = fansList.length; i < len; i++) {
         let temp = fansList[i]
         let userinfo = await temp.getFromUserInfo()
-        UserinfoList.push(userinfo)
+        UserinfoList.push({
+          userinfo,
+          bothStatus: temp.bothStatus
+        })
       }
       ctx.rest(UserinfoList)
     } else {
@@ -246,7 +249,10 @@ module.exports = {
       for (let i = 0, len = FollowersList.length; i < len; i++) {
         let temp = FollowersList[i]
         let userinfo = await temp.getToUserInfo()
-        UserinfoList.push(userinfo)
+        UserinfoList.push({
+          userinfo,
+          bothStatus: temp.bothStatus
+        })
       }
       ctx.rest(UserinfoList)
     } else {

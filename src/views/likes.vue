@@ -15,7 +15,6 @@ import Loading from 'base/loading/loading'
 import VideoList from 'components/VideoList/VideoList'
 import NoMore from 'base/NoMore/NoMore'
 import { baseURL } from 'common/js/config'
-import axios from 'axios'
 import { mapGetters, mapMutations } from 'vuex'
 export default {
   data () {
@@ -42,10 +41,7 @@ export default {
       let userId = this.$route.params.id === 'me' ? this.loginInfo.userId : this.$route.params.id
       this.isLoading = true
       this.page++
-      axios.get(`/api/user/${userId}/Likes/page/${this.page}`, {
-        baseURL,
-        withCredentials: true
-      }).then((r) => {
+      this.$axios.get(`/api/user/${userId}/Likes/page/${this.page}`).then((r) => {
         this.isLoading = false
         this.list = this.list.concat(r.data.data)
       })

@@ -21,16 +21,11 @@
 import Scroll from 'base/scroll/scroll'
 import FollowedList from 'components/FollowedList/FollowedList'
 import CommentList from 'components/CommentList/CommentList'
-import { baseURL } from 'common/js/config'
 import { mapGetters } from 'vuex'
-import axios from 'axios'
 export default {
   created () {
     let userId = this.loginInfo.userId
-    axios.get(`/api/user/${userId}/FollowerVideo`, {
-      baseURL,
-      withCredentials: true
-    }).then((r) => {
+    this.$axios.get(`/api/user/${userId}/FollowerVideo`).then((r) => {
       this.list = r.data.data
       this.$refs.listWrap.refresh()
       this.isLoading = false
@@ -59,10 +54,7 @@ export default {
         this.page = 1
         this.currentCommentVideoId = videoId
         this.commentNum = commentNum
-        axios.get(`/api/video/${videoId}/getVideoComment/page/${this.page}`, {
-          baseURL,
-          withCredentials: true
-        }).then((res) => {
+        this.$axios.get(`/api/video/${videoId}/getVideoComment/page/${this.page}`).then((res) => {
           if (res.data.data.length < 20) {
             this.isEnd = true
           }
@@ -72,10 +64,7 @@ export default {
       } else {
         this.page++
         if (this.isEnd) return
-        axios.get(`/api/video/${videoId}/getVideoComment/page/${this.page}`, {
-          baseURL,
-          withCredentials: true
-        }).then((res) => {
+        this.$axios.get(`/api/video/${videoId}/getVideoComment/page/${this.page}`).then((res) => {
           if (res.data.data.length < 20) {
             this.isEnd = true
           }

@@ -22,6 +22,11 @@ const CommentInfo = db.defineModel('CommentInfo', {
       model: 'UserRegister',
       key: 'userId'
     }
+  },
+  isRead: {
+    type: db.BOOLEAN,
+    allowNull: false,
+    default: false
   }
 })
 

@@ -1,13 +1,14 @@
 <template>
 <div>
+  <tip ref="tip"></tip>
   <my-list :Title="title" @scrollToEnd="scrollToEnd">
-    <li v-for="item in list" :key="item.id" class="list-item" @click="chooseUser($event, item.userId)">
-      <img :src="`${baseURL}${item.userAvatar}`" width="45" height="45" alt="" class="avatar">
+    <li v-for="item in list" :key="item.userinfo.id" class="list-item" @click="chooseUser($event, item.userinfo.userId)">
+      <img :src="`${baseURL}${item.userinfo.userAvatar}`" width="45" height="45" alt="" class="avatar">
       <div class="main">
-        <p class="name">{{item.userNickname}}</p>
-        <p class="desc">{{item.userDesc}}</p>
+        <p class="name">{{item.userinfo.userNickname}}</p>
+        <p class="desc">{{item.userinfo.userDesc}}</p>
       </div>
-      <div class="btn">关注</div>
+      <div class="btn btn-inactive" @click="triggerFollow($event.target, item)" v-html="item.bothStatus? '互相关注': '已关注'"></div>
     </li>
     <no-more class="no-more" v-if="!isLoading"></no-more>
     <loading v-else></loading>
@@ -18,7 +19,7 @@
 <script>
 import MyList from 'base/myList/myList'
 import { baseURL } from 'common/js/config'
-import axios from 'axios'
+import { addClass, removeClass } from 'common/js/dom'
 import NoMore from 'base/NoMore/NoMore'
 import { mapGetters } from 'vuex'
 import Loading from 'base/loading/loading'
@@ -45,15 +46,27 @@ export default {
       let userId = this.$route.params.id === 'me' ? this.loginInfo.userId : this.$route.params.id
       this.isLoading = true
       this.page++
-      axios.get(`/api/user/${userId}/Followers/page/${this.page}`, {
-        baseURL,
-        withCredentials: true
-      }).then((r) => {
+      this.$axios.get(`/api/user/${userId}/Followers/page/${this.page}`).then((r) => {
         this.isLoading = false
         if (r.data.data.length < PER_PAGE_LIMIT_NUM) {
           this.isEnd = true
         }
         this.list = this.list.concat(r.data.data)
+      })
+    },
+    triggerFollow (target, item) {
+      this.$axios.get(`/api/user/${this.loginInfo.userId}/triggerFollow/${item.userinfo.userId}`).then(res => {
+        if (res.data.data.includes('取消')) {
+          addClass(target, 'btn-active')
+          target.innerText = '关注'
+          this.$refs.tip.show('取关成功')
+        } else {
+          removeClass(target, 'btn-active')
+          target.innerText = item.bothStatus? '互相关注': '已关注'
+          this.$refs.tip.show('关注成功')
+        }
+      }).catch(e => {
+        this.$refs.tip.show('网络错误')
       })
     },
     chooseUser (e, userId) {
@@ -109,7 +122,10 @@ export default {
     line-height 25px
     font-size $font-size-small
     margin-right 5px
-    width 60px
+    width 70px
     height 25px
+  .btn-inactive
+    background rgb(56, 59, 68)
+  .btn-active
     background rgb(248, 53, 95)
 </style>

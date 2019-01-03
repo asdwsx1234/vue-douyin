@@ -79,14 +79,8 @@ import Scroll from 'base/scroll/scroll'
 import MeTab from 'components/MeTab/MeTab'
 import CommentList from 'components/CommentList/CommentList'
 import { baseURL } from 'common/js/config'
-import axios from 'axios'
 import { mapGetters, mapMutations } from 'vuex'
 import PlayList from 'components/PlayList/PlayList'
-
-const instance = axios.create({
-  baseURL: baseURL,
-  withCredentials: true
-})
 
 const VIDEO_NUM_PER_REQUEST = 21
 
@@ -179,10 +173,7 @@ export default {
         this.page = 1
         this.currentCommentVideoId = videoId
         this.commentNum = commentNum
-        axios.get(`/api/video/${videoId}/getVideoComment/page/${this.page}`, {
-          baseURL,
-          withCredentials: true
-        }).then((res) => {
+        this.$axios.get(`/api/video/${videoId}/getVideoComment/page/${this.page}`).then((res) => {
           if (res.data.data.length < 20) {
             this.isEnd = true
           }
@@ -192,10 +183,7 @@ export default {
       } else {
         this.page++
         if (this.isEnd) return
-        axios.get(`/api/video/${videoId}/getVideoComment/page/${this.page}`, {
-          baseURL,
-          withCredentials: true
-        }).then((res) => {
+        this.$axios.get(`/api/video/${videoId}/getVideoComment/page/${this.page}`).then((res) => {
           if (res.data.data.length < 20) {
             this.isEnd = true
           }
@@ -219,7 +207,7 @@ export default {
       this.$refs.playList.scrollToIndex(index)
     },
     async logout () {
-      let res = await instance.get(`/api/user/${this.loginInfo.userId}/logout`)
+      let res = await this.$axios.get(`/api/user/${this.loginInfo.userId}/logout`)
       if (res.data.code === 200) {
         this.SET_ISLOGGED(false)
         this.SET_LOGININFO({})
@@ -227,31 +215,31 @@ export default {
       }
     },
     async getFollowerNum (userId) {
-      let res = await instance.get(`/api/user/${userId}/FollowersNum`)
+      let res = await this.$axios.get(`/api/user/${userId}/FollowersNum`)
       if (res.data.code === 200) {
         this.followerNum = res.data.data
       }
     },
     async getFanNum (userId) {
-      let res = await instance.get(`/api/user/${userId}/FansNum`)
+      let res = await this.$axios.get(`/api/user/${userId}/FansNum`)
       if (res.data.code === 200) {
         this.fanNum = res.data.data
       }
     },
     async getByLikeNum (userId) {
-      let res = await instance.get(`/api/user/${userId}/byLikesNum`)
+      let res = await this.$axios.get(`/api/user/${userId}/byLikesNum`)
       if (res.data.code === 200) {
         this.byLikeNum = res.data.data
       }
     },
     async getLikeNum (userId) {
-      let res = await instance.get(`/api/user/${userId}/LikesNum`)
+      let res = await this.$axios.get(`/api/user/${userId}/LikesNum`)
       if (res.data.code === 200) {
         this.likeNum = res.data.data
       }
     },
     async getVideoNum (userId) {
-      let res = await instance.get(`/api/user/${userId}/VideosNum`)
+      let res = await this.$axios.get(`/api/user/${userId}/VideosNum`)
       if (res.data.code === 200) {
         this.videoNum = res.data.data
       }

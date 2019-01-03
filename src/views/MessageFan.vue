@@ -1,49 +1,84 @@
 <template>
 <div>
-  <my-list Title="粉丝">
-    <li v-for="item in Interests" :key="item.id" class="list-item">
-      <img src="./1.jpg" width="45" height="45" alt="" class="avatar">
+  <tip ref="tip"></tip>
+  <my-list Title="粉丝" @scrollToEnd="scrollToEnd">
+    <li v-for="item in list" :key="item.id" class="list-item">
+      <img :src="`${baseURL}${item.userinfo.userAvatar}`" width="45" height="45" alt="" class="avatar">
       <div class="main">
-        <p class="name">{{item.name}}</p>
+        <p class="name">{{item.userinfo.userNickname}}</p>
         <p class="name">关注了你</p>
         <p class="desc">刚刚</p>
       </div>
-      <div class="btn">关注</div>
+      <div class="btn" :class="{'btn-inactive': item.bothStatus}" @click="triggerFollow(item)" v-html="item.bothStatus? '互相关注': '关注'"></div>
     </li>
-    <div v-if="!Interests.length" class="tip-wrap">
+    <div v-if="!list.length" class="tip-wrap">
       <p>您还没有粉丝哦</p>
       <p class="desc">快去拍摄精彩视频吸引粉丝吧！</p>
     </div>
+    <loading v-show="isLoading"></loading>
   </my-list>
 </div>
 </template>
 
 <script>
 import MyList from 'base/myList/myList'
+import { baseURL } from 'common/js/config'
+import { mapGetters } from 'vuex'
+import Loading from 'base/loading/loading'
+const PER_PAGE_LIMIT_NUM = 21
 export default {
   data () {
     return {
-      Interests: [
-        { id: 1, avatar: '', name: 'well啊', desc: '测试测试测是测试' },
-        { id: 2, avatar: '', name: 'well吧', desc: '测试测试测是测试' },
-        { id: 3, avatar: '', name: 'well', desc: '测试测试测是测试' },
-        { id: 4, avatar: '', name: 'well', desc: '测试测试测是测试' },
-        { id: 5, avatar: '', name: 'well', desc: '测试测试测是测试' },
-        { id: 6, avatar: '', name: 'well', desc: '测试测试测是测试' },
-        { id: 7, avatar: '', name: 'well', desc: '测试测试测是测试' },
-        { id: 8, avatar: '', name: 'well', desc: '测试测试测是测试' },
-        { id: 9, avatar: '', name: 'well', desc: '测试测试测是测试' },
-        { id: 10, avatar: '', name: 'well', desc: '测试测试测是测试' },
-        { id: 11, avatar: '', name: 'well', desc: '测试测试测是测试' },
-        { id: 12, avatar: '', name: 'well', desc: '测试测试测是测试' },
-        { id: 13, avatar: '', name: 'well', desc: '测试测试测是测试' },
-        { id: 14, avatar: '', name: 'well', desc: '测试测试测是测试' },
-        { id: 15, avatar: '', name: 'well', desc: '测试测试测是测试' }
-      ]
+      list: [],
+      isLoading: false,
+      page: 0,
+      isEnd: false,
+      baseURL,
+      timer: null
     }
   },
+  created () {
+    this.fetchFansList()
+  },
+  methods: {
+    fetchFansList () {
+      if (this.isEnd) return
+      let userId = this.loginInfo.userId
+      this.isLoading = true
+      this.page++
+      this.$axios.get(`/api/user/${userId}/Fans/page/${this.page}`).then((r) => {
+        this.isLoading = false
+        if (r.data.data.length < PER_PAGE_LIMIT_NUM) {
+          this.isEnd = true
+        }
+        this.list = this.list.concat(r.data.data)
+      })
+    },
+    triggerFollow (item) {
+      if (this.timer) return
+      this.timer = setTimeout(() => {
+        this.$axios.get(`/api/user/${this.loginInfo.userId}/triggerFollow/${item.userinfo.userId}`).then(res => {
+          item.bothStatus = !item.bothStatus
+          item.bothStatus? this.$refs.tip.show('关注成功'): this.$refs.tip.show('取关成功')
+          this.timer = null
+        }).catch(e => {
+          this.$refs.tip.show('网络错误')
+          this.timer = null
+        })
+      }, 300)
+    },
+    scrollToEnd () {
+      this.fetchFansList()
+    }
+  },
+  computed: {
+    ...mapGetters([
+      'loginInfo'
+    ])
+  },
   components: {
-    MyList
+    MyList,
+    Loading
   }
 }
 </script>
@@ -80,12 +115,12 @@ export default {
       color $color-desc
   .btn
     text-align center
-    line-height 30px
+    line-height 25px
     font-size $font-size-small
     margin-right 5px
-    border-radius 5px
-    width 80px
-    height 30px
-    color #fff
-    background rgb(253, 44, 85)
+    width 70px
+    height 25px
+    background rgb(248, 53, 95)
+  .btn-inactive
+    background rgb(56, 59, 68)
 </style>

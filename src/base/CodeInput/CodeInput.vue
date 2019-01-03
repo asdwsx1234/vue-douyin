@@ -6,8 +6,6 @@
 </template>
 
 <script>
-import axios from 'axios'
-import { baseURL } from 'common/js/config'
 export default {
   props: {
     email: {
@@ -30,9 +28,7 @@ export default {
     },
     getCode () {
       if (this.disabled) return
-      axios.get(`/api/common/user/getCode/${this.email}`, {
-        baseURL
-      }).catch((e) => {
+      this.$axios.get(`/api/common/user/getCode/${this.email}`).catch((e) => {
         this.$emit('code-tip', '验证码发送失败')
       })
       this.setDisabled(true)

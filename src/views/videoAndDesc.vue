@@ -13,9 +13,7 @@
 <script>
 import Loading from 'base/loading/loading'
 import FollowedList from 'components/FollowedList/FollowedList'
-import { baseURL } from 'common/js/config'
 import { mapGetters } from 'vuex'
-import axios from 'axios'
 export default {
   data () {
     return {
@@ -40,10 +38,7 @@ export default {
       let userId = this.$route.params.id === 'me' ? this.loginInfo.userId : this.$route.params.id
       this.isLoading = true
       this.page++
-      axios.get(`/api/user/${userId}/Videos/page/${this.page}`, {
-        baseURL,
-        withCredentials: true
-      }).then((r) => {
+      this.$axios.get(`/api/user/${userId}/Videos/page/${this.page}`).then((r) => {
         this.list = this.list.concat(r.data.data)
         this.isLoading = false
       })

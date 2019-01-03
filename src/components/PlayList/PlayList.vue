@@ -31,8 +31,6 @@ import Scroll from 'base/scroll/scroll'
 import MyVideo from 'components/MyVideo/MyVideo'
 import CommentList from 'components/CommentList/CommentList'
 import { mapGetters, mapActions } from 'vuex'
-import { baseURL } from 'common/js/config'
-import axios from 'axios'
 export default {
   data () {
     return {
@@ -66,10 +64,7 @@ export default {
         this.page = 1
         this.currentCommentVideoId = videoId
         this.commentNum = commentNum
-        axios.get(`/api/video/${videoId}/getVideoComment/page/${this.page}`, {
-          baseURL,
-          withCredentials: true
-        }).then((res) => {
+        this.$axios.get(`/api/video/${videoId}/getVideoComment/page/${this.page}`).then((res) => {
           if (res.data.data.length < 20) {
             this.isEnd = true
           }
@@ -79,10 +74,7 @@ export default {
       } else {
         this.page++
         if (this.isEnd) return
-        axios.get(`/api/video/${videoId}/getVideoComment/page/${this.page}`, {
-          baseURL,
-          withCredentials: true
-        }).then((res) => {
+        this.$axios.get(`/api/video/${videoId}/getVideoComment/page/${this.page}`).then((res) => {
           if (res.data.data.length < 20) {
             this.isEnd = true
           }

@@ -38,8 +38,6 @@ import MyVideo from 'components/MyVideo/MyVideo'
 import Login from 'components/Login/Login'
 import CommentList from 'components/CommentList/CommentList'
 import { mapGetters, mapActions } from 'vuex'
-import { baseURL } from 'common/js/config'
-import axios from 'axios'
 export default {
   created () {
     this.getPopularVideo()
@@ -71,16 +69,16 @@ export default {
       }
     },
     fetchCommentsAndShowList (videoId, commentNum) {
-      if (!this.isLogged) this.showLoginWrap = true
+      if (!this.isLogged) {
+        this.showLoginWrap = true
+        return
+      }
       if (this.currentCommentVideoId !== videoId) {
         this.isEnd = false
         this.page = 1
         this.currentCommentVideoId = videoId
         this.commentNum = commentNum
-        axios.get(`/api/video/${videoId}/getVideoComment/page/${this.page}`, {
-          baseURL,
-          withCredentials: true
-        }).then((res) => {
+        this.$axios.get(`/api/video/${videoId}/getVideoComment/page/${this.page}`).then((res) => {
           if (res.data.data.length < 20) {
             this.isEnd = true
           }
@@ -90,10 +88,7 @@ export default {
       } else {
         this.page++
         if (this.isEnd) return
-        axios.get(`/api/video/${videoId}/getVideoComment/page/${this.page}`, {
-          baseURL,
-          withCredentials: true
-        }).then((res) => {
+        this.$axios.get(`/api/video/${videoId}/getVideoComment/page/${this.page}`).then((res) => {
           if (res.data.data.length < 20) {
             this.isEnd = true
           }

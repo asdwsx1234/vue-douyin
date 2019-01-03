@@ -30,8 +30,6 @@ import { regEmail } from 'common/js/util'
 import Register from 'components/Register/Register'
 import RetrievePassword from 'components/RetrievePassword/RetrievePassword'
 import { mapActions } from 'vuex'
-import axios from 'axios'
-import { baseURL } from 'common/js/config'
 export default {
   data () {
     return {
@@ -76,9 +74,7 @@ export default {
         this._emitTip('请输入正确的邮箱！')
         return
       }
-      axios.get(`/api/common/user/detectEmail/${user.email}`, {
-        baseURL
-      }).then(() => {
+      this.$axios.get(`/api/common/user/detectEmail/${user.email}`).then(() => {
         this.showRetrievePassword = true
       }).catch(() => {
         this._emitTip('邮箱未注册！')

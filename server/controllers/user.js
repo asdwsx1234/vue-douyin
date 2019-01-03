@@ -521,7 +521,8 @@ module.exports = {
       let newUr = await UserRelation.build({
         'fromId': fromUserId,
         'toId': toUserId,
-        'bothStatus': false
+        'bothStatus': false,
+        'isRead': false
       })
       if (toUr) {
         toUr.bothStatus = true

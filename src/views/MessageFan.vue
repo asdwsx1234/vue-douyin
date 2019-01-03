@@ -59,7 +59,7 @@ export default {
       this.timer = setTimeout(() => {
         this.$axios.get(`/api/user/${this.loginInfo.userId}/triggerFollow/${item.userinfo.userId}`).then(res => {
           item.bothStatus = !item.bothStatus
-          item.bothStatus? this.$refs.tip.show('关注成功'): this.$refs.tip.show('取关成功')
+          item.bothStatus ? this.$refs.tip.show('关注成功') : this.$refs.tip.show('取关成功')
           this.timer = null
         }).catch(e => {
           this.$refs.tip.show('网络错误')

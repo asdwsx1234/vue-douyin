@@ -14,7 +14,6 @@
 import Loading from 'base/loading/loading'
 import VideoList from 'components/VideoList/VideoList'
 import NoMore from 'base/NoMore/NoMore'
-import { baseURL } from 'common/js/config'
 import { mapGetters, mapMutations } from 'vuex'
 export default {
   data () {

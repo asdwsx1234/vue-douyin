@@ -94,7 +94,7 @@ export default {
       this.getLikeNum(userId)
       this.getVideoNum(userId)
     } else {
-      instance.get(`/api/common/user/${this.$route.params.id}/getUserInfo`).then((r) => {
+      this.$axios.get(`/api/common/user/${this.$route.params.id}/getUserInfo`).then((r) => {
         this.userInfo = r.data.data
         let userId = this.userInfo.userId
         this.getFollowerNum(userId)

@@ -62,7 +62,7 @@ export default {
           this.$refs.tip.show('取关成功')
         } else {
           removeClass(target, 'btn-active')
-          target.innerText = item.bothStatus? '互相关注': '已关注'
+          target.innerText = item.bothStatus ? '互相关注' : '已关注'
           this.$refs.tip.show('关注成功')
         }
       }).catch(e => {

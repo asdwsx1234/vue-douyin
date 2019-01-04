@@ -6,7 +6,7 @@ const instance = axios.create({
   withCredentials: true
 })
 
-export const loginByPassword = async ({ commit, state }, user) => {
+export const loginByPassword = async ({ dispatch, commit, state }, user) => {
   let res = await instance.post('/api/common/user/loginByPassword', user)
   if (res.data.code === 200) {
     let userId = res.data.data.userId
@@ -15,16 +15,21 @@ export const loginByPassword = async ({ commit, state }, user) => {
     if (res1.data.code === 200) {
       let loginInfo = res1.data.data
       commit(types.SET_LOGININFO, loginInfo)
+      dispatch('getFanUnreadNum', loginInfo.userId)
     }
   }
 }
 
-export const persistentConnection = async ({ commit, state }) => {
+export const persistentConnection = async ({ dispatch, commit, state }) => {
   let res = await instance.get('/api/common/user/persistent/getUserInfo')
   if (res.data.code === 200) {
     let loginInfo = res.data.data
     commit(types.SET_ISLOGGED, true)
     commit(types.SET_LOGININFO, loginInfo)
+    dispatch('getFanUnreadNum', loginInfo.userId)
+    return {
+      code: 200
+    }
   } else {
     commit(types.SET_ISLOGGED, false)
     commit(types.SET_LOGININFO, {})
@@ -42,5 +47,13 @@ export const getPopularVideo = async ({ commit, state }) => {
     }
     let resultList = state.popularVideo
     commit(types.SET_POPULARVIDEO, resultList.concat(popularVideo))
+  }
+}
+
+export const getFanUnreadNum = async ({ commit, state }, userId) => {
+  let res = await instance.get(`/api/user/${userId}/FanUnreadNum`)
+  if (res.data.code === 200) {
+    commit(types.SET_FANUNREADNUM, res.data.data)
+  } else {
   }
 }

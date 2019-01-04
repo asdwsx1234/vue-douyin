@@ -3,11 +3,12 @@
   <tip ref="tip"></tip>
   <my-list Title="粉丝" @scrollToEnd="scrollToEnd">
     <li v-for="item in list" :key="item.id" class="list-item">
+      <span v-if="!item.isRead" class="point"></span>
       <img :src="`${baseURL}${item.userinfo.userAvatar}`" width="45" height="45" alt="" class="avatar">
       <div class="main">
         <p class="name">{{item.userinfo.userNickname}}</p>
         <p class="name">关注了你</p>
-        <p class="desc">刚刚</p>
+        <p class="desc">{{formatTime(item.createdAt)}}</p>
       </div>
       <div class="btn" :class="{'btn-inactive': item.bothStatus}" @click="triggerFollow(item)" v-html="item.bothStatus? '互相关注': '关注'"></div>
     </li>
@@ -23,10 +24,17 @@
 <script>
 import MyList from 'base/myList/myList'
 import { baseURL } from 'common/js/config'
-import { mapGetters } from 'vuex'
+import { formatTime } from 'common/js/util'
+import { mapGetters, mapActions } from 'vuex'
 import Loading from 'base/loading/loading'
 const PER_PAGE_LIMIT_NUM = 21
 export default {
+  mounted () {
+    const userId = this.loginInfo.userId
+    this.$axios.get(`/api/user/${userId}/readAllFanMsg`).then(() => {
+      this.getFanUnreadNum(userId)
+    })
+  },
   data () {
     return {
       list: [],
@@ -61,6 +69,10 @@ export default {
           item.bothStatus = !item.bothStatus
           item.bothStatus ? this.$refs.tip.show('关注成功') : this.$refs.tip.show('取关成功')
           this.timer = null
+          this.$socket.emit('sendTriggerFollow', {
+            fromUserId: this.loginInfo.userId,
+            toUserId: item.userinfo.userId
+          })
         }).catch(e => {
           this.$refs.tip.show('网络错误')
           this.timer = null
@@ -69,7 +81,11 @@ export default {
     },
     scrollToEnd () {
       this.fetchFansList()
-    }
+    },
+    formatTime,
+    ...mapActions([
+      'getFanUnreadNum'
+    ])
   },
   computed: {
     ...mapGetters([
@@ -96,10 +112,20 @@ export default {
     font-size $font-size-small
     color $color-desc
 .list-item
+  position relative
   padding 10px 10px
   display flex
   align-items center
   background rgb(28, 31, 42)
+  .point
+    position absolute
+    left -2px
+    top 50%
+    transform translateY(-50%)
+    border-radius 50%
+    height 8px
+    width 8px
+    background #face15
   .avatar
     margin-right 10px
     border-radius 50%

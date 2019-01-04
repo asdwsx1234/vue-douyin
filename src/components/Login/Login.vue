@@ -29,7 +29,7 @@
 import { regEmail } from 'common/js/util'
 import Register from 'components/Register/Register'
 import RetrievePassword from 'components/RetrievePassword/RetrievePassword'
-import { mapActions } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 export default {
   data () {
     return {
@@ -38,6 +38,11 @@ export default {
       email: '',
       password: ''
     }
+  },
+  computed: {
+    ...mapGetters([
+      'loginInfo'
+    ])
   },
   methods: {
     _emitTip (message) {
@@ -59,8 +64,8 @@ export default {
         this._emitTip('密码至少需要6位！')
         return
       }
-      this.loginByPassword(user).then(() => {
-
+      this.loginByPassword(user).then((res) => {
+        this.$socket.emit('login', this.loginInfo.userId)
       }).catch((e) => {
         this.password = ''
         this._emitTip('账号或密码错误！')

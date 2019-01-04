@@ -7,6 +7,7 @@ const controller = require('./controller')
 const staticFiles = require('./staticFiles')
 const bodyParser = require('koa-bodyparser')
 const cors = require('koa2-cors')
+const redisClient = require('./redis')
 
 const app = new Koa()
 const server = require('http').createServer(app.callback())
@@ -14,16 +15,31 @@ const io = require('socket.io')(server)
 
 io.on('connection', socket => {
   const socketId = socket.id
-  socket.on('login', userId => {
-    // 保存userid： sockeId
+  socket.on('login', async userId => {
+    await redisClient.set(`SOCKET:${userId}`, socketId, 'EX', 1000000 / 1000)
+    io.to(socketId).emit('responselogin', {
+      userId,
+      socketId
+    })
   })
   socket.on('sendPrivateLetter', async data => {
-    const { toUser } = data
+    // const { toUser } = data
     // const sockeId   拿出toUser的socketId
     // io.to(socketId).emit('receivePrivateLetter', data)
   })
-  socket.on('logout', userId => {
+  socket.on('sendTriggerFollow', async data => {
+    const { toUserId } = data
+    const toUserSocketId = await redisClient.get(`SOCKET:${toUserId}`)
+    io.to(toUserSocketId).emit('receiveTriggerFollow')
+  })
+  socket.on('logout', async userId => {
     // 删除
+    const socketId = await redisClient.get(`SOCKET:${userId}`)
+    io.to(socketId).emit('responselogout', {
+      userId,
+      socketId
+    })
+    await redisClient.del(`SOCKET:${userId}`)
   })
 })
 

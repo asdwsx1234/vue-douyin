@@ -1,6 +1,7 @@
 const state = {
   isLogged: false,
   loginInfo: {},
+  fanUnreadNum: 0,
   followerList: [],
   fanList: [],
   likeList: [],

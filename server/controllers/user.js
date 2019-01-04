@@ -223,7 +223,9 @@ module.exports = {
         let userinfo = await temp.getFromUserInfo()
         UserinfoList.push({
           userinfo,
-          bothStatus: temp.bothStatus
+          bothStatus: temp.bothStatus,
+          createdAt: temp.createdAt,
+          isRead: temp.isRead
         })
       }
       ctx.rest(UserinfoList)
@@ -271,7 +273,7 @@ module.exports = {
       let res = []
       for (let i = 0, len = FollowersList.length; i < len; i++) {
         let ur = FollowersList[i]
-        let userInfo = await ur.getFromUserInfo()
+        let userInfo = await ur.getToUserInfo()
         let videoInfos = await VideoInfo.findAll({
           where: {
             userId: userInfo.userId
@@ -311,6 +313,47 @@ module.exports = {
     if (user) {
       const fansList = await user.getFans()
       ctx.rest(fansList.length)
+    } else {
+      throw new APIError('user:not_found', 'user not found by userId.')
+    }
+  },
+  'GET /api/user/:userId/FanUnreadNum': async (ctx, next) => {
+    const userId = ctx.params.userId
+    const user = await UserRegister.findOne({
+      where: {
+        'userId': userId
+      }
+    })
+    if (user) {
+      const fansList = await user.getFans({
+        where: {
+          'isRead': false
+        }
+      })
+      ctx.rest(fansList.length)
+    } else {
+      throw new APIError('user:not_found', 'user not found by userId.')
+    }
+  },
+  'GET /api/user/:userId/readAllFanMsg': async (ctx, next) => {
+    const userId = ctx.params.userId
+    const user = await UserRegister.findOne({
+      where: {
+        'userId': userId
+      }
+    })
+    if (user) {
+      const fansList = await user.getFans({
+        where: {
+          'isRead': false
+        }
+      })
+      for (let i = 0, len = fansList.length; i < len; i++) {
+        let temp = fansList[i]
+        temp.isRead = true
+        await temp.save()
+      }
+      ctx.rest(`read fansMsg suc`)
     } else {
       throw new APIError('user:not_found', 'user not found by userId.')
     }

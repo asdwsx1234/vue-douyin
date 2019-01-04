@@ -10,7 +10,10 @@
     <span class="tab-btn">+</span>
   </div>
   <router-link tag="div" class="tab-item" to="/message">
-    <span class="tab-link">消息</span>
+    <span class="tab-link">
+      消息
+      <span class="point" v-if="hasMessageUnread"></span>
+    </span>
   </router-link>
   <router-link tag="div" class="tab-item" to="/profile/me">
     <span class="tab-link">我</span>
@@ -19,6 +22,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 export default {
   computed: {
     isHome () {
@@ -31,7 +35,18 @@ export default {
         if (route.path.indexOf(paths[i]) !== -1) return true
       }
       return false
-    }
+    },
+    hasMessageUnread () {
+      let totalUnreadNum = this.fanUnreadNum
+      if (totalUnreadNum === 0) {
+        return false
+      } else {
+        return true
+      }
+    },
+    ...mapGetters([
+      'fanUnreadNum'
+    ])
   }
 }
 </script>
@@ -58,6 +73,15 @@ export default {
     .tab-link
       padding-bottom 10px
       color $color-desc
+      position relative
+      .point
+        position absolute
+        right -12px
+        top 1px
+        border-radius 50%
+        height 8px
+        width 8px
+        background #face15
     &.router-link-active
       .tab-link
         color $color-white

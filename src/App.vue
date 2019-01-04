@@ -13,29 +13,41 @@
 
 <script>
 import HomeTab from 'components/HomeTab/HomeTab'
-import { mapActions } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 export default {
   created () {
-    this.persistentConnection()
-    console.log(this)
-    this.$socket.emit('haha', 'nishizhu')
+    this.persistentConnection().then((res) => {
+      if (res.code === 200) {
+        this.$socket.emit('login', this.loginInfo.userId)
+      }
+    })
   },
   sockets: {
     connect: function () {
       console.log('socket connected')
     },
-    haha1111: function (data) {
-      console.log('this method was fired by the socket server. eg: io.emit("haha", data)')
+    responselogin (data) {
+      // console.log(`socket connected ${data.userId}=====>${data.socketId}`)
+    },
+    responselogout (data) {
+      // console.log(`socket disconnected ${data.userId}=====>${data.socketId}`)
+    },
+    receiveTriggerFollow () {
+      this.getFanUnreadNum(this.loginInfo.userId)
     }
   },
   computed: {
     isHome () {
       return this.$route.name === 'home'
-    }
+    },
+    ...mapGetters([
+      'loginInfo'
+    ])
   },
   methods: {
     ...mapActions([
-      'persistentConnection'
+      'persistentConnection',
+      'getFanUnreadNum'
     ])
   },
   components: {

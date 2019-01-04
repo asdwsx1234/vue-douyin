@@ -2,7 +2,9 @@
   <ul class="msg-tab">
     <li class="tab-item">
       <router-link tag="div" to="/message/fan">
-        <div class="icon iconfont icon-team"></div>
+        <div class="icon iconfont icon-team">
+          <span class="point" v-show="fanUnreadNum!==0">{{fanUnreadNum}}</span>
+        </div>
         <span class="desc">粉丝</span>
       </router-link>
     </li>
@@ -28,6 +30,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 export default {
   data () {
     return {
@@ -36,6 +39,11 @@ export default {
         { id: 3, desc: '@我的' },
         { id: 4, desc: '评论' }]
     }
+  },
+  computed: {
+    ...mapGetters([
+      'fanUnreadNum'
+    ])
   }
 }
 </script>
@@ -49,12 +57,26 @@ export default {
     justify-content center
     flex 1
     .icon
+      position relative
       width 40px
       height 40px
       font-size 20px
       display flex
       justify-content center
       align-items center
+    .point
+      position absolute
+      right -4px
+      top -4px
+      border-radius 50%
+      height 16px
+      width 16px
+      background #face15
+      text-align center
+      line-height 16px
+      color $color-background
+      font-size $font-size-small
+      font-weight 600
     .icon-heart
       background rgb(248, 53, 95)
     .icon-team

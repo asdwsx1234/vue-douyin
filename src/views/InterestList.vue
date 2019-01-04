@@ -37,7 +37,8 @@ export default {
       isLoading: false,
       page: 0,
       isEnd: false,
-      baseURL
+      baseURL,
+      timer: null
     }
   },
   methods: {
@@ -55,19 +56,28 @@ export default {
       })
     },
     triggerFollow (target, item) {
-      this.$axios.get(`/api/user/${this.loginInfo.userId}/triggerFollow/${item.userinfo.userId}`).then(res => {
-        if (res.data.data.includes('取消')) {
-          addClass(target, 'btn-active')
-          target.innerText = '关注'
-          this.$refs.tip.show('取关成功')
-        } else {
-          removeClass(target, 'btn-active')
-          target.innerText = item.bothStatus ? '互相关注' : '已关注'
-          this.$refs.tip.show('关注成功')
-        }
-      }).catch(e => {
-        this.$refs.tip.show('网络错误')
-      })
+      if (this.timer) return
+      this.timer = setTimeout(() => {
+        this.$axios.get(`/api/user/${this.loginInfo.userId}/triggerFollow/${item.userinfo.userId}`).then(res => {
+          if (res.data.data.includes('取消')) {
+            addClass(target, 'btn-active')
+            target.innerText = '关注'
+            this.$refs.tip.show('取关成功')
+          } else {
+            removeClass(target, 'btn-active')
+            target.innerText = item.bothStatus ? '互相关注' : '已关注'
+            this.$refs.tip.show('关注成功')
+          }
+          this.$socket.emit('sendTriggerFollow', {
+            fromUserId: this.loginInfo.userId,
+            toUserId: item.userinfo.userId
+          })
+          this.timer = null
+        }).catch(e => {
+          this.$refs.tip.show('网络错误')
+          this.timer = null
+        })
+      }, 300)
     },
     chooseUser (e, userId) {
       if (e.target.className.includes('btn')) return

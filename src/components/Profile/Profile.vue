@@ -210,7 +210,9 @@ export default {
       let res = await this.$axios.get(`/api/user/${this.loginInfo.userId}/logout`)
       if (res.data.code === 200) {
         this.SET_ISLOGGED(false)
+        this.$socket.emit('logout', this.loginInfo.userId)
         this.SET_LOGININFO({})
+        this.SET_FANUNREADNUM(0)
         this.$router.push('/home')
       }
     },
@@ -246,7 +248,8 @@ export default {
     },
     ...mapMutations([
       'SET_ISLOGGED',
-      'SET_LOGININFO'
+      'SET_LOGININFO',
+      'SET_FANUNREADNUM'
     ])
   },
   watch: {

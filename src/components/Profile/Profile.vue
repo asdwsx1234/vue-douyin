@@ -91,6 +91,7 @@ export default {
       let userId = this.userInfo.userId
       this.getFollowerNum(userId)
       this.getFanNum(userId)
+      this.getByLikeNum(userId)
       this.getLikeNum(userId)
       this.getVideoNum(userId)
     } else {

@@ -1,35 +1,82 @@
 <template>
 <div>
-  <my-list Title="赞">
-    <li v-for="item in Interests" :key="item.id" class="list-item">
-      <img src="./1.jpg" width="45" height="45" alt="" class="avatar">
+  <my-list Title="赞" @scrollToEnd="scrollToEnd">
+    <li v-for="(item, index) in list" :key="index" class="list-item">
+      <span v-if="!item.isRead" class="point"></span>
+      <img :src="`${baseURL}${item.userInfo.userAvatar}`" width="45" height="45" alt="" class="avatar">
       <div class="main">
-        <p class="name">@{{item.name}}</p>
-        <p class="name">赞了你的作品</p>
-        <p class="desc">{{item.time}}</p>
+        <p class="name">@{{item.userInfo.userNickname}}</p>
+        <p class="name">赞了你的{{ item.videoInfo ? '作品' : '评论' }}</p>
+        <p class="desc">{{formatTime(item.createdAt)}}</p>
       </div>
-      <img class="cover" src="./1.jpg" alt="" width="60" height="60">
+      <img class="cover" v-if="item.videoInfo" :src="item.videoInfo.videoCover" alt="" width="60" height="60">
+      <p v-else>{{item.commentInfo.commentContent}}</p>
     </li>
-    <div v-if="!Interests.length" class="tip-wrap">
-      <p>您还没有被@哦</p>
+    <div v-if="!list.length" class="tip-wrap">
+      <p>您还没有被赞哦</p>
       <p class="desc">赶快去和好友互动起来吧！</p>
     </div>
+    <loading v-show="isLoading"></loading>
   </my-list>
 </div>
 </template>
 
 <script>
 import MyList from 'base/myList/myList'
+import { baseURL } from 'common/js/config'
+import { formatTime } from 'common/js/util'
+import { mapGetters, mapActions } from 'vuex'
+import Loading from 'base/loading/loading'
+const PER_PAGE_LIMIT_NUM = 21
 export default {
+  created () {
+    this.fetchByLikeList()
+  },
+  beforeDestroy () {
+    const userId = this.loginInfo.userId
+    this.$axios.get(`/api/user/${userId}/readAllByLikeMsg`).then(() => {
+      this.getByLikeUnreadNum(userId)
+    })
+  },
   data () {
     return {
-      Interests: [
-        { id: 1, avatar: '', name: 'well啊', content: '@测试小号 艾特', time: '刚刚' }
-      ]
+      list: [],
+      isLoading: false,
+      page: 0,
+      isEnd: false,
+      baseURL
     }
   },
+  computed: {
+    ...mapGetters([
+      'loginInfo'
+    ])
+  },
+  methods: {
+    fetchByLikeList () {
+      if (this.isEnd) return
+      let userId = this.loginInfo.userId
+      this.isLoading = true
+      this.page++
+      this.$axios.get(`/api/user/${userId}/byLike/page/${this.page}`).then((r) => {
+        this.isLoading = false
+        if (r.data.data.length < PER_PAGE_LIMIT_NUM) {
+          this.isEnd = true
+        }
+        this.list = this.list.concat(r.data.data)
+      })
+    },
+    scrollToEnd () {
+      this.fetchByLikeList()
+    },
+    ...mapActions([
+      'getByLikeUnreadNum'
+    ]),
+    formatTime
+  },
   components: {
-    MyList
+    MyList,
+    Loading
   }
 }
 </script>
@@ -47,10 +94,20 @@ export default {
     font-size $font-size-small
     color $color-desc
 .list-item
+  position relative
   padding 10px 10px
   display flex
   align-items center
   background rgb(28, 31, 42)
+  .point
+    position absolute
+    left -2px
+    top 50%
+    transform translateY(-50%)
+    border-radius 50%
+    height 8px
+    width 8px
+    background #face15
   .avatar
     margin-right 10px
     border-radius 50%

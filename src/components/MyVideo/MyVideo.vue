@@ -14,8 +14,8 @@
           @click="chooseUser">
         <div class="follow">+</div>
       </div>
-      <div class="like iconfont icon-heart-fill" :class="{ 'red-heart': like }" @click="toggleLike">
-        <span class="likenum">{{VideoItem.WSLCNum.likeNum}}</span>
+      <div class="like iconfont icon-heart-fill" :class="{ 'red-heart': like }" @click="toggleLike(VideoItem.videoInfo.videoId)">
+        <span class="likenum">{{likeNum}}</span>
       </div>
       <div class="comment iconfont icon-message" @click.stop="showCommentList(VideoItem.videoInfo.videoId, VideoItem.WSLCNum.commentNum)">
         <span class="commentnum">{{VideoItem.WSLCNum.commentNum}}</span>
@@ -38,6 +38,7 @@
 
 <script>
 import { baseURL } from 'common/js/config'
+import { mapGetters } from 'vuex'
 export default {
   props: {
     VideoItem: {
@@ -45,16 +46,28 @@ export default {
       required: true
     }
   },
+  created () {
+    if (this.isLogged) {
+      this.$axios.get(`/api/user/${this.loginInfo.userId}/isLiked/${this.VideoItem.videoInfo.videoId}`).then(res => {
+        this.like = res.data.data
+      })
+    }
+  },
   data () {
     return {
       baseURL,
-      like: false
+      like: false,
+      likeNum: this.VideoItem.WSLCNum.likeNum
     }
   },
   computed: {
     isHome () {
       return this.$route.name === 'home'
-    }
+    },
+    ...mapGetters([
+      'isLogged',
+      'loginInfo'
+    ])
   },
   methods: {
     playHandler () {
@@ -64,8 +77,22 @@ export default {
     showCommentList (videoId, commentNum) {
       this.$emit('showCommentList', videoId, commentNum)
     },
-    toggleLike () {
-      this.like = !this.like
+    toggleLike (videoId) {
+      if (this.isLogged) {
+        this.$axios.get(`/api/user/${this.loginInfo.userId}/triggerLike/${this.VideoItem.videoInfo.videoId}`).then(res => {
+          if (res.data.data.includes('取消')) {
+            this.like = false
+            this.likeNum--
+          } else {
+            this.like = true
+            this.likeNum++
+          }
+          this.$socket.emit('sendTriggerLike', {
+            fromUserId: this.loginInfo.userId,
+            toUserId: this.VideoItem.userInfo.userId
+          })
+        })
+      }
     },
     chooseUser () {
       this.$router.push(`/profile/${this.VideoItem.videoInfo.userId}`)

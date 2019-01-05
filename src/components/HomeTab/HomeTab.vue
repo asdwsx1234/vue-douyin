@@ -37,7 +37,7 @@ export default {
       return false
     },
     hasMessageUnread () {
-      let totalUnreadNum = this.fanUnreadNum
+      let totalUnreadNum = this.fanUnreadNum + this.byLikeUnreadNum
       if (totalUnreadNum === 0) {
         return false
       } else {
@@ -45,7 +45,8 @@ export default {
       }
     },
     ...mapGetters([
-      'fanUnreadNum'
+      'fanUnreadNum',
+      'byLikeUnreadNum'
     ])
   }
 }

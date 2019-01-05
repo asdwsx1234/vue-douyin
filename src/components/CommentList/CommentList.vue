@@ -18,7 +18,7 @@
             <p class="content">{{item.Comment.commentContent}}</p>
             <p class="time">{{formatTime(item.Comment.createdAt)}}</p>
           </div>
-          <div class="like" :class="{ 'red-heart': likes[index] }" @click.stop="toggleLike(index)">
+          <div class="like" :class="{ 'red-heart': likes[index] }" @click.stop="toggleLike(item, index)">
             <i class="iconfont icon-heart-fill"></i>
             <p class="like-desc">{{item.likeNum}}</p>
           </div>
@@ -39,6 +39,7 @@ import Scroll from 'base/scroll/scroll'
 import NoMore from 'base/NoMore/NoMore'
 import { formatTime } from 'common/js/util'
 import { baseURL } from 'common/js/config'
+import { mapGetters } from 'vuex'
 export default {
   props: {
     commentList: {
@@ -50,10 +51,26 @@ export default {
       required: true
     }
   },
-  mounted () {
-    let length = this.commentList.length
-    for (let i = 0; i < length; i++) {
-      this.likes[i] = false
+  created () {
+    for (let i = 0, len = this.commentList.length; i < len; i++) {
+      this.$axios.get(`/api/user/${this.loginInfo.userId}/isLikedComment/${this.commentList[i].Comment.commentId}`).then((res) => {
+        this.likes[i] = res.data.data
+        if (i === len - 1) {
+          this.$forceUpdate()
+        }
+      })
+    }
+  },
+  watch: {
+    commentList (newVal, oldVal) {
+      for (let i = oldVal.length, len = newVal.length; i < len; i++) {
+        this.$axios.get(`/api/user/${this.loginInfo.userId}/isLikedComment/${this.commentList[i].Comment.commentId}`).then((res) => {
+          this.likes[i] = res.data.data
+          if (i === len - 1) {
+            this.$forceUpdate()
+          }
+        })
+      }
     }
   },
   data () {
@@ -62,13 +79,30 @@ export default {
       baseURL
     }
   },
+  computed: {
+    ...mapGetters([
+      'loginInfo'
+    ])
+  },
   methods: {
     close (e) {
       this.$emit('close', e)
     },
-    toggleLike (index) {
-      this.likes[index] = !this.likes[index]
-      this.likes = [].concat(this.likes)
+    toggleLike (item, index) {
+      this.$axios.get(`/api/user/${this.loginInfo.userId}/triggerLikeComment/${item.Comment.videoId}/${item.Comment.commentId}`).then((res) => {
+        if (res.data.data.includes('取消')) {
+          this.likes[index] = false
+          item.likeNum--
+        } else {
+          this.likes[index] = true
+          item.likeNum++
+        }
+        this.likes = [].concat(this.likes)
+        this.$socket.emit('sendTriggerLike', {
+          fromUserId: this.loginInfo.userId,
+          toUserId: item.Comment.userId
+        })
+      })
     },
     scrollToEnd () {
       if (this.commentList.length > 0) {

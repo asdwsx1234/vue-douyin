@@ -32,6 +32,9 @@ export default {
     responselogout (data) {
       // console.log(`socket disconnected ${data.userId}=====>${data.socketId}`)
     },
+    receiveTriggerLike () {
+      this.getByLikeUnreadNum(this.loginInfo.userId)
+    },
     receiveTriggerFollow () {
       this.getFanUnreadNum(this.loginInfo.userId)
     }
@@ -47,7 +50,8 @@ export default {
   methods: {
     ...mapActions([
       'persistentConnection',
-      'getFanUnreadNum'
+      'getFanUnreadNum',
+      'getByLikeUnreadNum'
     ])
   },
   components: {

@@ -29,12 +29,6 @@ import { mapGetters, mapActions } from 'vuex'
 import Loading from 'base/loading/loading'
 const PER_PAGE_LIMIT_NUM = 21
 export default {
-  mounted () {
-    const userId = this.loginInfo.userId
-    this.$axios.get(`/api/user/${userId}/readAllFanMsg`).then(() => {
-      this.getFanUnreadNum(userId)
-    })
-  },
   data () {
     return {
       list: [],
@@ -47,6 +41,12 @@ export default {
   },
   created () {
     this.fetchFansList()
+  },
+  beforeDestroy () {
+    const userId = this.loginInfo.userId
+    this.$axios.get(`/api/user/${userId}/readAllFanMsg`).then(() => {
+      this.getFanUnreadNum(userId)
+    })
   },
   methods: {
     fetchFansList () {

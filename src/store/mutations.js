@@ -10,6 +10,9 @@ const mutations = {
   [types.SET_FANUNREADNUM] (state, fanUnreadNum) {
     state.fanUnreadNum = fanUnreadNum
   },
+  [types.SET_BYLIKEUNREADNUM] (state, byLikeUnreadNum) {
+    state.byLikeUnreadNum = byLikeUnreadNum
+  },
   [types.SET_FOLLOWERLIST] (state, followerList) {
     state.followerList = followerList
   },

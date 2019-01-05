@@ -27,10 +27,21 @@ io.on('connection', socket => {
     // const sockeId   拿出toUser的socketId
     // io.to(socketId).emit('receivePrivateLetter', data)
   })
+  socket.on('sendTriggerLike', async data => {
+    const { toUserId } = data
+    const toUserSocketId = await redisClient.get(`SOCKET:${toUserId}`)
+    io.to(toUserSocketId).emit('receiveTriggerLike', {
+      toUserId,
+      toUserSocketId
+    })
+  })
   socket.on('sendTriggerFollow', async data => {
     const { toUserId } = data
     const toUserSocketId = await redisClient.get(`SOCKET:${toUserId}`)
-    io.to(toUserSocketId).emit('receiveTriggerFollow')
+    io.to(toUserSocketId).emit('receiveTriggerFollow', {
+      toUserId,
+      toUserSocketId
+    })
   })
   socket.on('logout', async userId => {
     // 删除

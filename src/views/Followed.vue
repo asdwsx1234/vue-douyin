@@ -1,5 +1,5 @@
 <template>
-<div @click.capture="closeCommentList">
+<div @click.capture="closeCommentList($event)">
   <scroll class="list-wrap"
     :data="list"
     ref="listWrap">
@@ -74,7 +74,7 @@ export default {
       }
     },
     closeCommentList (e) {
-      if (this.showCommentList) {
+      if (this.showCommentList && (e.target.nodeName === 'VIDEO' || e.target.className.includes('icon-close') || e.target.className.includes('followed-item'))) {
         this.currentCommentVideoId = ''
         e.stopPropagation()
         this.showCommentList = false

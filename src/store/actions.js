@@ -16,6 +16,7 @@ export const loginByPassword = async ({ dispatch, commit, state }, user) => {
       let loginInfo = res1.data.data
       commit(types.SET_LOGININFO, loginInfo)
       dispatch('getFanUnreadNum', loginInfo.userId)
+      dispatch('getByLikeUnreadNum', loginInfo.userId)
     }
   }
 }
@@ -27,6 +28,7 @@ export const persistentConnection = async ({ dispatch, commit, state }) => {
     commit(types.SET_ISLOGGED, true)
     commit(types.SET_LOGININFO, loginInfo)
     dispatch('getFanUnreadNum', loginInfo.userId)
+    dispatch('getByLikeUnreadNum', loginInfo.userId)
     return {
       code: 200
     }
@@ -54,6 +56,14 @@ export const getFanUnreadNum = async ({ commit, state }, userId) => {
   let res = await instance.get(`/api/user/${userId}/FanUnreadNum`)
   if (res.data.code === 200) {
     commit(types.SET_FANUNREADNUM, res.data.data)
+  } else {
+  }
+}
+
+export const getByLikeUnreadNum = async ({ commit, state }, userId) => {
+  let res = await instance.get(`/api/user/${userId}/byLikeUnreadNum`)
+  if (res.data.code === 200) {
+    commit(types.SET_BYLIKEUNREADNUM, res.data.data)
   } else {
   }
 }

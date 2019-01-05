@@ -10,7 +10,9 @@
     </li>
     <li class="tab-item">
       <router-link tag="div" to="/message/like">
-        <div class="icon iconfont icon-heart"></div>
+        <div class="icon iconfont icon-heart">
+          <span class="point" :class="{ 'point-plus': byLikeUnreadNum > 99 }" v-show="byLikeUnreadNum!==0">{{byLikeUnreadNum > 99 ? '99+' : byLikeUnreadNum}}</span>
+        </div>
         <span class="desc">赞</span>
       </router-link>
     </li>
@@ -42,7 +44,8 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'fanUnreadNum'
+      'fanUnreadNum',
+      'byLikeUnreadNum'
     ])
   }
 }
@@ -77,6 +80,10 @@ export default {
       color $color-background
       font-size $font-size-small
       font-weight 600
+    .point-plus
+      right -10px
+      border-radius 8px
+      width 26px
     .icon-heart
       background rgb(248, 53, 95)
     .icon-team

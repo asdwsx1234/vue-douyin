@@ -18,6 +18,7 @@ const KEY_WATCH_NUM = 'videoWatchNum'
 const KEY_SHARE_NUM = 'videoShareNum'
 const KEY_LIKE_NUM = 'videoLikeNum'
 const KEY_COMMENT_NUM = 'videoCommentNum'
+const KEY_COMMENT_LIKE_NUM = 'commmentLikeNum'
 const PER_PAGE_LIMIT_NUM = 21
 
 const regEmail = /^([a-zA-Z0-9]+[_|.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/
@@ -214,6 +215,9 @@ module.exports = {
     })
     if (user) {
       const fansList = await user.getFans({
+        order: [
+          ['createdAt', 'DESC']
+        ],
         limit: PER_PAGE_LIMIT_NUM,
         offset: (page - 1) * PER_PAGE_LIMIT_NUM
       })
@@ -350,6 +354,7 @@ module.exports = {
       })
       for (let i = 0, len = fansList.length; i < len; i++) {
         let temp = fansList[i]
+        if (temp.isRead === true) continue
         temp.isRead = true
         await temp.save()
       }
@@ -403,6 +408,168 @@ module.exports = {
         commentLikeSumNum += commentLikeNum.count
       }
       ctx.rest(videoLikeSumNum + commentLikeSumNum)
+    } else {
+      throw new APIError('user:not_found', 'user not found by userId.')
+    }
+  },
+  'GET /api/user/:userId/byLikeUnreadNum': async (ctx, next) => {
+    const userId = ctx.params.userId
+    const user = await UserRegister.findOne({
+      where: {
+        'userId': userId
+      }
+    })
+    if (user) {
+      const userVideos = await user.getVideos()
+      const userComments = await user.getComments()
+      let videoLikeSumNum = 0
+      let commentLikeSumNum = 0
+      for (let i = 0, len = userVideos.length; i < len; i++) {
+        let videoInfo = userVideos[i]
+        let videoLikeNum = await LikeInfo.findAndCount({
+          where: {
+            videoId: videoInfo.videoId,
+            isRead: false
+          }
+        })
+        videoLikeSumNum += videoLikeNum.count
+      }
+      for (let i = 0, len = userComments.length; i < len; i++) {
+        let commentInfo = userComments[i]
+        let commentLikeNum = await LikeInfo.findAndCount({
+          where: {
+            commentId: commentInfo.commentId,
+            isRead: false
+          }
+        })
+        commentLikeSumNum += commentLikeNum.count
+      }
+      ctx.rest(videoLikeSumNum + commentLikeSumNum)
+    } else {
+      throw new APIError('user:not_found', 'user not found by userId.')
+    }
+  },
+  'GET /api/user/:userId/byLike/page/:page': async (ctx, next) => {
+    const userId = ctx.params.userId
+    let page = ctx.params.page
+    if (page < 0 || !page) page = 1
+    const user = await UserRegister.findOne({
+      where: {
+        'userId': userId
+      }
+    })
+    if (user) {
+      let result = []
+      const userVideos = await user.getVideos({
+        limit: PER_PAGE_LIMIT_NUM,
+        offset: (page - 1) * PER_PAGE_LIMIT_NUM
+      })
+      const userComments = await user.getComments({
+        limit: PER_PAGE_LIMIT_NUM,
+        offset: (page - 1) * PER_PAGE_LIMIT_NUM
+      })
+      for (let i = 0, len = userVideos.length; i < len; i++) {
+        let videoInfo = userVideos[i]
+        let videoLikeList = await LikeInfo.findAll({
+          order: [
+            ['createdAt', 'DESC']
+          ],
+          where: {
+            videoId: videoInfo.videoId
+          }
+        })
+        for (let i = 0, len = videoLikeList.length; i < len; i++) {
+          let userInfo = await UserInfo.findOne({
+            where: {
+              'userId': videoLikeList[i].userId
+            }
+          })
+          let temp = {
+            videoInfo,
+            userInfo,
+            createdAt: videoLikeList[i].createdAt,
+            isRead: videoLikeList[i].isRead
+          }
+          if (videoLikeList[i].isRead === false) {
+            result = [temp].concat(result)
+          } else {
+            result.push(temp)
+          }
+        }
+      }
+      for (let i = 0, len = userComments.length; i < len; i++) {
+        let commentInfo = userComments[i]
+        let commentLikeList = await LikeInfo.findAll({
+          order: [
+            ['createdAt', 'DESC']
+          ],
+          where: {
+            commentId: commentInfo.commentId
+          }
+        })
+        for (let i = 0, len = commentLikeList.length; i < len; i++) {
+          let userInfo = await UserInfo.findOne({
+            where: {
+              'userId': commentLikeList[i].userId
+            }
+          })
+          let temp = {
+            commentInfo,
+            userInfo,
+            createdAt: commentLikeList[i].createdAt,
+            isRead: commentLikeList[i].isRead
+          }
+          if (commentLikeList[i].isRead === false) {
+            result = [temp].concat(result)
+          } else {
+            result.push(temp)
+          }
+        }
+      }
+      ctx.rest(result)
+    } else {
+      throw new APIError('user:not_found', 'user not found by userId.')
+    }
+  },
+  'GET /api/user/:userId/readAllByLikeMsg': async (ctx, next) => {
+    const userId = ctx.params.userId
+    const user = await UserRegister.findOne({
+      where: {
+        'userId': userId
+      }
+    })
+    if (user) {
+      const userVideos = await user.getVideos()
+      const userComments = await user.getComments()
+      for (let i = 0, len = userVideos.length; i < len; i++) {
+        let videoInfo = userVideos[i]
+        let videoLikeList = await LikeInfo.findAll({
+          where: {
+            videoId: videoInfo.videoId
+          }
+        })
+        for (let i = 0, len = videoLikeList.length; i < len; i++) {
+          let temp = videoLikeList[i]
+          if (temp.isRead === true) continue
+          temp.isRead = true
+          await temp.save()
+        }
+      }
+      for (let i = 0, len = userComments.length; i < len; i++) {
+        let commentInfo = userComments[i]
+        let commentLikeList = await LikeInfo.findAll({
+          where: {
+            commentId: commentInfo.commentId
+          }
+        })
+        for (let i = 0, len = commentLikeList.length; i < len; i++) {
+          let temp = commentLikeList[i]
+          if (temp.isRead === true) continue
+          temp.isRead = true
+          await temp.save()
+        }
+      }
+      ctx.rest('ok')
     } else {
       throw new APIError('user:not_found', 'user not found by userId.')
     }
@@ -576,6 +743,35 @@ module.exports = {
       ctx.rest('关注成功')
     }
   },
+  'GET /api/user/:fromUserId/isLiked/:toVideoId': async (ctx, next) => {
+    const fromUserId = ctx.params.fromUserId
+    const toVideoId = ctx.params.toVideoId
+    const user = await UserRegister.findOne({
+      where: {
+        'userId': fromUserId
+      }
+    })
+    const video = await VideoInfo.findOne({
+      where: {
+        'videoId': toVideoId
+      }
+    })
+
+    if (!user || !video) {
+      throw new APIError('user:not_existed', 'fromUser or toVideo is not existed.')
+    }
+    let li = await LikeInfo.findOne({
+      where: {
+        'videoId': toVideoId,
+        'userId': fromUserId
+      }
+    })
+    if (li) {
+      ctx.rest(true)
+    } else {
+      ctx.rest(false)
+    }
+  },
   'GET /api/user/:fromUserId/triggerLike/:toVideoId': async (ctx, next) => {
     const fromUserId = ctx.params.fromUserId
     const toVideoId = ctx.params.toVideoId
@@ -607,9 +803,77 @@ module.exports = {
       utils.incrOrCut(KEY_LIKE_NUM, 1, toVideoId)
       await LikeInfo.create({
         'videoId': toVideoId,
-        'userId': fromUserId
+        'userId': fromUserId,
+        'isRead': false
       })
       ctx.rest('喜欢成功')
+    }
+  },
+  'GET /api/user/:fromUserId/triggerLikeComment/:videoId/:toCommentId': async (ctx, next) => {
+    const fromUserId = ctx.params.fromUserId
+    const videoId = ctx.params.videoId
+    const toCommentId = ctx.params.toCommentId
+    const user = await UserRegister.findOne({
+      where: {
+        'userId': fromUserId
+      }
+    })
+    const video = await CommentInfo.findOne({
+      where: {
+        'commentId': toCommentId
+      }
+    })
+
+    if (!user || !video) {
+      throw new APIError('user:not_existed', 'fromUser or toVideo is not existed.')
+    }
+    let li = await LikeInfo.findOne({
+      where: {
+        'commentId': toCommentId,
+        'userId': fromUserId
+      }
+    })
+    if (li) {
+      utils.incrOrCut(`${KEY_COMMENT_LIKE_NUM}:${videoId}`, -1, toCommentId)
+      await li.destroy()
+      ctx.rest('取消喜欢评论成功')
+    } else {
+      utils.incrOrCut(`${KEY_COMMENT_LIKE_NUM}:${videoId}`, 1, toCommentId)
+      await LikeInfo.create({
+        'commentId': toCommentId,
+        'userId': fromUserId,
+        'isRead': false
+      })
+      ctx.rest('喜欢评论成功')
+    }
+  },
+  'GET /api/user/:fromUserId/isLikedComment/:toCommentId': async (ctx, next) => {
+    const fromUserId = ctx.params.fromUserId
+    const toCommentId = ctx.params.toCommentId
+    const user = await UserRegister.findOne({
+      where: {
+        'userId': fromUserId
+      }
+    })
+    const video = await CommentInfo.findOne({
+      where: {
+        'commentId': toCommentId
+      }
+    })
+
+    if (!user || !video) {
+      throw new APIError('user:not_existed', 'fromUser or toVideo is not existed.')
+    }
+    let li = await LikeInfo.findOne({
+      where: {
+        'commentId': toCommentId,
+        'userId': fromUserId
+      }
+    })
+    if (li) {
+      ctx.rest(true)
+    } else {
+      ctx.rest(false)
     }
   },
   'GET /api/user/:fromUserId/watch/:toVideoId': async (ctx, next) => {

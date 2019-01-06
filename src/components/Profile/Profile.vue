@@ -61,6 +61,7 @@
         v-if="showCommentList"
         :commentList="commentList"
         :commentNum="commentNum"
+        :currentCommentVideoId="currentCommentVideoId"
         @close="closeCommentList"
         @scrollToEnd="fetchCommentsAndShowList"></comment-list>
     </transition>
@@ -81,6 +82,7 @@ import CommentList from 'components/CommentList/CommentList'
 import { baseURL } from 'common/js/config'
 import { mapGetters, mapMutations } from 'vuex'
 import PlayList from 'components/PlayList/PlayList'
+import { deduplicateCommentList } from 'common/js/util'
 
 const VIDEO_NUM_PER_REQUEST = 21
 
@@ -178,7 +180,7 @@ export default {
           if (res.data.data.length < 20) {
             this.isEnd = true
           }
-          this.commentList = res.data.data
+          this.commentList = deduplicateCommentList(res.data.data)
           this.showCommentList = true
         })
       } else {
@@ -188,7 +190,7 @@ export default {
           if (res.data.data.length < 20) {
             this.isEnd = true
           }
-          this.commentList = this.commentList.concat(res.data.data)
+          this.commentList = deduplicateCommentList(this.commentList.concat(res.data.data))
           this.showCommentList = true
         })
       }

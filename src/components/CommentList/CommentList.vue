@@ -7,11 +7,11 @@
     <scroll
       @click.stop.native
       class="comment-item-wrap"
-      :data="commentList"
+      :data="acommentList"
       :pullup="true"
       @scrollToEnd="scrollToEnd">
       <div>
-        <div class="comment-item" v-for="(item, index) in commentList" :key="index">
+        <div class="comment-item" v-for="(item, index) in acommentList" :key="index">
           <img class="avatar" :src="`${baseURL}${item.userInfo.userAvatar}`" alt="" width="40" height="40">
           <div class="main">
             <p class="name">@{{item.userInfo.userNickname}}</p>
@@ -27,9 +27,9 @@
       </div>
     </scroll>
     <div class="input-bar">
-      <input class="input" placeholder="  有爱评论，说点儿好听的~" type="text">
+      <input class="input" placeholder="  有爱评论，说点儿好听的~" v-model="commentContent" type="text">
       <span class="iconfont icon-at"></span>
-      <span class="iconfont icon-at"></span>
+      <span class="iconfont icon-check" @click="sendComment"></span>
     </div>
   </div>
 </template>
@@ -47,6 +47,10 @@ export default {
       required: true
     },
     commentNum: {
+      type: String,
+      required: true
+    },
+    currentCommentVideoId: {
       type: String,
       required: true
     }
@@ -76,6 +80,8 @@ export default {
   data () {
     return {
       likes: [],
+      acommentList: this.commentList,
+      commentContent: '',
       baseURL
     }
   },
@@ -83,6 +89,11 @@ export default {
     ...mapGetters([
       'loginInfo'
     ])
+  },
+  watch: {
+    commentList (newVal) {
+      this.acommentList = newVal
+    }
   },
   methods: {
     close (e) {
@@ -107,6 +118,31 @@ export default {
     scrollToEnd () {
       if (this.commentList.length > 0) {
         this.$emit('scrollToEnd', this.commentList[0].Comment.videoId)
+      }
+    },
+    sendComment () {
+      let cc = this.commentContent.trim()
+      if (cc) {
+        let comment = {
+          fromUserId: this.loginInfo.userId,
+          replyId: '',
+          content: cc,
+          toVideoId: this.currentCommentVideoId
+        }
+        this.$axios.post(`/api/user/commentVideo`, comment).then(res => {
+          let mycomment = {
+            Comment: res.data.data,
+            likeNum: 0,
+            userInfo: this.loginInfo
+          }
+          this.commentContent = ''
+          this.acommentList = [mycomment].concat(this.acommentList)
+          this.likes = [false].concat(this.likes)
+          this.$socket.emit('sendComment', {
+            toVideoId: comment.toVideoId,
+            replyId: comment.replyId
+          })
+        })
       }
     },
     formatTime
@@ -196,6 +232,7 @@ export default {
       font-size $font-size-medium
       color $color-text
       padding-left 10px
+      caret-color $color-point
       &:focus
         outline none
         border none

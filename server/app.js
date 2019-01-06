@@ -8,7 +8,8 @@ const staticFiles = require('./staticFiles')
 const bodyParser = require('koa-bodyparser')
 const cors = require('koa2-cors')
 const redisClient = require('./redis')
-
+const VideoInfo = require('./models/VideoInfo')
+const CommentInfo = require('./models/CommentInfo')
 const app = new Koa()
 const server = require('http').createServer(app.callback())
 const io = require('socket.io')(server)
@@ -26,6 +27,33 @@ io.on('connection', socket => {
     // const { toUser } = data
     // const sockeId   拿出toUser的socketId
     // io.to(socketId).emit('receivePrivateLetter', data)
+  })
+  socket.on('sendComment', async data => {
+    const { toVideoId, replyId } = data
+    if (replyId) {
+      const commmentInfo = await CommentInfo.findOne({
+        where: {
+          commentId: replyId
+        }
+      })
+      const toCommentOwnerId = commmentInfo.userId
+      const toCUserSocketId = await redisClient.get(`SOCKET:${toCommentOwnerId}`)
+      io.to(toCUserSocketId).emit('receiveComment', {
+        toCommentOwnerId,
+        toCUserSocketId
+      })
+    }
+    const toVideoInfo = await VideoInfo.findOne({
+      where: {
+        videoId: toVideoId
+      }
+    })
+    const toVideoOwnerId = toVideoInfo.userId
+    const toUserSocketId = await redisClient.get(`SOCKET:${toVideoOwnerId}`)
+    io.to(toUserSocketId).emit('receiveComment', {
+      toVideoOwnerId,
+      toUserSocketId
+    })
   })
   socket.on('sendTriggerLike', async data => {
     const { toUserId } = data

@@ -3,6 +3,7 @@ const state = {
   loginInfo: {},
   fanUnreadNum: 0,
   byLikeUnreadNum: 0,
+  byCommentUnreadNum: 0,
   followerList: [],
   fanList: [],
   likeList: [],

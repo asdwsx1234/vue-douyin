@@ -2,6 +2,7 @@ export const isLogged = state => state.isLogged
 export const loginInfo = state => state.loginInfo
 export const fanUnreadNum = state => state.fanUnreadNum
 export const byLikeUnreadNum = state => state.byLikeUnreadNum
+export const byCommentUnreadNum = state => state.byCommentUnreadNum
 export const followerList = state => state.followerList
 export const fanList = state => state.fanList
 export const likeList = state => state.likeList

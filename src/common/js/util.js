@@ -22,3 +22,12 @@ export function formatTime (Timestamp) {
   else if (minutes < 2880) return `昨天 ${CreatedAt.getHours()}:${CreatedAt.getMinutes()}`
   else return `${CreatedAt.getFullYear()}-${CreatedAt.getMonth() + 1}-${CreatedAt.getDate()}`
 }
+
+export function deduplicateCommentList (list) {
+  for (let i = 0; i < list.length; i++) {
+    for (let j = i + 1; j < list.length; j++) {
+      if (list[i].Comment.commentId === list[j].Comment.commentId) list.splice(j, 1)
+    }
+  }
+  return list
+}

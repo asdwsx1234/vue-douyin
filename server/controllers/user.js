@@ -574,6 +574,166 @@ module.exports = {
       throw new APIError('user:not_found', 'user not found by userId.')
     }
   },
+  'GET /api/user/:userId/byCommentUnreadNum': async (ctx, next) => {
+    const userId = ctx.params.userId
+    const user = await UserRegister.findOne({
+      where: {
+        'userId': userId
+      }
+    })
+    if (user) {
+      const userVideos = await user.getVideos()
+      const userComments = await user.getComments()
+      let videCommentSumNum = 0
+      let commentBycommentSumNum = 0
+      for (let i = 0, len = userVideos.length; i < len; i++) {
+        let videoInfo = userVideos[i]
+        let videoCommentNum = await CommentInfo.findAndCount({
+          where: {
+            videoId: videoInfo.videoId,
+            isRead: false
+          }
+        })
+        videCommentSumNum += videoCommentNum.count
+      }
+      for (let i = 0, len = userComments.length; i < len; i++) {
+        let commentInfo = userComments[i]
+        let commentBycommentNum = await CommentInfo.findAndCount({
+          where: {
+            commentReplyID: commentInfo.commentId,
+            isRead: false
+          }
+        })
+        commentBycommentSumNum += commentBycommentNum.count
+      }
+      ctx.rest(videCommentSumNum + commentBycommentSumNum)
+    } else {
+      throw new APIError('user:not_found', 'user not found by userId.')
+    }
+  },
+  'GET /api/user/:userId/byComment/page/:page': async (ctx, next) => {
+    const userId = ctx.params.userId
+    let page = ctx.params.page
+    if (page < 0 || !page) page = 1
+    const user = await UserRegister.findOne({
+      where: {
+        'userId': userId
+      }
+    })
+    if (user) {
+      let result = []
+      const userVideos = await user.getVideos({
+        limit: PER_PAGE_LIMIT_NUM,
+        offset: (page - 1) * PER_PAGE_LIMIT_NUM
+      })
+      const userComments = await user.getComments({
+        limit: PER_PAGE_LIMIT_NUM,
+        offset: (page - 1) * PER_PAGE_LIMIT_NUM
+      })
+      for (let i = 0, len = userVideos.length; i < len; i++) {
+        let videoInfo = userVideos[i]
+        let byCommentList = await CommentInfo.findAll({
+          order: [
+            ['createdAt', 'DESC']
+          ],
+          where: {
+            videoId: videoInfo.videoId
+          }
+        })
+        for (let i = 0, len = byCommentList.length; i < len; i++) {
+          let userInfo = await UserInfo.findOne({
+            where: {
+              'userId': byCommentList[i].userId
+            }
+          })
+          let temp = {
+            videoInfo,
+            userInfo,
+            byCommentInfo: byCommentList[i]
+          }
+          if (byCommentList[i].isRead === false) {
+            result = [temp].concat(result)
+          } else {
+            result.push(temp)
+          }
+        }
+      }
+      for (let i = 0, len = userComments.length; i < len; i++) {
+        let commentInfo = userComments[i]
+        let byCommentList = await CommentInfo.findAll({
+          order: [
+            ['createdAt', 'DESC']
+          ],
+          where: {
+            commentReplyID: commentInfo.commentId
+          }
+        })
+        for (let i = 0, len = byCommentList.length; i < len; i++) {
+          let userInfo = await UserInfo.findOne({
+            where: {
+              'userId': byCommentList[i].userId
+            }
+          })
+          let temp = {
+            commentInfo,
+            userInfo,
+            byCommentInfo: byCommentList[i]
+          }
+          if (byCommentList[i].isRead === false) {
+            result = [temp].concat(result)
+          } else {
+            result.push(temp)
+          }
+        }
+      }
+      ctx.rest(result)
+    } else {
+      throw new APIError('user:not_found', 'user not found by userId.')
+    }
+  },
+  'GET /api/user/:userId/readAllByCommentMsg': async (ctx, next) => {
+    const userId = ctx.params.userId
+    const user = await UserRegister.findOne({
+      where: {
+        'userId': userId
+      }
+    })
+    if (user) {
+      const userVideos = await user.getVideos()
+      const userComments = await user.getComments()
+      for (let i = 0, len = userVideos.length; i < len; i++) {
+        let videoInfo = userVideos[i]
+        let videoByCommentList = await CommentInfo.findAll({
+          where: {
+            videoId: videoInfo.videoId
+          }
+        })
+        for (let i = 0, len = videoByCommentList.length; i < len; i++) {
+          let temp = videoByCommentList[i]
+          if (temp.isRead === true) continue
+          temp.isRead = true
+          await temp.save()
+        }
+      }
+      for (let i = 0, len = userComments.length; i < len; i++) {
+        let commentInfo = userComments[i]
+        let commentByCommentList = await CommentInfo.findAll({
+          where: {
+            commentReplyID: commentInfo.commentId
+          }
+        })
+        for (let i = 0, len = commentByCommentList.length; i < len; i++) {
+          let temp = commentByCommentList[i]
+          if (temp.isRead === true) continue
+          temp.isRead = true
+          await temp.save()
+        }
+      }
+      ctx.rest('ok')
+    } else {
+      throw new APIError('user:not_found', 'user not found by userId.')
+    }
+  },
   'GET /api/user/:userId/Likes/page/:page': async (ctx, next) => {
     const userId = ctx.params.userId
     let page = ctx.params.page
@@ -930,26 +1090,30 @@ module.exports = {
    * 如果是单纯的评论，则将comment.commentReplyID = '',
    * 创建评论并插入数据库
    */
-  'POST /api/user/:fromUserId/commentVideo/:toVideoId/comment/:replyId': async (ctx, next) => {
+  'POST /api/user/commentVideo': async (ctx, next) => {
     let comment = {
-      userId: ctx.params.fromUserId,
-      commentReplyID: ctx.params.replyId,
+      commentId: db.generateId(),
+      userId: ctx.request.body.fromUserId,
+      commentReplyID: ctx.request.body.replyId,
       commentContent: ctx.request.body.content,
-      videoId: ctx.params.toVideoId
+      videoId: ctx.request.body.toVideoId,
+      isRead: false
     }
     const user = await UserRegister.findOne({
       where: {
         'userId': comment.userId
       }
     })
+    if (!user) {
+      throw new APIError('user:not_existed', 'fromUser is not existed.')
+    }
     const video = await VideoInfo.findOne({
       where: {
         'videoId': comment.videoId
       }
     })
-
-    if (!user || !video) {
-      throw new APIError('user:not_existed', 'fromUser or toVideo is not existed.')
+    if (!video) {
+      throw new APIError('user:not_existed', 'toVideo is not existed.')
     }
     if (!comment.commentReplyID) {
       comment.commentReplyID = ''
@@ -964,6 +1128,7 @@ module.exports = {
       }
     }
     utils.incrOrCut(KEY_COMMENT_NUM, 1, comment.videoId)
+    await redisClient.zadd(`${KEY_COMMENT_LIKE_NUM}:${comment.videoId}`, 0, comment.commentId)
     const c = await CommentInfo.create(comment)
     ctx.rest(c)
   },

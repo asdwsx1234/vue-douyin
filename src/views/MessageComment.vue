@@ -1,35 +1,81 @@
 <template>
 <div>
-  <my-list Title="评论">
-    <li v-for="item in Interests" :key="item.id" class="list-item">
-      <img src="./1.jpg" width="45" height="45" alt="" class="avatar">
+  <my-list Title="评论" @scrollToEnd="scrollToEnd">
+    <li v-for="(item, index) in list" :key="index" class="list-item">
+      <span v-if="!item.byCommentInfo.isRead" class="point"></span>
+      <img :src="`${baseURL}${item.userInfo.userAvatar}`" width="45" height="45" alt="" class="avatar">
       <div class="main">
-        <p class="name">@{{item.name}}</p>
-        <p class="name">{{item.content}}</p>
-        <p class="desc">评论了你的作品 {{item.time}}</p>
+        <p class="name">@{{item.userInfo.userNickname}}</p>
+        <p class="name">{{item.byCommentInfo.commentContent}}</p>
+        <p class="desc">评论了你的作品 {{formatTime(item.byCommentInfo.createdAt)}}</p>
       </div>
-      <img class="cover" src="./1.jpg" alt="" width="60" height="60">
+      <img class="cover" v-if="item.videoInfo" :src="item.videoInfo.videoCover" alt="" width="60" height="60">
     </li>
-    <div v-if="!Interests.length" class="tip-wrap">
+    <div v-if="!list.length" class="tip-wrap">
       <p>您还没有作品被评论哦</p>
       <p class="desc">赶快分享你的视频给好友吧！</p>
     </div>
+    <loading v-show="isLoading"></loading>
   </my-list>
 </div>
 </template>
 
 <script>
 import MyList from 'base/myList/myList'
+import { baseURL } from 'common/js/config'
+import { formatTime } from 'common/js/util'
+import { mapGetters, mapActions } from 'vuex'
+import Loading from 'base/loading/loading'
+const PER_PAGE_LIMIT_NUM = 21
 export default {
+  created () {
+    this.fetchByCommentList()
+  },
+  beforeDestroy () {
+    const userId = this.loginInfo.userId
+    this.$axios.get(`/api/user/${userId}/readAllByCommentMsg`).then(() => {
+      this.getByCommentUnreadNum(userId)
+    })
+  },
   data () {
     return {
-      Interests: [
-        { id: 1, avatar: '', name: 'well啊', content: '@测试小号 艾特', time: '刚刚' }
-      ]
+      list: [],
+      isLoading: false,
+      page: 0,
+      isEnd: false,
+      baseURL
     }
   },
+  computed: {
+    ...mapGetters([
+      'loginInfo'
+    ])
+  },
+  methods: {
+    fetchByCommentList () {
+      if (this.isEnd) return
+      let userId = this.loginInfo.userId
+      this.isLoading = true
+      this.page++
+      this.$axios.get(`/api/user/${userId}/byComment/page/${this.page}`).then((r) => {
+        this.isLoading = false
+        if (r.data.data.length < PER_PAGE_LIMIT_NUM) {
+          this.isEnd = true
+        }
+        this.list = this.list.concat(r.data.data)
+      })
+    },
+    scrollToEnd () {
+      this.fetchByCommentList()
+    },
+    ...mapActions([
+      'getByCommentUnreadNum'
+    ]),
+    formatTime
+  },
   components: {
-    MyList
+    MyList,
+    Loading
   }
 }
 </script>
@@ -47,10 +93,20 @@ export default {
     font-size $font-size-small
     color $color-desc
 .list-item
+  position relative
   padding 10px 10px
   display flex
   align-items center
   background rgb(28, 31, 42)
+  .point
+    position absolute
+    left -2px
+    top 50%
+    transform translateY(-50%)
+    border-radius 50%
+    height 8px
+    width 8px
+    background #face15
   .avatar
     margin-right 10px
     border-radius 50%

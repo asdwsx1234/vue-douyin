@@ -37,6 +37,9 @@ export default {
     },
     receiveTriggerFollow () {
       this.getFanUnreadNum(this.loginInfo.userId)
+    },
+    receiveComment() {
+      this.getByCommentUnreadNum(this.loginInfo.userId)
     }
   },
   computed: {
@@ -51,7 +54,8 @@ export default {
     ...mapActions([
       'persistentConnection',
       'getFanUnreadNum',
-      'getByLikeUnreadNum'
+      'getByLikeUnreadNum',
+      'getByCommentUnreadNum'
     ])
   },
   components: {

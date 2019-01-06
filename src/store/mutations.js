@@ -13,6 +13,9 @@ const mutations = {
   [types.SET_BYLIKEUNREADNUM] (state, byLikeUnreadNum) {
     state.byLikeUnreadNum = byLikeUnreadNum
   },
+  [types.SET_BYCOMMENTUNREADNUM] (state, byCommentUnreadNum) {
+    state.byCommentUnreadNum = byCommentUnreadNum
+  },
   [types.SET_FOLLOWERLIST] (state, followerList) {
     state.followerList = followerList
   },

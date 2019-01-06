@@ -143,6 +143,9 @@ module.exports = {
           })
         }
         const commentInfolist = await vi.getCommentInfos({
+          order: [
+            ['createdAt', 'DESC']
+          ],
           limit: PER_PAGE_LIMIT_NUM - TOP_LIKE_COMMENT_NUM
         })
         for (let i = 0, len = commentInfolist.length; i < len; i++) {
@@ -160,6 +163,9 @@ module.exports = {
         }
       } else {
         const commentInfolist = await vi.getCommentInfos({
+          order: [
+            ['createdAt', 'DESC']
+          ],
           limit: PER_PAGE_LIMIT_NUM,
           offset: PER_PAGE_LIMIT_NUM * (page - 1)
         })

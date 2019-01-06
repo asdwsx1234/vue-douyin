@@ -3,7 +3,7 @@
     <li class="tab-item">
       <router-link tag="div" to="/message/fan">
         <div class="icon iconfont icon-team">
-          <span class="point" v-show="fanUnreadNum!==0">{{fanUnreadNum}}</span>
+          <span class="point" :class="{ 'point-plus': fanUnreadNum > 99 }" v-show="fanUnreadNum!==0">{{fanUnreadNum > 99 ? '99+' : fanUnreadNum}}</span>
         </div>
         <span class="desc">粉丝</span>
       </router-link>
@@ -24,7 +24,9 @@
     </li>
     <li class="tab-item">
       <router-link tag="div" to="/message/comment">
-        <div class="icon iconfont icon-message"></div>
+        <div class="icon iconfont icon-message">
+          <span class="point" :class="{ 'point-plus': byCommentUnreadNum > 99 }" v-show="byCommentUnreadNum!==0">{{byCommentUnreadNum > 99 ? '99+' : byCommentUnreadNum}}</span>
+        </div>
         <span class="desc">评论</span>
       </router-link>
     </li>
@@ -45,7 +47,8 @@ export default {
   computed: {
     ...mapGetters([
       'fanUnreadNum',
-      'byLikeUnreadNum'
+      'byLikeUnreadNum',
+      'byCommentUnreadNum'
     ])
   }
 }

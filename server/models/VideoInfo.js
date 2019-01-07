@@ -15,7 +15,12 @@ let VideoInfo = db.defineModel('VideoInfo', {
   videoCover: db.STRING(200),
   videoDesc: db.STRING(200),
   videoPath: db.STRING(200),
-  videoStatus: db.STRING(20)
+  videoStatus: db.STRING(20),
+  isRead: {
+    type: db.BOOLEAN,
+    allowNull: false,
+    default: false
+  }
 })
 
 VideoInfo.hasMany(LikeInfo, { foreignKey: 'videoId' })

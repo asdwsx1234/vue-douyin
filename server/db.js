@@ -115,5 +115,6 @@ for (let type of TYPES) {
 
 exp.ID = ID_TYPE
 exp.generateId = generateId
+exp.sequelize = sequelize
 
 module.exports = exp

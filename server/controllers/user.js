@@ -207,7 +207,7 @@ module.exports = {
   'GET /api/user/:userId/Fans/page/:page': async (ctx, next) => {
     const userId = ctx.params.userId
     let page = ctx.params.page
-    if (page < 0 || !page) page = 1
+    if (page < 0 || isNaN(Number(page))) page = 1
     const user = await UserRegister.findOne({
       where: {
         'userId': userId
@@ -240,7 +240,7 @@ module.exports = {
   'GET /api/user/:userId/Followers/page/:page': async (ctx, next) => {
     const userId = ctx.params.userId
     let page = ctx.params.page
-    if (page < 0 || !page) page = 1
+    if (page < 0 || isNaN(Number(page))) page = 1
     const user = await UserRegister.findOne({
       where: {
         'userId': userId
@@ -354,7 +354,6 @@ module.exports = {
       })
       for (let i = 0, len = fansList.length; i < len; i++) {
         let temp = fansList[i]
-        if (temp.isRead === true) continue
         temp.isRead = true
         await temp.save()
       }
@@ -385,29 +384,20 @@ module.exports = {
       }
     })
     if (user) {
-      const userVideos = await user.getVideos()
-      const userComments = await user.getComments()
-      let videoLikeSumNum = 0
-      let commentLikeSumNum = 0
-      for (let i = 0, len = userVideos.length; i < len; i++) {
-        let videoInfo = userVideos[i]
-        let videoLikeNum = await LikeInfo.findAndCount({
-          where: {
-            videoId: videoInfo.videoId
-          }
-        })
-        videoLikeSumNum += videoLikeNum.count
-      }
-      for (let i = 0, len = userComments.length; i < len; i++) {
-        let commentInfo = userComments[i]
-        let commentLikeNum = await LikeInfo.findAndCount({
-          where: {
-            commentId: commentInfo.commentId
-          }
-        })
-        commentLikeSumNum += commentLikeNum.count
-      }
-      ctx.rest(videoLikeSumNum + commentLikeSumNum)
+      let videoByLikeNum = await db.sequelize.query(`select count(*) as num from UserRegister
+      inner join VideoInfo
+      on UserRegister.userId = VideoInfo.userId
+      inner join LikeInfo
+      on VideoInfo.videoId = LikeInfo.videoId
+      where UserRegister.userId = '${userId}'`)
+      let commentByLikeNum = await db.sequelize.query(`select count(*) as num from UserRegister
+      inner join CommentInfo
+      on UserRegister.userId = CommentInfo.userId
+      inner join LikeInfo
+      on CommentInfo.commentId = LikeInfo.commentId
+      where UserRegister.userId = '${userId}'`)
+
+      ctx.rest(videoByLikeNum[0][0].num + commentByLikeNum[0][0].num)
     } else {
       throw new APIError('user:not_found', 'user not found by userId.')
     }
@@ -420,31 +410,20 @@ module.exports = {
       }
     })
     if (user) {
-      const userVideos = await user.getVideos()
-      const userComments = await user.getComments()
-      let videoLikeSumNum = 0
-      let commentLikeSumNum = 0
-      for (let i = 0, len = userVideos.length; i < len; i++) {
-        let videoInfo = userVideos[i]
-        let videoLikeNum = await LikeInfo.findAndCount({
-          where: {
-            videoId: videoInfo.videoId,
-            isRead: false
-          }
-        })
-        videoLikeSumNum += videoLikeNum.count
-      }
-      for (let i = 0, len = userComments.length; i < len; i++) {
-        let commentInfo = userComments[i]
-        let commentLikeNum = await LikeInfo.findAndCount({
-          where: {
-            commentId: commentInfo.commentId,
-            isRead: false
-          }
-        })
-        commentLikeSumNum += commentLikeNum.count
-      }
-      ctx.rest(videoLikeSumNum + commentLikeSumNum)
+      let videoByLikeUnreadNum = await db.sequelize.query(`select count(*) as num from UserRegister
+      inner join VideoInfo
+      on UserRegister.userId = VideoInfo.userId
+      inner join LikeInfo
+      on VideoInfo.videoId = LikeInfo.videoId
+      where UserRegister.userId = '${userId}' and LikeInfo.isRead = false`)
+      let commentByLikeUnreadNum = await db.sequelize.query(`select count(*) as num from UserRegister
+      inner join CommentInfo
+      on UserRegister.userId = CommentInfo.userId
+      inner join LikeInfo
+      on CommentInfo.commentId = LikeInfo.commentId
+      where UserRegister.userId = '${userId}' and LikeInfo.isRead = false`)
+
+      ctx.rest(videoByLikeUnreadNum[0][0].num + commentByLikeUnreadNum[0][0].num)
     } else {
       throw new APIError('user:not_found', 'user not found by userId.')
     }
@@ -452,81 +431,34 @@ module.exports = {
   'GET /api/user/:userId/byLike/page/:page': async (ctx, next) => {
     const userId = ctx.params.userId
     let page = ctx.params.page
-    if (page < 0 || !page) page = 1
+    if (page < 0 || isNaN(Number(page))) page = 1
     const user = await UserRegister.findOne({
       where: {
         'userId': userId
       }
     })
     if (user) {
-      let result = []
-      const userVideos = await user.getVideos({
-        limit: PER_PAGE_LIMIT_NUM,
-        offset: (page - 1) * PER_PAGE_LIMIT_NUM
-      })
-      const userComments = await user.getComments({
-        limit: PER_PAGE_LIMIT_NUM,
-        offset: (page - 1) * PER_PAGE_LIMIT_NUM
-      })
-      for (let i = 0, len = userVideos.length; i < len; i++) {
-        let videoInfo = userVideos[i]
-        let videoLikeList = await LikeInfo.findAll({
-          order: [
-            ['createdAt', 'DESC']
-          ],
-          where: {
-            videoId: videoInfo.videoId
-          }
-        })
-        for (let i = 0, len = videoLikeList.length; i < len; i++) {
-          let userInfo = await UserInfo.findOne({
-            where: {
-              'userId': videoLikeList[i].userId
-            }
-          })
-          let temp = {
-            videoInfo,
-            userInfo,
-            createdAt: videoLikeList[i].createdAt,
-            isRead: videoLikeList[i].isRead
-          }
-          if (videoLikeList[i].isRead === false) {
-            result = [temp].concat(result)
-          } else {
-            result.push(temp)
-          }
-        }
-      }
-      for (let i = 0, len = userComments.length; i < len; i++) {
-        let commentInfo = userComments[i]
-        let commentLikeList = await LikeInfo.findAll({
-          order: [
-            ['createdAt', 'DESC']
-          ],
-          where: {
-            commentId: commentInfo.commentId
-          }
-        })
-        for (let i = 0, len = commentLikeList.length; i < len; i++) {
-          let userInfo = await UserInfo.findOne({
-            where: {
-              'userId': commentLikeList[i].userId
-            }
-          })
-          let temp = {
-            commentInfo,
-            userInfo,
-            createdAt: commentLikeList[i].createdAt,
-            isRead: commentLikeList[i].isRead
-          }
-          if (commentLikeList[i].isRead === false) {
-            result = [temp].concat(result)
-          } else {
-            result.push(temp)
-          }
-        }
-      }
-      ctx.rest(result)
+      let videoByLikeList = await db.sequelize.query(`select VideoInfo.videoId,VideoInfo.videoCover,LikeInfo.userId,UserInfo.userAvatar,UserInfo.userNickname,LikeInfo.isRead,LikeInfo.createdAt from UserRegister
+      inner join VideoInfo
+      on UserRegister.userId = VideoInfo.userId
+      inner join LikeInfo
+      on VideoInfo.videoId = LikeInfo.videoId
+      inner join UserInfo
+      on LikeInfo.userId = UserInfo.userId
+      where UserRegister.userId = '${userId}'
+      order by LikeInfo.createdAt desc
+      limit ${PER_PAGE_LIMIT_NUM} offset ${(page - 1) * PER_PAGE_LIMIT_NUM}`)
+      let commentByLikeList = await db.sequelize.query(`select CommentInfo.commentId,CommentInfo.commentContent,LikeInfo.userId,UserInfo.userAvatar,UserInfo.userNickname,LikeInfo.isRead,LikeInfo.createdAt from UserRegister
+      inner join CommentInfo
+      on UserRegister.userId = CommentInfo.userId
+      inner join LikeInfo
+      on CommentInfo.commentId = LikeInfo.commentId
+      inner join UserInfo
+      on LikeInfo.userId = UserInfo.userId
+      where UserRegister.userId = '${userId}'
+      order by LikeInfo.createdAt desc
+      limit ${PER_PAGE_LIMIT_NUM} offset ${(page - 1) * PER_PAGE_LIMIT_NUM}`)
+      ctx.rest(videoByLikeList[0].concat(commentByLikeList[0]))
     } else {
       throw new APIError('user:not_found', 'user not found by userId.')
     }
@@ -539,37 +471,28 @@ module.exports = {
       }
     })
     if (user) {
-      const userVideos = await user.getVideos()
-      const userComments = await user.getComments()
-      for (let i = 0, len = userVideos.length; i < len; i++) {
-        let videoInfo = userVideos[i]
-        let videoLikeList = await LikeInfo.findAll({
-          where: {
-            videoId: videoInfo.videoId
-          }
-        })
-        for (let i = 0, len = videoLikeList.length; i < len; i++) {
-          let temp = videoLikeList[i]
-          if (temp.isRead === true) continue
-          temp.isRead = true
-          await temp.save()
-        }
-      }
-      for (let i = 0, len = userComments.length; i < len; i++) {
-        let commentInfo = userComments[i]
-        let commentLikeList = await LikeInfo.findAll({
-          where: {
-            commentId: commentInfo.commentId
-          }
-        })
-        for (let i = 0, len = commentLikeList.length; i < len; i++) {
-          let temp = commentLikeList[i]
-          if (temp.isRead === true) continue
-          temp.isRead = true
-          await temp.save()
-        }
-      }
-      ctx.rest('ok')
+      let readAllVideoByLikeRes = await db.sequelize.query(`update UserRegister
+      inner join VideoInfo
+      on UserRegister.userId = VideoInfo.userId
+      inner join LikeInfo
+      on VideoInfo.videoId = LikeInfo.videoId
+      inner join UserInfo
+      on LikeInfo.userId = UserInfo.userId
+      set LikeInfo.isRead = true
+      where UserRegister.userId = '${userId}'`)
+      let readAllCommentByLikeRes = await db.sequelize.query(`update UserRegister
+      inner join CommentInfo
+      on UserRegister.userId = CommentInfo.userId
+      inner join LikeInfo
+      on CommentInfo.commentId = LikeInfo.commentId
+      inner join UserInfo
+      on LikeInfo.userId = UserInfo.userId
+      set LikeInfo.isRead = true
+      where UserRegister.userId = '${userId}'`)
+      ctx.rest({
+        readAllVideoByLikeRes,
+        readAllCommentByLikeRes
+      })
     } else {
       throw new APIError('user:not_found', 'user not found by userId.')
     }
@@ -582,31 +505,21 @@ module.exports = {
       }
     })
     if (user) {
-      const userVideos = await user.getVideos()
-      const userComments = await user.getComments()
-      let videCommentSumNum = 0
-      let commentBycommentSumNum = 0
-      for (let i = 0, len = userVideos.length; i < len; i++) {
-        let videoInfo = userVideos[i]
-        let videoCommentNum = await CommentInfo.findAndCount({
-          where: {
-            videoId: videoInfo.videoId,
-            isRead: false
-          }
-        })
-        videCommentSumNum += videoCommentNum.count
-      }
-      for (let i = 0, len = userComments.length; i < len; i++) {
-        let commentInfo = userComments[i]
-        let commentBycommentNum = await CommentInfo.findAndCount({
-          where: {
-            commentReplyID: commentInfo.commentId,
-            isRead: false
-          }
-        })
-        commentBycommentSumNum += commentBycommentNum.count
-      }
-      ctx.rest(videCommentSumNum + commentBycommentSumNum)
+      let videoByCommentUnreadNum = await db.sequelize.query(`select count(*) as num from UserRegister
+      inner join VideoInfo
+      on UserRegister.userId = VideoInfo.userId
+      inner join CommentInfo
+      on VideoInfo.videoId = CommentInfo.videoId
+      where UserRegister.userId = '${userId}' and CommentInfo.isRead = false`)
+
+      let commentByCommentUnreadNum = await db.sequelize.query(`select count(*) as num from UserRegister
+      inner join CommentInfo as c1
+      on UserRegister.userId = c1.userId
+      inner join CommentInfo as c2
+      on c1.commentId = c2.commentReplyId
+      where UserRegister.userId = '${userId}' and c2.isRead = false`)
+
+      ctx.rest(videoByCommentUnreadNum[0][0].num + commentByCommentUnreadNum[0][0].num)
     } else {
       throw new APIError('user:not_found', 'user not found by userId.')
     }
@@ -614,79 +527,36 @@ module.exports = {
   'GET /api/user/:userId/byComment/page/:page': async (ctx, next) => {
     const userId = ctx.params.userId
     let page = ctx.params.page
-    if (page < 0 || !page) page = 1
+    if (page < 0 || isNaN(Number(page))) page = 1
     const user = await UserRegister.findOne({
       where: {
         'userId': userId
       }
     })
     if (user) {
-      let result = []
-      const userVideos = await user.getVideos({
-        limit: PER_PAGE_LIMIT_NUM,
-        offset: (page - 1) * PER_PAGE_LIMIT_NUM
-      })
-      const userComments = await user.getComments({
-        limit: PER_PAGE_LIMIT_NUM,
-        offset: (page - 1) * PER_PAGE_LIMIT_NUM
-      })
-      for (let i = 0, len = userVideos.length; i < len; i++) {
-        let videoInfo = userVideos[i]
-        let byCommentList = await CommentInfo.findAll({
-          order: [
-            ['createdAt', 'DESC']
-          ],
-          where: {
-            videoId: videoInfo.videoId
-          }
-        })
-        for (let i = 0, len = byCommentList.length; i < len; i++) {
-          let userInfo = await UserInfo.findOne({
-            where: {
-              'userId': byCommentList[i].userId
-            }
-          })
-          let temp = {
-            videoInfo,
-            userInfo,
-            byCommentInfo: byCommentList[i]
-          }
-          if (byCommentList[i].isRead === false) {
-            result = [temp].concat(result)
-          } else {
-            result.push(temp)
-          }
-        }
-      }
-      for (let i = 0, len = userComments.length; i < len; i++) {
-        let commentInfo = userComments[i]
-        let byCommentList = await CommentInfo.findAll({
-          order: [
-            ['createdAt', 'DESC']
-          ],
-          where: {
-            commentReplyID: commentInfo.commentId
-          }
-        })
-        for (let i = 0, len = byCommentList.length; i < len; i++) {
-          let userInfo = await UserInfo.findOne({
-            where: {
-              'userId': byCommentList[i].userId
-            }
-          })
-          let temp = {
-            commentInfo,
-            userInfo,
-            byCommentInfo: byCommentList[i]
-          }
-          if (byCommentList[i].isRead === false) {
-            result = [temp].concat(result)
-          } else {
-            result.push(temp)
-          }
-        }
-      }
-      ctx.rest(result)
+      let videoByCommentList = await db.sequelize.query(`select VideoInfo.videoId,VideoInfo.videoCover,CommentInfo.commentId,CommentInfo.commentContent,CommentInfo.isRead,CommentInfo.createdAt,UserInfo.userNickname,UserInfo.userAvatar  from UserRegister
+      inner join VideoInfo
+      on UserRegister.userId = VideoInfo.userId
+      inner join CommentInfo
+      on VideoInfo.videoId = CommentInfo.videoId
+      inner join UserInfo
+      on CommentInfo.userId = UserInfo.userId
+      where UserRegister.userId = '${userId}'
+      order by CommentInfo.createdAt
+      limit ${PER_PAGE_LIMIT_NUM} offset ${(page - 1) * PER_PAGE_LIMIT_NUM}`)
+      let commentByCommentList = await db.sequelize.query(`select VideoInfo.videoId,VideoInfo.videoCover,c2.commentId,c2.commentContent,c2.isRead,c2.createdAt,UserInfo.userNickname,UserInfo.userAvatar  from UserRegister
+      inner join CommentInfo as c1
+      on UserRegister.userId = c1.userId
+      inner join CommentInfo as c2
+      on c1.commentId = c2.commentReplyId
+      inner join VideoInfo
+      on c2.videoId = VideoInfo.videoId
+      inner join UserInfo
+      on c2.userId = UserInfo.userId
+      where UserRegister.userId = '${userId}'
+      order by c2.createdAt
+      limit ${PER_PAGE_LIMIT_NUM} offset ${(page - 1) * PER_PAGE_LIMIT_NUM}`)
+      ctx.rest(videoByCommentList[0].concat(commentByCommentList[0]))
     } else {
       throw new APIError('user:not_found', 'user not found by userId.')
     }
@@ -699,36 +569,20 @@ module.exports = {
       }
     })
     if (user) {
-      const userVideos = await user.getVideos()
-      const userComments = await user.getComments()
-      for (let i = 0, len = userVideos.length; i < len; i++) {
-        let videoInfo = userVideos[i]
-        let videoByCommentList = await CommentInfo.findAll({
-          where: {
-            videoId: videoInfo.videoId
-          }
-        })
-        for (let i = 0, len = videoByCommentList.length; i < len; i++) {
-          let temp = videoByCommentList[i]
-          if (temp.isRead === true) continue
-          temp.isRead = true
-          await temp.save()
-        }
-      }
-      for (let i = 0, len = userComments.length; i < len; i++) {
-        let commentInfo = userComments[i]
-        let commentByCommentList = await CommentInfo.findAll({
-          where: {
-            commentReplyID: commentInfo.commentId
-          }
-        })
-        for (let i = 0, len = commentByCommentList.length; i < len; i++) {
-          let temp = commentByCommentList[i]
-          if (temp.isRead === true) continue
-          temp.isRead = true
-          await temp.save()
-        }
-      }
+      await db.sequelize.query(`update UserRegister
+      inner join VideoInfo
+      on UserRegister.userId = VideoInfo.userId
+      inner join CommentInfo
+      on VideoInfo.videoId = CommentInfo.videoId
+      set CommentInfo.isRead = true
+      where UserRegister.userId = '${userId}'`)
+      await db.sequelize.query(`update UserRegister
+      inner join CommentInfo as c1
+      on UserRegister.userId = c1.userId
+      inner join CommentInfo as c2
+      on c1.commentId = c2.commentReplyId
+      set c2.isRead = true
+      where UserRegister.userId = '${userId}'`)
       ctx.rest('ok')
     } else {
       throw new APIError('user:not_found', 'user not found by userId.')
@@ -737,7 +591,7 @@ module.exports = {
   'GET /api/user/:userId/Likes/page/:page': async (ctx, next) => {
     const userId = ctx.params.userId
     let page = ctx.params.page
-    if (page < 0 || !page) page = 1
+    if (page < 0 || isNaN(Number(page))) page = 1
     const user = await UserRegister.findOne({
       where: {
         'userId': userId
@@ -780,7 +634,7 @@ module.exports = {
   'GET /api/user/:userId/Videos/page/:page': async (ctx, next) => {
     const userId = ctx.params.userId
     let page = ctx.params.page
-    if (page < 0 || !page) page = 1
+    if (page < 0 || isNaN(Number(page))) page = 1
     const user = await UserRegister.findOne({
       where: {
         'userId': userId

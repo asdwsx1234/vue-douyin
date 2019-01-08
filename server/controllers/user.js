@@ -19,6 +19,7 @@ const KEY_SHARE_NUM = 'videoShareNum'
 const KEY_LIKE_NUM = 'videoLikeNum'
 const KEY_COMMENT_NUM = 'videoCommentNum'
 const KEY_COMMENT_LIKE_NUM = 'commmentLikeNum'
+
 const PER_PAGE_LIMIT_NUM = 21
 
 const regEmail = /^([a-zA-Z0-9]+[_|.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/
@@ -622,21 +623,24 @@ module.exports = {
       }
     })
     if (user) {
-      const VideoList = await user.getVideos({
-        limit: PER_PAGE_LIMIT_NUM,
-        offset: (page - 1) * PER_PAGE_LIMIT_NUM
-      })
-      const userInfo = await user.getUserInfo()
-      let res = []
+      let result = []
+      let res = await db.sequelize.query(`select UserRegister.userId,UserInfo.userAvatar,UserInfo.userNickname,VideoInfo.videoId,VideoInfo.videoCover,VideoInfo.videoPath,VideoInfo.videoDesc,VideoInfo.createdAt from UserRegister
+      inner join VideoInfo
+      on UserRegister.userId = VideoInfo.userId
+      inner join UserInfo
+      on UserRegister.userId = UserInfo.userId
+      where UserRegister.userId = '${userId}'
+      order by VideoInfo.createdAt
+      limit ${PER_PAGE_LIMIT_NUM} offset ${(page - 1) * PER_PAGE_LIMIT_NUM}`)
+      let VideoList = res[0]
       for (let i = 0, len = VideoList.length; i < len; i++) {
         let video = VideoList[i]
         let shareNum = await redisClient.zscore(KEY_SHARE_NUM, video.videoId)
         let watchNum = await redisClient.zscore(KEY_WATCH_NUM, video.videoId)
         let commentNum = await redisClient.zscore(KEY_COMMENT_NUM, video.videoId)
         let likeNum = await redisClient.zscore(KEY_LIKE_NUM, video.videoId)
-        res.push({
-          videoInfo: video,
-          userInfo,
+        result.push({
+          Video: video,
           WSLCNum: {
             shareNum,
             watchNum,
@@ -645,7 +649,7 @@ module.exports = {
           }
         })
       }
-      ctx.rest(res)
+      ctx.rest(result)
     } else {
       throw new APIError('user:not_found', 'user not found by userId.')
     }

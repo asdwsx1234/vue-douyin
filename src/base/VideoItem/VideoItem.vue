@@ -1,6 +1,6 @@
 <template>
   <div>
-    <img class="cover" :src="item.videoInfo.videoCover" alt="">
+    <img class="cover" :src="item.Video.videoCover" alt="">
     <div class="desc">
         <div v-if="item.type == 1">
           <i class="icon iconfont icon-delete"></i>本地草稿箱

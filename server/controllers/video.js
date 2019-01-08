@@ -1,15 +1,15 @@
 const APIError = require('../rest').APIError
 const VideoInfo = require('../models/VideoInfo')
-const CommentInfo = require('../models/CommentInfo')
-const UserInfo = require('../models/UserInfo')
 const redisClient = require('../redis')
+const db = require('../db')
 
 const KEY_WATCH_NUM = 'videoWatchNum'
 const KEY_SHARE_NUM = 'videoShareNum'
 const KEY_LIKE_NUM = 'videoLikeNum'
 const KEY_COMMENT_NUM = 'videoCommentNum'
-const VIDEO_NUM = 30
 const KEY_COMMENT_LIKE_NUM = 'commmentLikeNum'
+
+const VIDEO_NUM = 30
 const PER_PAGE_LIMIT_NUM = 20
 const TOP_LIKE_COMMENT_NUM = 3
 module.exports = {
@@ -28,20 +28,18 @@ module.exports = {
       }
       summary = []
       for (let videoId of VideoSetId) {
-        let videoInfo = await VideoInfo.findOne({
-          where: {
-            videoId
-          }
-        })
-        let ur = await videoInfo.getUserRegister()
-        let userInfo = await ur.getUserInfo()
+        let res = await db.sequelize.query(`select VideoInfo.userId,UserInfo.userAvatar,UserInfo.userNickname,VideoInfo.videoId,VideoInfo.videoCover,VideoInfo.videoDesc,VideoInfo.videoPath from VideoInfo
+        inner join UserInfo
+        on VideoInfo.userId = UserInfo.userId
+        where VideoInfo.videoId = '${videoId}'
+        `)
+        let Video = res[0][0]
         let shareNum = await redisClient.zscore(KEY_SHARE_NUM, videoId)
         let watchNum = await redisClient.zscore(KEY_WATCH_NUM, videoId)
         let commentNum = await redisClient.zscore(KEY_COMMENT_NUM, videoId)
         let likeNum = await redisClient.zscore(KEY_LIKE_NUM, videoId)
         await redisClient.sadd(key, JSON.stringify({
-          videoInfo,
-          userInfo,
+          Video,
           WSLCNum: {
             shareNum,
             watchNum,
@@ -114,7 +112,7 @@ module.exports = {
   'GET /api/video/:videoId/getVideoComment/page/:page': async (ctx, next) => {
     const videoId = ctx.params.videoId
     let page = ctx.params.page
-    if (page < 0 || !page) page = 1
+    if (page < 0 || isNaN(Number(page))) page = 1
     let vi = await VideoInfo.findOne({
       where: {
         videoId
@@ -125,62 +123,99 @@ module.exports = {
       if (Number(page) === 1) {
         let topCommentId = await redisClient.zrevrange(`${KEY_COMMENT_LIKE_NUM}:${vi.videoId}`, 0, TOP_LIKE_COMMENT_NUM - 1)
         for (let i = 0, len = topCommentId.length; i < len; i++) {
-          let topComment = await CommentInfo.findOne({
-            where: {
-              commentId: topCommentId[i]
-            }
-          })
-          let userInfo = await UserInfo.findOne({
-            where: {
-              userId: topComment.userId
-            }
-          })
+          let res = await db.sequelize.query(`select CommentInfo.commentId,CommentInfo.commentContent,CommentInfo.commentReplyID,CommentInfo.createdAt,UserInfo.userId,UserInfo.userNickname,UserInfo.userAvatar from CommentInfo
+          inner join UserInfo
+          on CommentInfo.userId = UserInfo.userId
+          where CommentInfo.commentId = '${topCommentId[i]}'`)
+          let comment = res[0][0]
+          let replyComment
           let likeNum = await redisClient.zscore(`${KEY_COMMENT_LIKE_NUM}:${vi.videoId}`, topCommentId[i])
-          result.push({
-            Comment: topComment,
-            likeNum,
-            userInfo
-          })
+          if (comment.commentReplyID !== '') {
+            let res = await db.sequelize.query(`select CommentInfo.commentId,CommentInfo.commentContent,CommentInfo.commentReplyID,CommentInfo.createdAt,UserInfo.userId,UserInfo.userNickname,UserInfo.userAvatar from CommentInfo
+            inner join UserInfo
+            on CommentInfo.userId = UserInfo.userId
+            where CommentInfo.commentId = '${comment.commentReplyID}'`)
+            replyComment = res[0][0]
+          }
+          if (typeof replyComment === 'undefined') {
+            result.push({
+              Comment: comment,
+              likeNum
+            })
+          } else {
+            result.push({
+              Comment: comment,
+              replyComment,
+              likeNum
+            })
+          }
         }
-        const commentInfolist = await vi.getCommentInfos({
-          order: [
-            ['createdAt', 'DESC']
-          ],
-          limit: PER_PAGE_LIMIT_NUM - TOP_LIKE_COMMENT_NUM
-        })
+        let res1 = await db.sequelize.query(`select CommentInfo.commentId,CommentInfo.commentContent,CommentInfo.commentReplyID,CommentInfo.createdAt,UserInfo.userId,UserInfo.userNickname,UserInfo.userAvatar from VideoInfo
+        inner join CommentInfo
+        on VideoInfo.videoId = CommentInfo.videoId
+        inner join UserInfo
+        on CommentInfo.userId = UserInfo.userId
+        where VideoInfo.videoId = '${videoId}'
+        order by CommentInfo.createdAt desc
+        limit ${PER_PAGE_LIMIT_NUM - TOP_LIKE_COMMENT_NUM}`)
+        const commentInfolist = res1[0]
         for (let i = 0, len = commentInfolist.length; i < len; i++) {
-          let likeNum = await redisClient.zscore(`${KEY_COMMENT_LIKE_NUM}:${vi.videoId}`, commentInfolist[i].commentId)
-          let userInfo = await UserInfo.findOne({
-            where: {
-              userId: commentInfolist[i].userId
-            }
-          })
-          result.push({
-            Comment: commentInfolist[i],
-            likeNum,
-            userInfo
-          })
+          let comment = commentInfolist[i]
+          let replyComment
+          let likeNum = await redisClient.zscore(`${KEY_COMMENT_LIKE_NUM}:${vi.videoId}`, comment.commentId)
+          if (comment.commentReplyID !== '') {
+            let res = await db.sequelize.query(`select CommentInfo.commentId,CommentInfo.commentContent,CommentInfo.commentReplyID,CommentInfo.createdAt,UserInfo.userId,UserInfo.userNickname,UserInfo.userAvatar from CommentInfo
+            inner join UserInfo
+            on CommentInfo.userId = UserInfo.userId
+            where CommentInfo.commentId = '${comment.commentReplyID}'`)
+            replyComment = res[0][0]
+          }
+          if (typeof replyComment === 'undefined') {
+            result.push({
+              Comment: comment,
+              likeNum
+            })
+          } else {
+            result.push({
+              Comment: comment,
+              replyComment,
+              likeNum
+            })
+          }
         }
       } else {
-        const commentInfolist = await vi.getCommentInfos({
-          order: [
-            ['createdAt', 'DESC']
-          ],
-          limit: PER_PAGE_LIMIT_NUM,
-          offset: PER_PAGE_LIMIT_NUM * (page - 1)
-        })
+        let res = await db.sequelize.query(`select CommentInfo.commentId,CommentInfo.commentContent,CommentInfo.commentReplyID,CommentInfo.createdAt,UserInfo.userId,UserInfo.userNickname,UserInfo.userAvatar from VideoInfo
+        inner join CommentInfo
+        on VideoInfo.videoId = CommentInfo.videoId
+        inner join UserInfo
+        on CommentInfo.userId = UserInfo.userId
+        where VideoInfo.videoId = '${videoId}'
+        order by CommentInfo.createdAt desc
+        limit ${PER_PAGE_LIMIT_NUM - TOP_LIKE_COMMENT_NUM} offset ${PER_PAGE_LIMIT_NUM * (page - 1)}`)
+        const commentInfolist = res[0]
         for (let i = 0, len = commentInfolist.length; i < len; i++) {
-          let likeNum = await redisClient.zscore(`${KEY_COMMENT_LIKE_NUM}:${vi.videoId}`, commentInfolist[i].commentId)
-          let userInfo = await UserInfo.findOne({
-            where: {
-              userId: commentInfolist[i].userId
-            }
-          })
-          result.push({
-            Comment: commentInfolist[i],
-            likeNum,
-            userInfo
-          })
+          let comment = commentInfolist[i]
+          let replyComment
+          let likeNum = await redisClient.zscore(`${KEY_COMMENT_LIKE_NUM}:${vi.videoId}`, comment.commentId)
+          if (comment.commentReplyID !== '') {
+            let res = await db.sequelize.query(`select CommentInfo.commentId,CommentInfo.commentContent,CommentInfo.commentReplyID,CommentInfo.createdAt,UserInfo.userId,UserInfo.userNickname,UserInfo.userAvatar from CommentInfo
+            inner join UserInfo
+            on CommentInfo.userId = UserInfo.userId
+            where CommentInfo.commentId = '${comment.commentReplyID}'`)
+            replyComment = res[0][0]
+          }
+          if (typeof replyComment === 'undefined') {
+            result.push({
+              Comment: comment,
+              likeNum
+            })
+          } else {
+            result.push({
+              Comment: comment,
+              replyComment,
+              likeNum
+            })
+          }
         }
       }
       ctx.rest(result)

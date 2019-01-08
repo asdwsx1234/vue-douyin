@@ -1,15 +1,15 @@
 <template>
 <div class="followed-list">
-  <div class="followed-item" v-for="(item, index) in list" :key="item.videoInfo.videoId">
+  <div class="followed-item" v-for="(item, index) in list" :key="item.Video.videoId">
     <div class="top">
-      <img class="avatar" :src="`${baseURL}${item.userInfo.userAvatar}`" alt="" width="30" height="30"
-        @click="chooseUser(item.userInfo.userId)"> <span class="name">@{{item.userInfo.userNickname}}</span>
+      <img class="avatar" :src="`${baseURL}${item.Video.userAvatar}`" alt="" width="30" height="30"
+        @click="chooseUser(item.Video.userId)"> <span class="name">@{{item.Video.userNickname}}</span>
     </div>
-    <div class="desc">{{item.videoInfo.videoDesc}}</div>
+    <div class="desc">{{item.Video.videoDesc}}</div>
     <div class="video-wrap">
       <video class="video"
-        :poster="item.videoInfo.videoCover"
-        :src="item.videoInfo.videoPath"
+        :poster="item.Video.videoCover"
+        :src="item.Video.videoPath"
         webkit-playsinline
         playsinline
         x5-video-player-type="h5"
@@ -19,14 +19,14 @@
       <div class="like iconfont icon-heart-fill" :class="{ 'red-heart': likes[index] }" @click="toggleLike(item, index)">
         <span class="likenum">{{item.WSLCNum.likeNum}}</span>
       </div>
-      <div class="comment iconfont icon-message" @click.stop="showCommentList(item.videoInfo.videoId, item.WSLCNum.commentNum)">
+      <div class="comment iconfont icon-message" @click.stop="showCommentList(item.Video.videoId, item.WSLCNum.commentNum)">
         <span class="commentnum">{{item.WSLCNum.commentNum}}</span>
       </div>
       <div class="share iconfont icon-share">
         <span class="sharenum">{{item.WSLCNum.shareNum}}</span>
       </div>
     </div>
-    <div class="time">{{formatTime(item.videoInfo.createdAt)}}</div>
+    <div class="time">{{formatTime(item.Video.createdAt)}}</div>
   </div>
   <no-more class="no-more"></no-more>
 </div>
@@ -46,7 +46,7 @@ export default {
   },
   created () {
     for (let i = 0, len = this.list.length; i < len; i++) {
-      this.$axios.get(`/api/user/${this.loginInfo.userId}/isLiked/${this.list[i].videoInfo.videoId}`).then((res) => {
+      this.$axios.get(`/api/user/${this.loginInfo.userId}/isLiked/${this.list[i].Video.videoId}`).then((res) => {
         this.likes[i] = res.data.data
         if (i === len - 1) {
           this.$forceUpdate()
@@ -57,7 +57,7 @@ export default {
   watch: {
     list (newVal, oldVal) {
       for (let i = oldVal.length, len = newVal.length; i < len; i++) {
-        this.$axios.get(`/api/user/${this.loginInfo.userId}/isLiked/${this.list[i].videoInfo.videoId}`).then((res) => {
+        this.$axios.get(`/api/user/${this.loginInfo.userId}/isLiked/${this.list[i].Video.videoId}`).then((res) => {
           this.likes[i] = res.data.data
           if (i === len - 1) {
             this.$forceUpdate()
@@ -86,7 +86,7 @@ export default {
       v.paused ? v.play() : v.pause()
     },
     toggleLike (item, index) {
-      this.$axios.get(`/api/user/${this.loginInfo.userId}/triggerLike/${item.videoInfo.videoId}`).then((res) => {
+      this.$axios.get(`/api/user/${this.loginInfo.userId}/triggerLike/${item.Video.videoId}`).then((res) => {
         if (res.data.data.includes('取消')) {
           this.likes[index] = false
           item.WSLCNum.likeNum--
@@ -97,7 +97,7 @@ export default {
         this.likes = [].concat(this.likes)
         this.$socket.emit('sendTriggerLike', {
           fromUserId: this.loginInfo.userId,
-          toUserId: item.videoInfo.userId
+          toUserId: item.Video.userId
         })
       })
     },

@@ -2,11 +2,11 @@
 <div>
   <tip ref="tip"></tip>
   <my-list :Title="title" @scrollToEnd="scrollToEnd">
-    <li v-for="item in list" :key="item.userinfo.id" class="list-item" @click="chooseUser($event, item.userinfo.userId)">
-      <img :src="`${baseURL}${item.userinfo.userAvatar}`" width="45" height="45" alt="" class="avatar">
+    <li v-for="item in list" :key="item.userId" class="list-item" @click="chooseUser($event, item.userId)">
+      <img :src="`${baseURL}${item.userAvatar}`" width="45" height="45" alt="" class="avatar">
       <div class="main">
-        <p class="name">{{item.userinfo.userNickname}}</p>
-        <p class="desc">{{item.userinfo.userDesc}}</p>
+        <p class="name">{{item.userNickname}}</p>
+        <p class="desc">{{item.userDesc}}</p>
       </div>
       <div class="btn" :class="{'btn-inactive': item.bothStatus}" @click="triggerFollow(item)" v-html="item.bothStatus? '互相关注': '关注'"></div>
     </li>
@@ -57,7 +57,7 @@ export default {
     triggerFollow (item) {
       if (this.timer) return
       this.timer = setTimeout(() => {
-        this.$axios.get(`/api/user/${this.loginInfo.userId}/triggerFollow/${item.userinfo.userId}`).then(res => {
+        this.$axios.get(`/api/user/${this.loginInfo.userId}/triggerFollow/${item.userId}`).then(res => {
           item.bothStatus = !item.bothStatus
           item.bothStatus ? this.$refs.tip.show('关注成功') : this.$refs.tip.show('取关成功')
           this.timer = null

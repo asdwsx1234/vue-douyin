@@ -5,7 +5,7 @@
       :style="VideoItemHeightStyle"
       class="video-item"
       v-for="(item, index) in list"
-      :key="item.videoInfo.videoId"
+      :key="item.Video.videoId"
       :item="item"></video-item>
   </div>
 </template>

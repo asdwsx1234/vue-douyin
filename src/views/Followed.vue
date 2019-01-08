@@ -26,18 +26,14 @@ import { mapGetters } from 'vuex'
 import { deduplicateCommentList } from 'common/js/util'
 export default {
   created () {
-    let userId = this.loginInfo.userId
-    this.$axios.get(`/api/user/${userId}/FollowerVideo`).then((r) => {
-      this.list = r.data.data
-      this.$refs.listWrap.refresh()
-      this.isLoading = false
-    })
+    this.fetchVideoList()
   },
   data () {
     return {
       showCommentList: false,
       commentNum: 0,
       commentList: [],
+      videoPage: 0,
       page: 0,
       currentCommentVideoId: '',
       isEnd: false,
@@ -57,7 +53,7 @@ export default {
         this.currentCommentVideoId = videoId
         this.commentNum = commentNum
         this.$axios.get(`/api/video/${videoId}/getVideoComment/page/${this.page}`).then((res) => {
-          if (res.data.data.length < 20) {
+          if (res.data.data.length < 21) {
             this.isEnd = true
           }
           this.commentList = deduplicateCommentList(res.data.data)
@@ -67,13 +63,25 @@ export default {
         this.page++
         if (this.isEnd) return
         this.$axios.get(`/api/video/${videoId}/getVideoComment/page/${this.page}`).then((res) => {
-          if (res.data.data.length < 20) {
+          if (res.data.data.length < 21) {
             this.isEnd = true
           }
           this.commentList = deduplicateCommentList(this.commentList.concat(res.data.data))
           this.showCommentList = true
         })
       }
+    },
+    fetchVideoList () {
+      if (this.videoIsEnd) return
+      let userId = this.loginInfo.userId
+      this.videoPage++
+      this.$axios.get(`/api/user/${userId}/FollowerVideo/page/${this.videoPage}`).then((r) => {
+        if (r.data.data.length < 21) {
+            this.videoIsEnd = true
+        }
+        this.list = this.list.concat(r.data.data)
+        this.$refs.listWrap.refresh()
+      })
     },
     closeCommentList (e) {
       if (this.showCommentList && (e.target.nodeName === 'VIDEO' || e.target.className.includes('icon-close') || e.target.className.includes('followed-item'))) {

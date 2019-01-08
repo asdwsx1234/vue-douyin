@@ -2,11 +2,11 @@
 <div>
   <tip ref="tip"></tip>
   <my-list :Title="title" @scrollToEnd="scrollToEnd">
-    <li v-for="item in list" :key="item.userinfo.id" class="list-item" @click="chooseUser($event, item.userinfo.userId)">
-      <img :src="`${baseURL}${item.userinfo.userAvatar}`" width="45" height="45" alt="" class="avatar">
+    <li v-for="item in list" :key="item.userId" class="list-item" @click="chooseUser($event, item.userId)">
+      <img :src="`${baseURL}${item.userAvatar}`" width="45" height="45" alt="" class="avatar">
       <div class="main">
-        <p class="name">{{item.userinfo.userNickname}}</p>
-        <p class="desc">{{item.userinfo.userDesc}}</p>
+        <p class="name">{{item.userNickname}}</p>
+        <p class="desc">{{item.userDesc}}</p>
       </div>
       <div class="btn btn-inactive" @click="triggerFollow($event.target, item)" v-html="item.bothStatus? '互相关注': '已关注'"></div>
     </li>
@@ -58,7 +58,7 @@ export default {
     triggerFollow (target, item) {
       if (this.timer) return
       this.timer = setTimeout(() => {
-        this.$axios.get(`/api/user/${this.loginInfo.userId}/triggerFollow/${item.userinfo.userId}`).then(res => {
+        this.$axios.get(`/api/user/${this.loginInfo.userId}/triggerFollow/${item.userId}`).then(res => {
           if (res.data.data.includes('取消')) {
             addClass(target, 'btn-active')
             target.innerText = '关注'
@@ -70,7 +70,7 @@ export default {
           }
           this.$socket.emit('sendTriggerFollow', {
             fromUserId: this.loginInfo.userId,
-            toUserId: item.userinfo.userId
+            toUserId: item.userId
           })
           this.timer = null
         }).catch(e => {

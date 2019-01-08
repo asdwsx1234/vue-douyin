@@ -2,14 +2,14 @@
 <div>
   <my-list Title="评论" @scrollToEnd="scrollToEnd">
     <li v-for="(item, index) in list" :key="index" class="list-item">
-      <span v-if="!item.byCommentInfo.isRead" class="point"></span>
-      <img :src="`${baseURL}${item.userInfo.userAvatar}`" width="45" height="45" alt="" class="avatar">
+      <span v-if="!item.isRead" class="point"></span>
+      <img :src="`${baseURL}${item.userAvatar}`" width="45" height="45" alt="" class="avatar">
       <div class="main">
-        <p class="name">@{{item.userInfo.userNickname}}</p>
-        <p class="name">{{item.byCommentInfo.commentContent}}</p>
-        <p class="desc">评论了你的作品 {{formatTime(item.byCommentInfo.createdAt)}}</p>
+        <p class="name">@{{item.userNickname}}</p>
+        <p class="name">{{item.commentContent}}</p>
+        <p class="desc">评论了你的作品 {{formatTime(item.createdAt)}}</p>
       </div>
-      <img class="cover" v-if="item.videoInfo" :src="item.videoInfo.videoCover" alt="" width="60" height="60">
+      <img class="cover" v-if="item.videoCover" :src="item.videoCover" alt="" width="60" height="60">
     </li>
     <div v-if="!list.length" class="tip-wrap">
       <p>您还没有作品被评论哦</p>

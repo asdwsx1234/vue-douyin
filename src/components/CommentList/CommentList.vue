@@ -12,9 +12,9 @@
       @scrollToEnd="scrollToEnd">
       <div>
         <div class="comment-item" v-for="(item, index) in acommentList" :key="index">
-          <img class="avatar" :src="`${baseURL}${item.userInfo.userAvatar}`" alt="" width="40" height="40">
+          <img class="avatar" :src="`${baseURL}${item.Comment.userAvatar}`" alt="" width="40" height="40">
           <div class="main">
-            <p class="name">@{{item.userInfo.userNickname}}</p>
+            <p class="name">@{{item.Comment.userNickname}}</p>
             <p class="content">{{item.Comment.commentContent}}</p>
             <p class="time">{{formatTime(item.Comment.createdAt)}}</p>
           </div>
@@ -67,6 +67,7 @@ export default {
   },
   watch: {
     commentList (newVal, oldVal) {
+      this.acommentList = newVal
       for (let i = oldVal.length, len = newVal.length; i < len; i++) {
         this.$axios.get(`/api/user/${this.loginInfo.userId}/isLikedComment/${this.commentList[i].Comment.commentId}`).then((res) => {
           this.likes[i] = res.data.data
@@ -89,11 +90,6 @@ export default {
     ...mapGetters([
       'loginInfo'
     ])
-  },
-  watch: {
-    commentList (newVal) {
-      this.acommentList = newVal
-    }
   },
   methods: {
     close (e) {

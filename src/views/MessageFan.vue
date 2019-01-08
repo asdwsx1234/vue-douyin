@@ -4,9 +4,9 @@
   <my-list Title="粉丝" @scrollToEnd="scrollToEnd">
     <li v-for="item in list" :key="item.id" class="list-item">
       <span v-if="!item.isRead" class="point"></span>
-      <img :src="`${baseURL}${item.userinfo.userAvatar}`" width="45" height="45" alt="" class="avatar">
+      <img :src="`${baseURL}${item.userAvatar}`" width="45" height="45" alt="" class="avatar">
       <div class="main">
-        <p class="name">{{item.userinfo.userNickname}}</p>
+        <p class="name">{{item.userNickname}}</p>
         <p class="name">关注了你</p>
         <p class="desc">{{formatTime(item.createdAt)}}</p>
       </div>
@@ -65,13 +65,13 @@ export default {
     triggerFollow (item) {
       if (this.timer) return
       this.timer = setTimeout(() => {
-        this.$axios.get(`/api/user/${this.loginInfo.userId}/triggerFollow/${item.userinfo.userId}`).then(res => {
+        this.$axios.get(`/api/user/${this.loginInfo.userId}/triggerFollow/${item.userId}`).then(res => {
           item.bothStatus = !item.bothStatus
           item.bothStatus ? this.$refs.tip.show('关注成功') : this.$refs.tip.show('取关成功')
           this.timer = null
           this.$socket.emit('sendTriggerFollow', {
             fromUserId: this.loginInfo.userId,
-            toUserId: item.userinfo.userId
+            toUserId: item.userId
           })
         }).catch(e => {
           this.$refs.tip.show('网络错误')

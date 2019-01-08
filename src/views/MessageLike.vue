@@ -3,14 +3,14 @@
   <my-list Title="赞" @scrollToEnd="scrollToEnd">
     <li v-for="(item, index) in list" :key="index" class="list-item">
       <span v-if="!item.isRead" class="point"></span>
-      <img :src="`${baseURL}${item.userInfo.userAvatar}`" width="45" height="45" alt="" class="avatar">
+      <img :src="`${baseURL}${item.userAvatar}`" width="45" height="45" alt="" class="avatar">
       <div class="main">
-        <p class="name">@{{item.userInfo.userNickname}}</p>
-        <p class="name">赞了你的{{ item.videoInfo ? '作品' : '评论' }}</p>
+        <p class="name">@{{item.userNickname}}</p>
+        <p class="name">赞了你的{{ item.videoId ? '作品' : '评论' }}</p>
         <p class="desc">{{formatTime(item.createdAt)}}</p>
       </div>
-      <img class="cover" v-if="item.videoInfo" :src="item.videoInfo.videoCover" alt="" width="60" height="60">
-      <p v-else>{{item.commentInfo.commentContent}}</p>
+      <img class="cover" v-if="item.videoCover" :src="item.videoCover" alt="" width="60" height="60">
+      <p v-else>{{item.commentContent}}</p>
     </li>
     <div v-if="!list.length" class="tip-wrap">
       <p>您还没有被赞哦</p>

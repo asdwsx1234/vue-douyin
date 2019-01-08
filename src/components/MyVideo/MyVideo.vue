@@ -1,7 +1,7 @@
 <template>
   <div class="my-video">
-    <video class="video" :src="VideoItem.videoInfo.videoPath"
-      :poster="VideoItem.videoInfo.videoCover"
+    <video class="video" :src="VideoItem.Video.videoPath"
+      :poster="VideoItem.Video.videoCover"
       webkit-playsinline
       playsinline
       x5-video-player-type="h5"
@@ -10,14 +10,14 @@
       ref="video"></video>
     <div class="side-bar">
       <div class="avatar">
-        <img :src="`${baseURL}${VideoItem.userInfo.userAvatar}`" alt="" width="40" height="40"
+        <img :src="`${baseURL}${VideoItem.Video.userAvatar}`" alt="" width="40" height="40"
           @click="chooseUser">
         <div class="follow">+</div>
       </div>
-      <div class="like iconfont icon-heart-fill" :class="{ 'red-heart': like }" @click="toggleLike(VideoItem.videoInfo.videoId)">
+      <div class="like iconfont icon-heart-fill" :class="{ 'red-heart': like }" @click="toggleLike(VideoItem.Video.videoId)">
         <span class="likenum">{{likeNum}}</span>
       </div>
-      <div class="comment iconfont icon-message" @click.stop="showCommentList(VideoItem.videoInfo.videoId, VideoItem.WSLCNum.commentNum)">
+      <div class="comment iconfont icon-message" @click.stop="showCommentList(VideoItem.Video.videoId, VideoItem.WSLCNum.commentNum)">
         <span class="commentnum">{{VideoItem.WSLCNum.commentNum}}</span>
       </div>
       <div class="share iconfont icon-share">
@@ -25,8 +25,8 @@
       </div>
     </div>
     <div class="text-wrap">
-      <div class="name">@{{VideoItem.userInfo.userNickname}}</div>
-      <div class="desc">{{VideoItem.videoInfo.videoDesc}}</div>
+      <div class="name">@{{VideoItem.Video.userNickname}}</div>
+      <div class="desc">{{VideoItem.Video.videoDesc}}</div>
     </div>
     <div class="input-bar" v-show="!isHome">
       <input class="input" placeholder="  有爱评论，说点儿好听的~" type="text">
@@ -48,7 +48,7 @@ export default {
   },
   created () {
     if (this.isLogged) {
-      this.$axios.get(`/api/user/${this.loginInfo.userId}/isLiked/${this.VideoItem.videoInfo.videoId}`).then(res => {
+      this.$axios.get(`/api/user/${this.loginInfo.userId}/isLiked/${this.VideoItem.Video.videoId}`).then(res => {
         this.like = res.data.data
       })
     }
@@ -79,7 +79,7 @@ export default {
     },
     toggleLike (videoId) {
       if (this.isLogged) {
-        this.$axios.get(`/api/user/${this.loginInfo.userId}/triggerLike/${this.VideoItem.videoInfo.videoId}`).then(res => {
+        this.$axios.get(`/api/user/${this.loginInfo.userId}/triggerLike/${this.VideoItem.Video.videoId}`).then(res => {
           if (res.data.data.includes('取消')) {
             this.like = false
             this.likeNum--
@@ -89,13 +89,13 @@ export default {
           }
           this.$socket.emit('sendTriggerLike', {
             fromUserId: this.loginInfo.userId,
-            toUserId: this.VideoItem.userInfo.userId
+            toUserId: this.VideoItem.Video.userId
           })
         })
       }
     },
     chooseUser () {
-      this.$router.push(`/profile/${this.VideoItem.videoInfo.userId}`)
+      this.$router.push(`/profile/${this.VideoItem.Video.userId}`)
     }
   },
   components: {

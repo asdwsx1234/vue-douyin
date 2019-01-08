@@ -214,25 +214,15 @@ module.exports = {
       }
     })
     if (user) {
-      const fansList = await user.getFans({
-        order: [
-          ['createdAt', 'DESC']
-        ],
-        limit: PER_PAGE_LIMIT_NUM,
-        offset: (page - 1) * PER_PAGE_LIMIT_NUM
-      })
-      let UserinfoList = []
-      for (let i = 0, len = fansList.length; i < len; i++) {
-        let temp = fansList[i]
-        let userinfo = await temp.getFromUserInfo()
-        UserinfoList.push({
-          userinfo,
-          bothStatus: temp.bothStatus,
-          createdAt: temp.createdAt,
-          isRead: temp.isRead
-        })
-      }
-      ctx.rest(UserinfoList)
+      const res = await db.sequelize.query(`select UserRelation.bothStatus,UserRelation.createdAt,UserRelation.isRead,UserInfo.userId,UserInfo.userNickname,UserInfo.userAvatar,UserInfo.userDesc from UserRegister
+      inner join UserRelation
+      on UserRegister.userId = UserRelation.toId
+      inner join UserInfo
+      on UserRelation.fromId = UserInfo.userId
+      where UserRegister.userId = '${userId}'
+      order by UserRelation.createdAt desc
+      limit ${PER_PAGE_LIMIT_NUM} offset ${(page - 1) * PER_PAGE_LIMIT_NUM}`)
+      ctx.rest(res[0])
     } else {
       throw new APIError('user:not_found', 'user not found by userId.')
     }
@@ -247,62 +237,58 @@ module.exports = {
       }
     })
     if (user) {
-      const FollowersList = await user.getFollowers({
-        limit: PER_PAGE_LIMIT_NUM,
-        offset: (page - 1) * PER_PAGE_LIMIT_NUM
-      })
-      let UserinfoList = []
-      for (let i = 0, len = FollowersList.length; i < len; i++) {
-        let temp = FollowersList[i]
-        let userinfo = await temp.getToUserInfo()
-        UserinfoList.push({
-          userinfo,
-          bothStatus: temp.bothStatus
-        })
-      }
-      ctx.rest(UserinfoList)
+      const res = await db.sequelize.query(`select UserRelation.bothStatus,UserRelation.createdAt,UserRelation.isRead,UserInfo.userId,UserInfo.userNickname,UserInfo.userAvatar,UserInfo.userDesc from UserRegister
+      inner join UserRelation
+      on UserRegister.userId = UserRelation.fromId
+      inner join UserInfo
+      on UserRelation.toId = UserInfo.userId
+      where UserRegister.userId = '${userId}'
+      order by UserRelation.createdAt desc
+      limit ${PER_PAGE_LIMIT_NUM} offset ${(page - 1) * PER_PAGE_LIMIT_NUM}`)
+      ctx.rest(res[0])
     } else {
       throw new APIError('user:not_found', 'user not found by userId.')
     }
   },
-  'GET /api/user/:userId/FollowerVideo': async (ctx, next) => {
+  'GET /api/user/:userId/FollowerVideo/page/:page': async (ctx, next) => {
     const userId = ctx.params.userId
+    let page = ctx.params.page
+    if (page < 0 || isNaN(Number(page))) page = 1
     const user = await UserRegister.findOne({
       where: {
         'userId': userId
       }
     })
     if (user) {
-      const FollowersList = await user.getFollowers()
-      let res = []
-      for (let i = 0, len = FollowersList.length; i < len; i++) {
-        let ur = FollowersList[i]
-        let userInfo = await ur.getToUserInfo()
-        let videoInfos = await VideoInfo.findAll({
-          where: {
-            userId: userInfo.userId
+      let result = []
+      let res = await db.sequelize.query(`select UserRelation.toId as userId,UserInfo.userAvatar,UserInfo.userNickname,VideoInfo.videoId,VideoInfo.videoCover,VideoInfo.videoDesc,VideoInfo.videoPath,VideoInfo.createdAt from UserRegister
+      inner join UserRelation
+      on UserRegister.userId = UserRelation.fromId
+      inner join UserInfo
+      on UserRelation.toId = UserInfo.userId
+      inner join VideoInfo
+      on UserRelation.toId = VideoInfo.userId
+      where UserRegister.userId = '${userId}'
+      order by VideoInfo.createdAt desc
+      limit ${PER_PAGE_LIMIT_NUM} offset ${(page - 1) * PER_PAGE_LIMIT_NUM}`)
+      let followerVideoList = res[0]
+      for (let i = 0, len = followerVideoList.length; i < len; i++) {
+        let followerVideo = followerVideoList[i]
+        let shareNum = await redisClient.zscore(KEY_SHARE_NUM, followerVideo.videoId)
+        let watchNum = await redisClient.zscore(KEY_WATCH_NUM, followerVideo.videoId)
+        let commentNum = await redisClient.zscore(KEY_COMMENT_NUM, followerVideo.videoId)
+        let likeNum = await redisClient.zscore(KEY_LIKE_NUM, followerVideo.videoId)
+        result.push({
+          Video: followerVideo,
+          WSLCNum: {
+            shareNum,
+            watchNum,
+            commentNum,
+            likeNum
           }
         })
-        for (let j = 0, len = videoInfos.length; j < len; j++) {
-          let videoInfo = videoInfos[j]
-          if (!videoInfo) continue
-          let shareNum = await redisClient.zscore(KEY_SHARE_NUM, videoInfo.videoId)
-          let watchNum = await redisClient.zscore(KEY_WATCH_NUM, videoInfo.videoId)
-          let commentNum = await redisClient.zscore(KEY_COMMENT_NUM, videoInfo.videoId)
-          let likeNum = await redisClient.zscore(KEY_LIKE_NUM, videoInfo.videoId)
-          res.push({
-            userInfo,
-            videoInfo,
-            WSLCNum: {
-              shareNum,
-              watchNum,
-              commentNum,
-              likeNum
-            }
-          })
-        }
       }
-      ctx.rest(res)
+      ctx.rest(result)
     } else {
       throw new APIError('user:not_found', 'user not found by userId.')
     }
@@ -347,16 +333,11 @@ module.exports = {
       }
     })
     if (user) {
-      const fansList = await user.getFans({
-        where: {
-          'isRead': false
-        }
-      })
-      for (let i = 0, len = fansList.length; i < len; i++) {
-        let temp = fansList[i]
-        temp.isRead = true
-        await temp.save()
-      }
+      await db.sequelize.query(`update UserRegister
+      inner join UserRelation
+      on UserRegister.userId = UserRelation.toId
+      set UserRelation.isRead = true
+      where UserRegister.userId = '${userId}'`)
       ctx.rest(`read fansMsg suc`)
     } else {
       throw new APIError('user:not_found', 'user not found by userId.')
@@ -598,26 +579,26 @@ module.exports = {
       }
     })
     if (user) {
-      const userInfo = await user.getUserInfo()
-      const LikeList = await user.getLikes({
-        where: {
-          commentId: null
-        },
-        limit: PER_PAGE_LIMIT_NUM,
-        offset: (page - 1) * PER_PAGE_LIMIT_NUM
-      })
-      let VideoinfoList = []
-      for (let i = 0, len = LikeList.length; i < len; i++) {
-        let temp = LikeList[i]
-        let video = await temp.getVideoInfo()
-        if (!video) continue
-        let shareNum = await redisClient.zscore(KEY_SHARE_NUM, video.videoId)
-        let watchNum = await redisClient.zscore(KEY_WATCH_NUM, video.videoId)
-        let commentNum = await redisClient.zscore(KEY_COMMENT_NUM, video.videoId)
-        let likeNum = await redisClient.zscore(KEY_LIKE_NUM, video.videoId)
-        VideoinfoList.push({
-          videoInfo: video,
-          userInfo,
+      let result = []
+      let res = await db.sequelize.query(`select VideoInfo.userId,UserInfo.userAvatar,UserInfo.userNickname,VideoInfo.videoId,VideoInfo.videoCover,VideoInfo.videoDesc,VideoInfo.videoPath from UserRegister
+      inner join LikeInfo
+      on UserRegister.userId = LikeInfo.userId
+      inner join VideoInfo
+      on LikeInfo.videoId = VideoInfo.videoId
+      inner join UserInfo
+      on VideoInfo.userId = UserInfo.userId
+      where UserRegister.userId = '${userId}' and LikeInfo.commentId is null
+      order by LikeInfo.createdAt desc
+      limit ${PER_PAGE_LIMIT_NUM} offset ${(page - 1) * PER_PAGE_LIMIT_NUM}`)
+      let LikeVideoList = res[0]
+      for (let i = 0, len = LikeVideoList.length; i < len; i++) {
+        let LikeVideo = LikeVideoList[i]
+        let shareNum = await redisClient.zscore(KEY_SHARE_NUM, LikeVideo.videoId)
+        let watchNum = await redisClient.zscore(KEY_WATCH_NUM, LikeVideo.videoId)
+        let commentNum = await redisClient.zscore(KEY_COMMENT_NUM, LikeVideo.videoId)
+        let likeNum = await redisClient.zscore(KEY_LIKE_NUM, LikeVideo.videoId)
+        result.push({
+          Video: LikeVideo,
           WSLCNum: {
             shareNum,
             watchNum,
@@ -626,7 +607,7 @@ module.exports = {
           }
         })
       }
-      ctx.rest(VideoinfoList)
+      ctx.rest(result)
     } else {
       throw new APIError('user:not_found', 'user not found by userId.')
     }

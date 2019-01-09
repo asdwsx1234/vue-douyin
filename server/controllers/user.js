@@ -923,6 +923,42 @@ module.exports = {
     })
     ctx.rest('分享成功')
   },
+  'GET /api/user/:fromUserId/relation/:toUserId': async (ctx, next) => {
+    const fromUserId = ctx.params.fromUserId
+    const toUserId = ctx.params.toUserId
+    const toUser = await UserRegister.findOne({
+      where: {
+        'userId': toUserId
+      }
+    })
+    const fromUser = await UserRegister.findOne({
+      where: {
+        'userId': fromUserId
+      }
+    })
+    if (!toUser || !fromUser) {
+      throw new APIError('user:not_existed', 'fromUser or toUser is not existed.')
+    }
+    let res = await UserRelation.findOne({
+      where: {
+        fromId: fromUserId,
+        toId: toUserId
+      }
+    })
+    if (res) {
+      res.bothStatus ? ctx.rest('both') : ctx.rest('follow')
+    }
+    let res1 = await UserRelation.findOne({
+      where: {
+        fromId: toUserId,
+        toId: fromUserId
+      }
+    })
+    if (res1) {
+      ctx.rest('fan')
+    }
+    ctx.rest('none')
+  },
   /* 先查看数据库中评论者和被评论视频是否存在，不存在则抛出用户或者视频不存在错误。
    * 然后根据url中的replyId判断是否为回复评论还是单纯的评论
    * 如果是回复，则取查询被回复的评论是否存在，不存在则抛出回复评论不存在错误。

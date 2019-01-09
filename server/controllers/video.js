@@ -9,7 +9,7 @@ const KEY_LIKE_NUM = 'videoLikeNum'
 const KEY_COMMENT_NUM = 'videoCommentNum'
 const KEY_COMMENT_LIKE_NUM = 'commmentLikeNum'
 
-const VIDEO_NUM = 30
+const VIDEO_NUM = 250
 const PER_PAGE_LIMIT_NUM = 20
 const TOP_LIKE_COMMENT_NUM = 3
 module.exports = {
@@ -18,15 +18,14 @@ module.exports = {
     let isExists = await redisClient.exists(key)
     if (!isExists) {
       let topWatchVid = await redisClient.zrevrange(KEY_WATCH_NUM, 0, VIDEO_NUM)
-      let topShareVid = await redisClient.zrevrange(KEY_SHARE_NUM, 0, VIDEO_NUM)
-      let topLikeVid = await redisClient.zrevrange(KEY_LIKE_NUM, 0, VIDEO_NUM)
-      let topCommentVid = await redisClient.zrevrange(KEY_COMMENT_NUM, 0, VIDEO_NUM)
-      let summary = [...topWatchVid, ...topShareVid, ...topLikeVid, ...topCommentVid]
+      // let topShareVid = await redisClient.zrevrange(KEY_SHARE_NUM, 0, VIDEO_NUM)
+      // let topLikeVid = await redisClient.zrevrange(KEY_LIKE_NUM, 0, VIDEO_NUM)
+      // let topCommentVid = await redisClient.zrevrange(KEY_COMMENT_NUM, 0, VIDEO_NUM)
+      // let summary = [...topWatchVid, ...topShareVid, ...topLikeVid, ...topCommentVid]
       let VideoSetId = new Set()
-      for (let i of summary) {
+      for (let i of topWatchVid) {
         VideoSetId.add(i)
       }
-      summary = []
       for (let videoId of VideoSetId) {
         let res = await db.sequelize.query(`select VideoInfo.userId,UserInfo.userAvatar,UserInfo.userNickname,VideoInfo.videoId,VideoInfo.videoCover,VideoInfo.videoDesc,VideoInfo.videoPath from VideoInfo
         inner join UserInfo

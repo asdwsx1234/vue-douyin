@@ -77,7 +77,7 @@ export default {
       this.videoPage++
       this.$axios.get(`/api/user/${userId}/FollowerVideo/page/${this.videoPage}`).then((r) => {
         if (r.data.data.length < 21) {
-            this.videoIsEnd = true
+          this.videoIsEnd = true
         }
         this.list = this.list.concat(r.data.data)
         this.$refs.listWrap.refresh()

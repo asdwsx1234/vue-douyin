@@ -2,13 +2,14 @@
 <div>
   <tip ref="tip"></tip>
   <my-list :Title="title" @scrollToEnd="scrollToEnd">
-    <li v-for="item in list" :key="item.userId" class="list-item" @click="chooseUser($event, item.userId)">
+    <li v-for="item in renderList" :key="item.userId" class="list-item" @click="chooseUser($event, item.userId)">
       <img :src="`${baseURL}${item.userAvatar}`" width="45" height="45" alt="" class="avatar">
       <div class="main">
         <p class="name">{{item.userNickname}}</p>
         <p class="desc">{{item.userDesc}}</p>
       </div>
-      <div class="btn" :class="{'btn-inactive': item.bothStatus}" @click="triggerFollow(item)" v-html="item.bothStatus? '互相关注': '关注'"></div>
+      <div class="btn" v-if="$route.params.id === 'me'" :class="{'btn-inactive': item.bothStatus}" @click="triggerFollow(item)" v-html="item.bothStatus? '互相关注': '关注'"></div>
+      <div class="btn" v-else :class="{'btn-inactive': true}" @click="triggerFollow(item)" v-html="item.myRelation"></div>
     </li>
     <no-more class="no-more" v-if="!isLoading"></no-more>
     <loading v-else></loading>
@@ -26,6 +27,7 @@ const PER_PAGE_LIMIT_NUM = 21
 export default {
   activated () {
     this.list = []
+    this.renderList = []
     this.page = 0
     this.isEnd = false
     this.fetchFansList()
@@ -33,11 +35,22 @@ export default {
   data () {
     return {
       list: [],
+      renderList: [],
       isLoading: false,
       page: 0,
       isEnd: false,
       baseURL,
       timer: null
+    }
+  },
+  watch:{
+    list (newVal, oldVal) {
+      for (let i = oldVal.length; i < newVal.length; i++) {
+        this.$axios.get(`/api/user/${this.loginInfo.userId}/relation/${newVal[i].userId}`).then(r => {
+          this.renderList[i].myRelation = r.data.data
+          if (i === newVal.length - 1) this.$forceUpdate()
+        })
+      }
     }
   },
   methods: {
@@ -52,6 +65,7 @@ export default {
           this.isEnd = true
         }
         this.list = this.list.concat(r.data.data)
+        this.renderList = this.list
       })
     },
     triggerFollow (item) {

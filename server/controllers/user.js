@@ -586,6 +586,23 @@ module.exports = {
       throw new APIError('user:not_found', 'user not found by userId.')
     }
   },
+  'GET /api/user/:userId/getContact': async (ctx, next) => {
+    const userId = ctx.params.userId
+    const user = await UserRegister.findOne({
+      where: {
+        'userId': userId
+      }
+    })
+    if (user) {
+      let res = await db.sequelize.query(`select UserInfo.userId,UserInfo.userAvatar,UserInfo.userNickname,UserInfo.userDesc from UserRelation
+      inner join UserInfo
+      on UserRelation.toId = UserInfo.userId
+      where UserRelation.fromId = '${userId}' and UserRelation.bothStatus = true`)
+      ctx.rest(res[0])
+    } else {
+      throw new APIError('user:not_found', 'user not found by userId.')
+    }
+  },
   'GET /api/user/:userId/Likes/page/:page': async (ctx, next) => {
     const userId = ctx.params.userId
     let page = ctx.params.page
@@ -1015,7 +1032,7 @@ module.exports = {
 
 class UserController {
   /**
-   * @description 获取to用户和from用户有什么关系
+   * @description 获取to用户和from用户是什么关系
    * @param {String} fromUserId from用户id
    * @param {String} toUserId to用户id
    * @return {String} result 结果 （‘both‘：互相关注、’fan‘：粉丝、’follow‘：关注、’none‘：没有关系）

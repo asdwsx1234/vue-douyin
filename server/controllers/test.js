@@ -12,7 +12,7 @@ const db = require('../db')
 const utils = require('../utils/utils')
 const MAX_USER_NUM = 50
 const MAX_VIDEO_NUM = MAX_USER_NUM * 5
-const MAX_USER_RELATION_NUM = MAX_USER_NUM * 2
+const MAX_USER_RELATION_NUM = MAX_USER_NUM * 50
 
 const MAX_VIDEO_WATCH_NUM = MAX_USER_NUM * 50
 const MAX_VIDEO_SHARE_NUM = MAX_USER_NUM * 10
@@ -116,7 +116,8 @@ module.exports = {
         let newUr = await UserRelation.build({
           'fromId': fromUserId,
           'toId': toUserId,
-          'bothStatus': false
+          'bothStatus': false,
+          'isRead': false
         })
         if (toUr) {
           toUr.bothStatus = true

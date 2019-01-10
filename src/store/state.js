@@ -4,10 +4,7 @@ const state = {
   fanUnreadNum: 0,
   byLikeUnreadNum: 0,
   byCommentUnreadNum: 0,
-  followerList: [],
-  fanList: [],
-  likeList: [],
-  videoList: [],
+  allPrivateLetter: [],
   popularVideo: [],
   playList: []
 }

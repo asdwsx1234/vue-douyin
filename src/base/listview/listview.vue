@@ -15,10 +15,10 @@
       </div>
       <ul v-if="!querykey">
         <li @click="selectItem(item)" v-for="item in group.items" :key="item.id" class="list-group-item">
-          <img class="avatar" src="./1.jpg" width="50" height="50">
+          <img class="avatar" :src="`${baseURL}${item.userAvatar}`" width="50" height="50">
           <div class="main">
-            <span class="name">{{item.name}}</span>
-            <span class="desc">懒得填写个性签名</span>
+            <span class="name">{{item.userNickname}}</span>
+            <span class="desc">{{item.userDesc}}</span>
           </div>
           <span class="iconfont icon-message"></span>
         </li>
@@ -32,7 +32,7 @@
       :data-index="index"
       :key="item"
       class="item">
-        <p v-if="item === '#'" class="iconfont icon-search"></p>
+        <p v-if="item === '#search'" class="iconfont icon-search"></p>
         <p v-else>{{item}}</p>
       </li>
     </ul>
@@ -50,6 +50,7 @@
 import SearchBar from 'base/searchBar/searchBar'
 import Scroll from 'base/scroll/scroll'
 import SearchList from 'base/searchList/searchList'
+import { baseURL } from 'common/js/config'
 import { getData } from 'common/js/dom'
 const ANCHOR_HEIGHT = 18
 const TITLE_HEIGHT = 30
@@ -87,13 +88,14 @@ export default {
         { id: 13, name: 'well' },
         { id: 14, name: '测试' },
         { id: 15, name: 'well' }
-      ]
+      ],
+      baseURL
     }
   },
   computed: {
     shortcutList () {
       return this.data.map((group) => {
-        return group.title.substr(0, 1)
+        return group.title
       })
     },
     fixedTitle () {
@@ -147,7 +149,7 @@ export default {
     },
     _calculateHeight () {
       this.listHeight = []
-      const list = this.$refs.listGroup
+      const list = this.$refs.listGroup || []
       let height = 0 // 第一个list-item的初始高度
       this.listHeight.push(height)
       for (let i = 0; i < list.length; i++) {

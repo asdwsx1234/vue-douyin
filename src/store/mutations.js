@@ -16,17 +16,8 @@ const mutations = {
   [types.SET_BYCOMMENTUNREADNUM] (state, byCommentUnreadNum) {
     state.byCommentUnreadNum = byCommentUnreadNum
   },
-  [types.SET_FOLLOWERLIST] (state, followerList) {
-    state.followerList = followerList
-  },
-  [types.SET_FANLIST] (state, fanList) {
-    state.fanList = fanList
-  },
-  [types.SET_LIKELIST] (state, likeList) {
-    state.likeList = likeList
-  },
-  [types.SET_VIDEOLIST] (state, videoList) {
-    state.videoList = videoList
+  [types.SET_ALLPRIVATELETTER] (state, allPrivateLetter) {
+    state.allPrivateLetter = allPrivateLetter
   },
   [types.SET_POPULARVIDEO] (state, popularVideo) {
     state.popularVideo = popularVideo

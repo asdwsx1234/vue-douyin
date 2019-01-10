@@ -8,20 +8,62 @@
 <script>
 import MyHeader from 'components/MyHeader/MyHeader'
 import ListView from 'base/listview/listview'
+import { mapGetters } from 'vuex'
+import { getPinYinFirstCharacter } from 'common/js/pinyin'
 export default {
+  created () {
+    this.$axios.get(`/api/user/${this.loginInfo.userId}/getContact`).then(r => {
+      this.groups = this._normalizeContact(r.data.data)
+    })
+  },
   data () {
     return {
-      groups: [
-        { title: '#search' },
-        { title: 'A', items: [{ name: 'Ab' }, { name: 'Ac' }] },
-        { title: 'B', items: [{ name: 'Bb' }, { name: 'Bc' }] },
-        { title: 'C', items: [{ name: 'Cb' }, { name: 'Cc' }] },
-        { title: 'D', items: [{ name: 'Db' }, { name: 'Dc' }] },
-        { title: 'E', items: [{ name: 'Eb' }, { name: 'Ec' }] },
-        { title: 'F', items: [{ name: 'Fb' }, { name: 'Fc' }] },
-        { title: 'G', items: [{ name: 'Gb' }, { name: 'Gc' }] }
-      ]
+      groups: []
     }
+  },
+  methods: {
+    _normalizeContact(list) {
+      let map = {
+        character: {
+          title: '#',
+          items: []
+        }
+      }
+      list.forEach((item, index) => {
+        let key = getPinYinFirstCharacter(item.userNickname).toUpperCase()
+        if (key.match(/[a-zA-Z]/)) {
+          if (!map[key]) {
+            map[key] = {
+              title: key,
+              items: []
+            }
+          }
+        } else {
+          key = 'character'
+        }
+        map[key].items.push(item)
+      })
+      let character = []
+      let ret = []
+      for (let key in map) {
+        let val = map[key]
+        if (val.title.match(/[a-zA-Z]/)) {
+          ret.push(val)
+        } else if (val.title === '#') {
+          character.push(val)
+        }
+      }
+      ret.sort((a, b) => {
+        return a.title.charCodeAt(0) - b.title.charCodeAt(0)
+      })
+      ret = [{ title: '#search' }].concat(ret)
+      return ret.concat(character)
+    }
+  },
+  computed: {
+    ...mapGetters([
+      'loginInfo'
+    ])
   },
   components: {
     MyHeader,

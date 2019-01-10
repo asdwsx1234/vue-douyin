@@ -3,9 +3,6 @@ export const loginInfo = state => state.loginInfo
 export const fanUnreadNum = state => state.fanUnreadNum
 export const byLikeUnreadNum = state => state.byLikeUnreadNum
 export const byCommentUnreadNum = state => state.byCommentUnreadNum
-export const followerList = state => state.followerList
-export const fanList = state => state.fanList
-export const likeList = state => state.likeList
-export const videoList = state => state.videoList
+export const allPrivateLetter = state => state.allPrivateLetter
 export const popularVideo = state => state.popularVideo
 export const playList = state => state.playList

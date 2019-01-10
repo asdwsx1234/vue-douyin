@@ -54,7 +54,7 @@ export default {
       let userId = this.loginInfo.userId
       this.isLoading = true
       this.page++
-      this.$axios.get(`/api/user/${userId}/Fans/page/${this.page}`).then((r) => {
+      this.$axios.get(`/api/user/${userId}/Fans/page/${this.page}/${this.loginInfo.userId}`).then((r) => {
         this.isLoading = false
         if (r.data.data.length < PER_PAGE_LIMIT_NUM) {
           this.isEnd = true

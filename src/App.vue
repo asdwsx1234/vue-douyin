@@ -38,7 +38,7 @@ export default {
     receiveTriggerFollow () {
       this.getFanUnreadNum(this.loginInfo.userId)
     },
-    receiveComment() {
+    receiveComment () {
       this.getByCommentUnreadNum(this.loginInfo.userId)
     }
   },

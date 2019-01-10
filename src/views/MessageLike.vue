@@ -63,7 +63,7 @@ export default {
         if (r.data.data.length < PER_PAGE_LIMIT_NUM) {
           this.isEnd = true
         }
-        this.list = this.list.concat(r.data.data)
+        this.list = this.list.concat(r.data.data.sort((a ,b) => b.createdAt - a.createdAt))
       })
     },
     scrollToEnd () {

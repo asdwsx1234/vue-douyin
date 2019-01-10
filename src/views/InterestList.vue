@@ -8,7 +8,8 @@
         <p class="name">{{item.userNickname}}</p>
         <p class="desc">{{item.userDesc}}</p>
       </div>
-      <div class="btn btn-inactive" @click="triggerFollow($event.target, item)" v-html="item.bothStatus? '互相关注': '已关注'"></div>
+      <div class="btn btn-inactive" v-if="$route.params.id === 'me'" @click="triggerFollow($event.target, item)" v-html="item.bothStatus? '互相关注': '已关注'"></div>
+      <div class="btn" v-else :class="['follow', 'both'].includes(item.myRelation) ? 'btn-inactive' : 'btn-active'" @click="triggerFollow($event.target, item)" v-html="getBtnHtml(item.myRelation)"></div>
     </li>
     <no-more class="no-more" v-if="!isLoading"></no-more>
     <loading v-else></loading>
@@ -47,7 +48,7 @@ export default {
       let userId = this.$route.params.id === 'me' ? this.loginInfo.userId : this.$route.params.id
       this.isLoading = true
       this.page++
-      this.$axios.get(`/api/user/${userId}/Followers/page/${this.page}`).then((r) => {
+      this.$axios.get(`/api/user/${userId}/Followers/page/${this.page}/${this.loginInfo.userId}`).then((r) => {
         this.isLoading = false
         if (r.data.data.length < PER_PAGE_LIMIT_NUM) {
           this.isEnd = true
@@ -59,14 +60,30 @@ export default {
       if (this.timer) return
       this.timer = setTimeout(() => {
         this.$axios.get(`/api/user/${this.loginInfo.userId}/triggerFollow/${item.userId}`).then(res => {
-          if (res.data.data.includes('取消')) {
-            addClass(target, 'btn-active')
-            target.innerText = '关注'
-            this.$refs.tip.show('取关成功')
+          if (this.$route.params.id === 'me') {
+            if (res.data.data.includes('取消')) {
+              addClass(target, 'btn-active')
+              target.innerText = '关注'
+              this.$refs.tip.show('取关成功')
+            } else {
+              removeClass(target, 'btn-active')
+              target.innerText = item.bothStatus ? '互相关注' : '已关注'
+              this.$refs.tip.show('关注成功')
+            }
           } else {
-            removeClass(target, 'btn-active')
-            target.innerText = item.bothStatus ? '互相关注' : '已关注'
-            this.$refs.tip.show('关注成功')
+            if (res.data.data.includes('取消')) {
+              this.$refs.tip.show('取关成功')
+              switch (item.myRelation) {
+                case 'follow': item.myRelation = 'none'; break;
+                case 'both': item.myRelation = 'fan'; break;
+              }
+            } else {
+              this.$refs.tip.show('关注成功')
+              switch (item.myRelation) {
+                case 'fan': item.myRelation = 'both'; break;
+                case 'none': item.myRelation = 'follow'; break;
+              }
+            }
           }
           this.$socket.emit('sendTriggerFollow', {
             fromUserId: this.loginInfo.userId,
@@ -85,6 +102,14 @@ export default {
     },
     scrollToEnd () {
       this.fetchInterestList()
+    },
+    getBtnHtml (myRelation) {
+      switch(myRelation) {
+        case 'fan':
+        case 'none': return '关注'; break;
+        case 'follow': return '已关注'; break;
+        case 'both': return '互相关注'; break;
+      }
     }
   },
   computed: {

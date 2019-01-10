@@ -128,9 +128,10 @@ export default {
         this.$axios.post(`/api/user/commentVideo`, comment).then(res => {
           let mycomment = {
             Comment: res.data.data,
-            likeNum: 0,
-            userInfo: this.loginInfo
+            likeNum: 0
           }
+          mycomment.Comment.userAvatar = this.loginInfo.userAvatar
+          mycomment.Comment.userNickname = this.loginInfo.userNickname
           this.commentContent = ''
           this.acommentList = [mycomment].concat(this.acommentList)
           this.likes = [false].concat(this.likes)

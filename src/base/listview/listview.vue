@@ -20,7 +20,7 @@
             <span class="name">{{item.userNickname}}</span>
             <span class="desc">{{item.userDesc}}</span>
           </div>
-          <span class="iconfont icon-message"></span>
+          <span class="iconfont icon-message" @click.stop="chatWith(item)"></span>
         </li>
       </ul>
     </li>
@@ -52,11 +52,18 @@ import Scroll from 'base/scroll/scroll'
 import SearchList from 'base/searchList/searchList'
 import { baseURL } from 'common/js/config'
 import { getData } from 'common/js/dom'
+import { getPinYinStringFirstCharacter, getPinYin } from 'common/js/pinyin'
 const ANCHOR_HEIGHT = 18
 const TITLE_HEIGHT = 30
 export default {
   props: {
     data: {
+      type: Array,
+      default () {
+        return []
+      }
+    },
+    list: {
       type: Array,
       default () {
         return []
@@ -72,23 +79,7 @@ export default {
       currentIndex: 0,
       diff: -1,
       querykey: '',
-      searches: [
-        { id: 1, name: 'well' },
-        { id: 2, name: '测试' },
-        { id: 3, name: 'well' },
-        { id: 4, name: 'well' },
-        { id: 5, name: '测试' },
-        { id: 6, name: 'well' },
-        { id: 7, name: 'well' },
-        { id: 8, name: '测试' },
-        { id: 9, name: 'well' },
-        { id: 10, name: 'well' },
-        { id: 11, name: '测试' },
-        { id: 12, name: 'well' },
-        { id: 13, name: 'well' },
-        { id: 14, name: '测试' },
-        { id: 15, name: 'well' }
-      ],
+      searches: [],
       baseURL
     }
   },
@@ -114,12 +105,19 @@ export default {
   methods: {
     query (q) {
       this.querykey = q
+      if (!q) return
+      this.searches = this.list.filter((item, index, arr) => {
+        return item.userNickname.includes(q) || getPinYinStringFirstCharacter(item.userNickname, '').includes(q) || getPinYin(item.userNickname, '').includes(q)
+      })
     },
     scroll (pos) {
       this.scrollY = pos.y
     },
     selectItem (item) {
       this.$emit('select', item)
+    },
+    chatWith (item) {
+      this.$router.push({ path: `/ChatWith/${item.userId}`, query: { userNickname: item.userNickname, userAvatar: item.userAvatar } })
     },
     onShortcutTouchStart (e) {
       let anchorIndex = getData(e.target, 'index')

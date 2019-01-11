@@ -2,10 +2,10 @@
 <div class="search-list">
   <ul>
     <li class="search-item" v-for="item in searches" :key="item.id">
-      <img class="avatar" src="./1.jpg" width="50" height="50">
+      <img class="avatar" :src="`${baseURL}${item.userAvatar}`" width="50" height="50">
       <div class="main">
-        <span class="name">{{item.name}}</span>
-        <span class="desc">懒得填写个性签名</span>
+        <span class="name">{{item.userNickname}}</span>
+        <span class="desc">{{item.userDesc}}</span>
       </div>
       <span class="iconfont icon-message"></span>
     </li>
@@ -14,6 +14,7 @@
 </template>
 
 <script>
+import { baseURL } from 'common/js/config'
 export default {
   props: {
     searches: {
@@ -21,6 +22,11 @@ export default {
       default () {
         return []
       }
+    }
+  },
+  data () {
+    return {
+      baseURL
     }
   }
 }

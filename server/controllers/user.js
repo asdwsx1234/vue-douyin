@@ -1004,12 +1004,35 @@ module.exports = {
     const c = await CommentInfo.create(comment)
     ctx.rest(c)
   },
+  'GET /api/user/:fromUserId/getPrivateLetter/:toUserId': async (ctx, next) => {
+    const fromUserId = ctx.params.fromUserId
+    const toUserId = ctx.params.toUserId
+    const u1 = await UserRegister.findOne({
+      where: {
+        'userId': fromUserId
+      }
+    })
+    const u2 = await UserRegister.findOne({
+      where: {
+        'userId': toUserId
+      }
+    })
+    if (!u1 || !u2) {
+      throw new APIError('user:not_existed', 'fromUser or toUser is not existed.')
+    }
+    let res = await db.sequelize.query(`select PrivateLetter.privateLetterContent,PrivateLetter.fromId,PrivateLetter.toId,PrivateLetter.createdAt,PrivateLetter.isRead from PrivateLetter
+    where 
+    (fromId = '${fromUserId}' and toId = '${toUserId}' ) or
+    (fromId = '${toUserId}' and toId = '${fromUserId}' )
+    order by PrivateLetter.createdAt desc`)
+    ctx.rest(res[0])
+  },
   'POST /api/user/:fromUserId/privateLetter/:toUserId': async (ctx, next) => {
     let pl = {
       privateLetterContent: ctx.request.body.content,
-      privateLetterStatus: '未读',
       fromId: ctx.params.fromUserId,
-      toId: ctx.params.toUserId
+      toId: ctx.params.toUserId,
+      isRead: false
     }
     const u1 = await UserRegister.findOne({
       where: {
@@ -1021,9 +1044,18 @@ module.exports = {
         'userId': pl.toId
       }
     })
-
     if (!u1 || !u2) {
       throw new APIError('user:not_existed', 'fromUser or toUser is not existed.')
+    }
+    const b = await UserRelation.findOne({
+      where: {
+        'fromId': pl.fromId,
+        'toId': pl.toId,
+        'bothStatus': true
+      }
+    })
+    if (!b.bothStatus) {
+      throw new APIError('user:can_not_send_pl', 'bothStatus is false.')
     }
     const c = await PrivateLetter.create(pl)
     ctx.rest(c)

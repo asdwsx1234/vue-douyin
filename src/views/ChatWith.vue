@@ -1,15 +1,15 @@
 <template>
 <div>
-    <my-list :Title="$route.params.id" :needBottomMargin="true">
+    <my-list :Title="$route.query.userNickname" :needBottomMargin="true">
       <div class="chat-item" v-for="item in chatList" :key="item.id">
         <div class="right" v-if="item.isMe">
           <div class="content">
             {{item.content}}
           </div>
-          <img class="avatar" src="./1.jpg" alt="" width="40" height="40">
+          <img class="avatar" :src="`${baseURL}${loginInfo.userAvatar}`" alt="" width="40" height="40">
         </div>
         <div class="left" v-else>
-          <img class="avatar" src="./1.jpg" alt="" width="40" height="40">
+          <img class="avatar" :src="`${baseURL}${$route.query.userAvatar}`" alt="" width="40" height="40">
           <div class="content">
             {{item.content}}
           </div>
@@ -17,32 +17,65 @@
       </div>
     </my-list>
     <div class="input-bar">
-      <input class="input" placeholder="  发送消息..." type="text">
+      <input class="input" placeholder="  发送消息..." type="text" v-model="privateLetterContent">
       <span class="iconfont icon-at"></span>
-      <span class="iconfont icon-at"></span>
+      <span class="iconfont icon-check" @click="sendPrivateLetter"></span>
     </div>
 </div>
 </template>
 
 <script>
 import MyList from 'base/myList/myList'
+import { baseURL } from 'common/js/config'
+import { mapGetters } from 'vuex'
 export default {
+  activated () {
+    this.$axios.get(`/api/user/${this.loginInfo.userId}/getPrivateLetter/${this.$route.params.id}`).then(r => {
+      this.chatList = this._normalizeChatList(r.data.data)
+    })
+  },
   data () {
     return {
       chatList: [
-        { id: 1, isMe: false, content: '我是123，让我们开始聊天吧我是123，让我们开始聊天吧我是123，让我们开始聊天吧' },
-        { id: 2, isMe: true, content: '我是123，让我们开始聊天吧我是123我是123，让我们开始聊天吧我是123我是123，让我们开始聊天吧' },
-        { id: 3, isMe: false, content: '我是123，让我们开始聊天吧' },
-        { id: 4, isMe: true, content: '我是123，让我们开始聊天吧' },
-        { id: 5, isMe: false, content: '我是123，让我们开始聊天吧' },
-        { id: 6, isMe: true, content: '我是123，让我们开始聊天吧' },
-        { id: 7, isMe: true, content: '我是123，让我们开始聊天吧' },
-        { id: 8, isMe: false, content: '我是123，让我们开始聊天吧' },
-        { id: 9, isMe: true, content: '我是123，让我们开始聊天吧' },
-        { id: 10, isMe: true, content: '我是123，让我们开始聊天吧' },
-        { id: 11, isMe: false, content: '我是123，让我们开始聊天吧' },
-        { id: 12, isMe: true, content: '我是123，让我们开始聊天吧' }
-      ]
+        { id: 1, isMe: false, content: '我是123，让我们开始聊天吧我是123，让我们开始聊天吧我是123，让我们开始聊天吧' }
+      ],
+      privateLetterContent: '',
+      baseURL
+    }
+  },
+  computed: {
+    ...mapGetters([
+      'loginInfo'
+    ])
+  },
+  methods: {
+    _normalizeChatList (list) {
+      let result = []
+      for (let i = 0, len = list.length; i < len; i++){
+        let isMe
+        isMe = i === 0 ? true : false
+        // isMe = list[i].fromId === this.loginInfo.userId ? true : false
+        result.push({
+          id: list[i].id,
+          isMe,
+          content: list[i].privateLetterContent
+        })
+      }
+      return result
+    },
+    sendPrivateLetter () {
+      const plc = this.privateLetterContent.trim()
+      if (plc) {
+        let pl = {
+          content: plc,
+          fromUserId: this.loginInfo.userId,
+          toUserId: this.$route.params.id
+        }
+        this.$axios.post(`/api/user/${pl.fromUserId}/privateLetter/${pl.toUserId}`, pl).then((r) => {
+          console.log('send suc!')
+        })
+        this.privateLetterContent = ''
+      }
     }
   },
   components: {
@@ -61,7 +94,6 @@ export default {
     display flex
     margin 20px 0
   .content
-    flex 1
     position relative
     border-radius 5px
     background #fff
@@ -72,6 +104,7 @@ export default {
     margin 0 15px
   .left
     margin-right 100px
+    float left
     .content
       &:after
         display block
@@ -83,6 +116,8 @@ export default {
         content ''
   .right
     margin-left 100px
+    float right
+    width 100%
     .content
       &:after
         display block
@@ -107,6 +142,7 @@ export default {
     font-size $font-size-medium
     color $color-text
     padding-left 10px
+    caret-color $color-point
     &:focus
       outline none
       border none

@@ -18,7 +18,7 @@ export default {
   props: {
     Title: {
       type: String,
-      required: true
+      default: ''
     },
     needBottomMargin: {
       type: Boolean,

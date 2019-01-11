@@ -1,7 +1,7 @@
 <template>
 <div class="contact-wrap">
   <my-header class="header-border" title="选择联系人" :hasBack="true"></my-header>
-  <list-view :data="groups"></list-view>
+  <list-view :data="groups" :list="list" @select="chooseUser"></list-view>
 </div>
 </template>
 
@@ -13,16 +13,21 @@ import { getPinYinFirstCharacter } from 'common/js/pinyin'
 export default {
   created () {
     this.$axios.get(`/api/user/${this.loginInfo.userId}/getContact`).then(r => {
+      this.list = r.data.data
       this.groups = this._normalizeContact(r.data.data)
     })
   },
   data () {
     return {
-      groups: []
+      groups: [],
+      list: []
     }
   },
   methods: {
-    _normalizeContact(list) {
+    chooseUser (item) {
+      this.$router.push(`/profile/${item.userId}`)
+    },
+    _normalizeContact (list) {
       let map = {
         character: {
           title: '#',

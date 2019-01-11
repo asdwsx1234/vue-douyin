@@ -423,7 +423,7 @@ export function isChinese (str) {
  * @returns {string} 结果
  */
 export function getPinYin (str, split, uppercase) {
-  split = split || ' '
+  split = split || ''
   uppercase = uppercase || false
   var l2 = str.length
   var result = ''
@@ -474,6 +474,32 @@ export function getPinYinFirstCharacter (str, split, uppercase) {
   uppercase = uppercase || false
   // var len = str.length
   var len = 1 // 只取第一个字的首字母
+  var result = ''
+  var reg = new RegExp('[a-zA-Z0-9- ]')
+  var val
+  var name
+  for (var i = 0; i < len; i++) {
+    val = str.substr(i, 1)
+    if (isChinese(val)) {
+      name = arraySearch(val)
+      if (reg.test(val)) {
+        result += split + val
+      } else if (name !== false) {
+        result += split + name.substring(0, 1)
+      }
+    } else {
+      result += val
+    }
+  }
+  if (uppercase) result = result.toUpperCase()
+  result = result.replace(split, '')
+  return result.trim()
+}
+
+export function getPinYinStringFirstCharacter (str, split, uppercase) {
+  split = split || ''
+  uppercase = uppercase || false
+  var len = str.length
   var result = ''
   var reg = new RegExp('[a-zA-Z0-9- ]')
   var val

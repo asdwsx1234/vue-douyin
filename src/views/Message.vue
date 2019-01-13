@@ -4,8 +4,9 @@
     <div class="tab-wrap">
       <msg-tab></msg-tab>
     </div>
-    <scroll :data="items" class="list-wrap" ref="wrapper">
-      <msg-list :items="items"></msg-list>
+    <scroll :data="allPrivateLetter" class="list-wrap" ref="wrapper">
+      <msg-list :items="allPrivateLetter"></msg-list>
+      <img class="bgimg" v-if="allPrivateLetter.length === 0" src="./2.jpg"/>
     </scroll>
     <router-view class="bbb"></router-view>
   </div>
@@ -16,24 +17,19 @@ import Scroll from 'base/scroll/scroll'
 import MyHeader from 'components/MyHeader/MyHeader'
 import MsgTab from 'components/MsgTab/MsgTab'
 import MsgList from 'components/MsgList/MsgList'
+import { mapGetters } from 'vuex'
 export default {
   mounted () {
     // console.log(this.$refs.wrapper)
   },
   data () {
     return {
-      items: [
-        { id: 1, name: '抖音小助手', desc: '粉丝', time: '昨天' },
-        { id: 2, name: '资讯助手', desc: '赞', time: '2018-11-6' },
-        { id: 3, name: '系统通知', desc: '@我的', time: '2018-11-6' },
-        { id: 4, name: '哈哈', desc: '评论', time: '2018-11-6' },
-        { id: 5, name: '抖音小助手', desc: '粉丝', time: '昨天' },
-        { id: 6, name: '资讯助手', desc: '赞', time: '2018-11-6' },
-        { id: 7, name: '系统通知', desc: '@我的', time: '2018-11-6' },
-        { id: 8, name: '哈哈', desc: '评论', time: '2018-11-6' },
-        { id: 9, name: '抖音小助手', desc: '粉丝', time: '昨天' },
-        { id: 10, name: '资讯助手', desc: '赞', time: '2018-11-6' }]
     }
+  },
+  computed: {
+    ...mapGetters([
+      'allPrivateLetter'
+    ])
   },
   components: {
     MyHeader,
@@ -61,6 +57,11 @@ export default {
   right 0
   margin-top 132px
   margin-bottom 44px
+  .bgimg
+    position absolute
+    top 50%
+    left 50%
+    transform translateX(-50%) translateY(-50%)
 .bbb
   position fixed
   top 0

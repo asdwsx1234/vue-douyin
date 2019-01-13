@@ -71,14 +71,14 @@ export default {
             if (res.data.data.includes('取消')) {
               this.$refs.tip.show('取关成功')
               switch (item.myRelation) {
-                case 'follow': item.myRelation = 'none'; break;
-                case 'both': item.myRelation = 'fan'; break;
+                case 'follow': item.myRelation = 'none'; break
+                case 'both': item.myRelation = 'fan'; break
               }
             } else {
               this.$refs.tip.show('关注成功')
               switch (item.myRelation) {
-                case 'fan': item.myRelation = 'both'; break;
-                case 'none': item.myRelation = 'follow'; break;
+                case 'fan': item.myRelation = 'both'; break
+                case 'none': item.myRelation = 'follow'; break
               }
             }
           }
@@ -101,11 +101,11 @@ export default {
       this.fetchFansList()
     },
     getBtnHtml (myRelation) {
-      switch(myRelation) {
+      switch (myRelation) {
         case 'fan':
-        case 'none': return '关注'; break;
-        case 'follow': return '已关注'; break;
-        case 'both': return '互相关注'; break;
+        case 'none': return '关注'
+        case 'follow': return '已关注'
+        case 'both': return '互相关注'
       }
     }
   },

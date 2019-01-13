@@ -19,6 +19,38 @@ const mutations = {
   [types.SET_ALLPRIVATELETTER] (state, allPrivateLetter) {
     state.allPrivateLetter = allPrivateLetter
   },
+  [types.UPDATE_PRIVATELETTER] (state, privateLetter) {
+    const index = state.allPrivateLetter.findIndex((item) => {
+      return item.fromId === privateLetter.fromId
+    })
+    let unread
+    if (index !== -1) {
+      unread = (state.allPrivateLetter)[index].unread
+      unread++
+      state.allPrivateLetter.splice(index, 1)
+    } else {
+      unread = 1
+    }
+
+    if (privateLetter.isEnterChat) unread = 0
+
+    state.allPrivateLetter.unshift({
+      fromId: privateLetter.fromId,
+      userAvatar: privateLetter.userAvatar,
+      userNickname: privateLetter.userNickname,
+      content: privateLetter.content,
+      createdAt: privateLetter.createdAt,
+      unread: unread
+    })
+  },
+  [types.UPDATE_UNREAD_PRIVATELETTER] (state, privateLetter) {
+    const index = state.allPrivateLetter.findIndex((item) => {
+      return item.fromId === privateLetter.fromId
+    })
+    if (index !== -1) {
+      (state.allPrivateLetter)[index].unread = 0
+    }
+  },
   [types.SET_POPULARVIDEO] (state, popularVideo) {
     state.popularVideo = popularVideo
   },

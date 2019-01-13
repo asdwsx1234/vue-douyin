@@ -1,19 +1,19 @@
 <template>
   <swipeout class="message-list">
-    <swipeout-item class="message-item" v-for="item in items" :key="item.id">
+    <swipeout-item class="message-item" v-for="item in items" :key="item.fromId">
         <div slot="right-menu">
           <swipeout-button type="warn">删除</swipeout-button>
         </div>
         <div slot="content" class="front">
-          <img class="avatar" src="./logo.png" alt="" width="50" height="50">
+          <img class="avatar" :src="`${baseURL}${item.userAvatar}`" alt="" width="50" height="50">
           <div class="right">
             <div class="top">
-              <span class="name">{{item.name}}</span>
-              <span class="time">{{item.time}}</span>
+              <span class="name">{{item.userNickname}}</span>
+              <span class="time">{{formatTime(item.createdAt)}}</span>
             </div>
             <div class="bottom">
-              <span class="desc">{{item.desc}}</span>
-              <span class="point"></span>
+              <span class="desc">{{item.content}}</span>
+              <span class="point" :class="{ 'point-plus': item.unread > 99 }" v-show="item.unread!==0">{{item.unread > 99 ? '99+' : item.unread}}</span>
             </div>
           </div>
         </div>
@@ -23,6 +23,8 @@
 
 <script>
 import { Swipeout, SwipeoutItem, SwipeoutButton } from 'base/swipeout/'
+import { baseURL } from 'common/js/config'
+import { formatTime } from 'common/js/util'
 export default {
   props: {
     items: {
@@ -32,9 +34,11 @@ export default {
   },
   data () {
     return {
+      baseURL
     }
   },
   methods: {
+    formatTime
   },
   components: {
     Swipeout,
@@ -83,7 +87,15 @@ export default {
           font-size $font-size-small
         .point
           border-radius 50%
-          height 8px
-          width 8px
+          height 16px
+          width 16px
           background $color-point
+          text-align center
+          line-height 16px
+          color $color-background
+          font-size $font-size-small
+          font-weight 600
+        .point-plus
+          border-radius 8px
+          width 26px
 </style>

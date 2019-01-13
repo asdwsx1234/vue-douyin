@@ -24,9 +24,9 @@ io.on('connection', socket => {
     })
   })
   socket.on('sendPrivateLetter', async data => {
-    // const { toUser } = data
-    // const sockeId   拿出toUser的socketId
-    // io.to(socketId).emit('receivePrivateLetter', data)
+    const { toId } = data
+    const socketId = await redisClient.get(`SOCKET:${toId}`)
+    io.to(socketId).emit('receivePrivateLetter', data)
   })
   socket.on('sendComment', async data => {
     const { toVideoId, replyId } = data

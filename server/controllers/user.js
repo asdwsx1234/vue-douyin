@@ -1004,6 +1004,60 @@ module.exports = {
     const c = await CommentInfo.create(comment)
     ctx.rest(c)
   },
+  'GET /api/user/:userId/getAllPrivateLetter': async (ctx, next) => {
+    const userId = ctx.params.userId
+    const user = await UserRegister.findOne({
+      where: {
+        'userId': userId
+      }
+    })
+    if (user) {
+      let res = await db.sequelize.query(`select a.fromId,b.userNickname,b.userAvatar,( select count(*)
+      from PrivateLetter c
+      where c.isRead = false
+      AND c.toId = a.toId
+      AND c.fromId = a.fromId) as unread,
+      (select privateLetterContent from PrivateLetter d
+      where (d.toId = a.toId and d.fromId = a.fromId)
+      or (d.toId = a.fromId and d.fromId = a.toId)
+      order by d.createdAt desc
+      limit 1) as content,(
+      select f.createdAt from PrivateLetter f
+      where (f.toId = a.toId and f.fromId = a.fromId)
+      or (f.toId = a.fromId and f.fromId = a.toId)
+      order by f.createdAt desc
+      limit 1) as createdAt
+      from PrivateLetter a
+      join userInfo b on a.toId = '${userId}'
+      and a.fromId = b.userId
+      group by fromId`)
+      ctx.rest(res[0])
+    } else {
+      throw new APIError('user:not_found', 'user not found by userId.')
+    }
+  },
+  'GET /api/user/:fromUserId/readPrivateLetter/:toUserId': async (ctx, next) => {
+    const fromUserId = ctx.params.fromUserId
+    const toUserId = ctx.params.toUserId
+    const u1 = await UserRegister.findOne({
+      where: {
+        'userId': fromUserId
+      }
+    })
+    const u2 = await UserRegister.findOne({
+      where: {
+        'userId': toUserId
+      }
+    })
+    if (!u1 || !u2) {
+      throw new APIError('user:not_existed', 'fromUser or toUser is not existed.')
+    }
+    let res = await db.sequelize.query(`update PrivateLetter
+    set isRead = true
+    where 
+    fromId = '${toUserId}' and toId = '${fromUserId}'`)
+    ctx.rest(res[0])
+  },
   'GET /api/user/:fromUserId/getPrivateLetter/:toUserId': async (ctx, next) => {
     const fromUserId = ctx.params.fromUserId
     const toUserId = ctx.params.toUserId
@@ -1024,7 +1078,7 @@ module.exports = {
     where 
     (fromId = '${fromUserId}' and toId = '${toUserId}' ) or
     (fromId = '${toUserId}' and toId = '${fromUserId}' )
-    order by PrivateLetter.createdAt desc`)
+    order by PrivateLetter.createdAt asc`)
     ctx.rest(res[0])
   },
   'POST /api/user/:fromUserId/privateLetter/:toUserId': async (ctx, next) => {

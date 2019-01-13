@@ -13,7 +13,7 @@
 
 <script>
 import HomeTab from 'components/HomeTab/HomeTab'
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 export default {
   created () {
     this.persistentConnection().then((res) => {
@@ -40,6 +40,18 @@ export default {
     },
     receiveComment () {
       this.getByCommentUnreadNum(this.loginInfo.userId)
+    },
+    receivePrivateLetter (data) {
+      this.UPDATE_PRIVATELETTER({
+        fromId: data.fromId,
+        toId: data.toId,
+        content: data.content,
+        createdAt: data.createdAt,
+        userAvatar: data.userAvatar,
+        userNickname: data.userNickname,
+        type: 'privateLetter',
+        isEnterChat: this.$route.params.id === data.fromId // 是否进入了聊天页面，进入了的话那么该条消息的unread就是0
+      })
     }
   },
   computed: {
@@ -56,6 +68,9 @@ export default {
       'getFanUnreadNum',
       'getByLikeUnreadNum',
       'getByCommentUnreadNum'
+    ]),
+    ...mapMutations([
+      'UPDATE_PRIVATELETTER'
     ])
   },
   components: {

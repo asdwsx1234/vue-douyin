@@ -4,7 +4,7 @@
     <span class="backbtn iconfont icon-left" @click="GoBack"></span>
     <p class="title">{{Title}}</p>
   </div>
-  <scroll class="scroll-wrap" :class=" {'scroll-wrap-bottom':needBottomMargin }" :pullup="true" @scrollToEnd="scrollToEnd">
+  <scroll class="scroll-wrap" :class=" {'scroll-wrap-bottom':needBottomMargin }" :pullup="true" @scrollToEnd="scrollToEnd" :scrollToEndFlag="scrollToEndFlag">
     <ul>
       <slot></slot>
     </ul>
@@ -23,11 +23,16 @@ export default {
     needBottomMargin: {
       type: Boolean,
       default: false
+    },
+    scrollToEndFlag: {
+      type: Boolean,
+      default: false
     }
   },
   methods: {
     GoBack () {
       this.$router.back()
+      this.$emit('back')
     },
     scrollToEnd () {
       this.$emit('scrollToEnd')

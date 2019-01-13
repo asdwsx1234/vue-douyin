@@ -1,19 +1,20 @@
 <template>
 <div>
-    <my-list :Title="$route.query.userNickname" :needBottomMargin="true">
+    <my-list :Title="$route.query.userNickname" :needBottomMargin="true" :scrollToEndFlag="true" ref="scroll" @back="unsubscribe">
       <div class="chat-item" v-for="item in chatList" :key="item.id">
-        <div class="right" v-if="item.isMe">
+        <div class="right" v-if="item.type !== 'time' && item.content.isMe">
           <div class="content">
-            {{item.content}}
+            {{item.content.content}}
           </div>
           <img class="avatar" :src="`${baseURL}${loginInfo.userAvatar}`" alt="" width="40" height="40">
         </div>
-        <div class="left" v-else>
+        <div class="left" v-else-if="item.type !== 'time' && !item.isMe">
           <img class="avatar" :src="`${baseURL}${$route.query.userAvatar}`" alt="" width="40" height="40">
           <div class="content">
-            {{item.content}}
+            {{item.content.content}}
           </div>
         </div>
+        <span class="time" v-else>{{item.content}}</span>
       </div>
     </my-list>
     <div class="input-bar">
@@ -27,41 +28,139 @@
 <script>
 import MyList from 'base/myList/myList'
 import { baseURL } from 'common/js/config'
+import { parseChatTime } from 'common/js/util'
 import { mapGetters } from 'vuex'
 export default {
   activated () {
-    this.$axios.get(`/api/user/${this.loginInfo.userId}/getPrivateLetter/${this.$route.params.id}`).then(r => {
-      this.chatList = this._normalizeChatList(r.data.data)
+    console.log(1)
+    const myId = this.loginInfo.userId
+    const otherId = this.$route.params.id
+    this.resetAndGetUnread(otherId)
+    this.getPrivateLetter(myId, otherId)
+    this.readPrivateLetter(myId, otherId)
+    this.sockets.subscribe('receivePrivateLetter', (data) => {
+      if(data.fromId === this.loginInfo.userId) return
+      this.addMessageLocal({
+        type: 'privateLetter',
+        content: {
+          id: data.fromId,
+          isMe: data.fromId === this.loginInfo.userId,
+          content: data.content,
+          time: data.createdAt
+        }
+      })
+      this.$store.commit('UPDATE_PRIVATELETTER', {
+        fromId: data.fromId,
+        toId: data.toId,
+        content: data.content,
+        createdAt: data.createdAt,
+        userAvatar: data.userAvatar,
+        userNickname: data.userNickname,
+        type:'privateLetter',
+        isEnterChat: this.$route.params.id === data.fromId  // 是否进入了聊天页面，进入了的话那么该条消息的unread就是0
+      })
+      this.scrollToBottom()
     })
+  },
+  updated () {
+    this.scrollToBottom()
   },
   data () {
     return {
-      chatList: [
-        { id: 1, isMe: false, content: '我是123，让我们开始聊天吧我是123，让我们开始聊天吧我是123，让我们开始聊天吧' }
-      ],
+      unread: 0,
+      chatList: [],
       privateLetterContent: '',
       baseURL
     }
   },
   computed: {
     ...mapGetters([
-      'loginInfo'
+      'loginInfo',
+      'allPrivateLetter'
     ])
   },
+  watch: {
+    allMessage () {
+      this.getUnread()
+    }
+  },
   methods: {
-    _normalizeChatList (list) {
-      let result = []
-      for (let i = 0, len = list.length; i < len; i++){
-        let isMe
-        isMe = i === 0 ? true : false
-        // isMe = list[i].fromId === this.loginInfo.userId ? true : false
-        result.push({
-          id: list[i].id,
-          isMe,
-          content: list[i].privateLetterContent
+    unsubscribe () {
+      this.sockets.unsubscribe('receivePrivateLetter')
+    },
+    scrollToBottom () {
+      setTimeout(() => {
+        const scroll = this.$refs.scroll.$children[0]
+        scroll.scrollTo(0, scroll.scroll.maxScrollY)
+      }, 30)
+    },
+    resetAndGetUnread (id) {
+      this.chatList = []
+      this.$store.commit('UPDATE_UNREAD_PRIVATELETTER', {
+        fromId: id
+      })
+      this.getUnread()
+    },
+    getUnread () {
+      let unread = 0
+      this.allPrivateLetter.forEach(item => {
+        unread += item.unread
+      })
+      this.unread = unread
+    },
+    async getPrivateLetter (myId, otherId) {
+      let res = await this.$axios.get(`/api/user/${myId}/getPrivateLetter/${otherId}`)
+      let list = res.data.data
+      if (list.length === 0) return
+      this.isAddTimeMessage(0, list[0].createdAt)
+      for (let [index, value] of list.entries()) {
+        // 需要通过判断才能确定是否要添加时间消息
+        index > 0 && this.isAddTimeMessage(1, value.createdAt, list[index - 1].createdAt)
+        let content = {
+          type: 'privateLetter',
+          content: {
+            id: value.fromId,
+            isMe: value.fromId === this.loginInfo.userId,
+            content: value.privateLetterContent,
+            time: value.createdAt
+          }
+        }
+        this.chatList.push(content)
+      }
+    },
+    async readPrivateLetter (myId, otherId) {
+      let res = await this.$axios.get(`/api/user/${myId}/readPrivateLetter/${otherId}`)
+      if (res.data.code === 200) {
+      }
+    },
+    /* eslint-disable */
+    addMessageLocal(data){
+      const message = this.chatList
+      if(message.length === 0) {//如果本地原来没有消息，则直接添加时间消息，不需要经过比较判断
+        this.isAddTimeMessage(0, data.content.time)
+      }else{
+        const latestMessage = message[message.length - 1] //本地最新的一条消息
+        const latestTime = latestMessage.content.time//该消息的时间
+        this.isAddTimeMessage(1, data.content.time, latestTime)
+      }
+      this.chatList.push(data)  
+    },
+    //是否要添加时间消息
+    isAddTimeMessage(flag, currentTime, prevTime = ''){
+      if (flag) {   //当flag为真时,需要比较判断，才能确定是否要添加时间
+        const seprator = 30 * 60 * 1000   //时间间隔基准,半个小时
+        if(currentTime - prevTime > seprator) {//当下一条消息和这条消息的时间间隔大于30分钟,才添加时间
+          this.chatList.push({
+            type:'time',
+            content: parseChatTime(currentTime)
+          })
+        } 
+      } else {  //当flag为假时,是必须要添加时间消息的
+        this.chatList.push({
+          type:'time',
+          content: parseChatTime(currentTime)
         })
       }
-      return result
     },
     sendPrivateLetter () {
       const plc = this.privateLetterContent.trim()
@@ -72,7 +171,25 @@ export default {
           toUserId: this.$route.params.id
         }
         this.$axios.post(`/api/user/${pl.fromUserId}/privateLetter/${pl.toUserId}`, pl).then((r) => {
-          console.log('send suc!')
+          let res = r.data.data
+          this.$socket.emit('sendPrivateLetter', {
+            fromId: this.loginInfo.userId,
+            toId: res.toId,
+            content: res.privateLetterContent,
+            createdAt: res.createdAt,
+            userAvatar: this.loginInfo.userAvatar,
+            userNickname: this.loginInfo.userNickname
+          })
+          this.addMessageLocal({
+            type: 'privateLetter',
+            content: {
+              id: res.fromId,
+              isMe: res.fromId === this.loginInfo.userId,
+              content: res.privateLetterContent,
+              time: res.createdAt
+            }
+          }) 
+          this.scrollToBottom()
         })
         this.privateLetterContent = ''
       }
@@ -89,6 +206,10 @@ export default {
 .chat-item
   display flex
   width 100%
+  justify-content center
+  .time
+    margin-top 10px
+    font-size $font-size-small-s
   & > div
     flex 1
     display flex
@@ -104,7 +225,6 @@ export default {
     margin 0 15px
   .left
     margin-right 100px
-    float left
     .content
       &:after
         display block
@@ -115,9 +235,8 @@ export default {
         border-right 8px solid #fff
         content ''
   .right
+    justify-content flex-end
     margin-left 100px
-    float right
-    width 100%
     .content
       &:after
         display block

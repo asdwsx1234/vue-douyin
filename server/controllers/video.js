@@ -122,7 +122,7 @@ module.exports = {
       if (Number(page) === 1) {
         let topCommentId = await redisClient.zrevrange(`${KEY_COMMENT_LIKE_NUM}:${vi.videoId}`, 0, TOP_LIKE_COMMENT_NUM - 1)
         for (let i = 0, len = topCommentId.length; i < len; i++) {
-          let res = await db.sequelize.query(`select CommentInfo.commentId,CommentInfo.commentContent,CommentInfo.commentReplyID,CommentInfo.createdAt,UserInfo.userId,UserInfo.userNickname,UserInfo.userAvatar from CommentInfo
+          let res = await db.sequelize.query(`select CommentInfo.commentId,CommentInfo.videoId,CommentInfo.commentContent,CommentInfo.commentReplyID,CommentInfo.createdAt,UserInfo.userId,UserInfo.userNickname,UserInfo.userAvatar from CommentInfo
           inner join UserInfo
           on CommentInfo.userId = UserInfo.userId
           where CommentInfo.commentId = '${topCommentId[i]}'`)
@@ -130,7 +130,7 @@ module.exports = {
           let replyComment
           let likeNum = await redisClient.zscore(`${KEY_COMMENT_LIKE_NUM}:${vi.videoId}`, topCommentId[i])
           if (comment.commentReplyID !== '') {
-            let res = await db.sequelize.query(`select CommentInfo.commentId,CommentInfo.commentContent,CommentInfo.commentReplyID,CommentInfo.createdAt,UserInfo.userId,UserInfo.userNickname,UserInfo.userAvatar from CommentInfo
+            let res = await db.sequelize.query(`select CommentInfo.commentId,CommentInfo.videoId,CommentInfo.commentContent,CommentInfo.commentReplyID,CommentInfo.createdAt,UserInfo.userId,UserInfo.userNickname,UserInfo.userAvatar from CommentInfo
             inner join UserInfo
             on CommentInfo.userId = UserInfo.userId
             where CommentInfo.commentId = '${comment.commentReplyID}'`)

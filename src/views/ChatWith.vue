@@ -186,8 +186,7 @@ export default {
             }
           })
           this.$store.commit('UPDATE_PRIVATELETTER', {
-            fromId: res.fromId,
-            toId: res.toId,
+            fromId: res.toId,
             content: res.privateLetterContent,
             createdAt: res.createdAt,
             userAvatar: this.loginInfo.userAvatar,

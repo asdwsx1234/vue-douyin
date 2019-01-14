@@ -266,7 +266,8 @@ export default {
           color $color-desc
           font-size $font-size-small
       .icon-message
-        margin-right 40px
+        margin-right 30px
+        padding 10px
         font-size $font-size-large
   .search-bar-wrap
     padding 10px 20px

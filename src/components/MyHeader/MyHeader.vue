@@ -28,7 +28,7 @@ export default {
   },
   methods: {
     GoBack () {
-      this.$router.back()
+      this.$router.push('/message')
     }
   }
 }
@@ -48,6 +48,8 @@ export default {
   .back-wrap
     position absolute
     left: 10px
+    .icon-left
+      padding 10px
   .contact-wrap
     position absolute
     right 10px

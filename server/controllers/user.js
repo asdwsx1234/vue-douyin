@@ -1012,7 +1012,25 @@ module.exports = {
       }
     })
     if (user) {
-      let res = await db.sequelize.query(`select a.fromId,b.userNickname,b.userAvatar,( select count(*)
+      // await db.sequelize.query(`SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));`)
+      // 自己发送的但是对方未回的
+      let res = await db.sequelize.query(`select a.toId as fromId,b.userNickname,b.userAvatar,(0) as unread,
+            (select privateLetterContent from PrivateLetter d
+            where (d.toId = a.toId and d.fromId = a.fromId)
+            or (d.toId = a.fromId and d.fromId = a.toId)
+            order by d.createdAt desc
+            limit 1) as content,(
+            select f.createdAt from PrivateLetter f
+            where (f.toId = a.toId and f.fromId = a.fromId)
+            or (f.toId = a.fromId and f.fromId = a.toId)
+            order by f.createdAt desc
+            limit 1) as createdAt
+      from PrivateLetter a
+      join userInfo b on a.fromId = '${userId}'
+      and a.toId = b.userId
+      group by toId`)
+      
+      let res1 = await db.sequelize.query(`select a.fromId,b.userNickname,b.userAvatar,( select count(*)
       from PrivateLetter c
       where c.isRead = false
       AND c.toId = a.toId
@@ -1031,7 +1049,7 @@ module.exports = {
       join userInfo b on a.toId = '${userId}'
       and a.fromId = b.userId
       group by fromId`)
-      ctx.rest(res[0])
+      ctx.rest(res[0].concat(res1[0]))
     } else {
       throw new APIError('user:not_found', 'user not found by userId.')
     }

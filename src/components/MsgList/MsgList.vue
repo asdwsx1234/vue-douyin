@@ -1,10 +1,10 @@
 <template>
   <swipeout class="message-list">
-    <swipeout-item class="message-item" v-for="item in items" :key="item.fromId">
+    <swipeout-item class="message-item" v-for="item in items" :key="item.fromId" >
         <div slot="right-menu">
           <swipeout-button type="warn">删除</swipeout-button>
         </div>
-        <div slot="content" class="front">
+        <div slot="content" class="front" @click="chatWith(item)">
           <img class="avatar" :src="`${baseURL}${item.userAvatar}`" alt="" width="50" height="50">
           <div class="right">
             <div class="top">
@@ -38,6 +38,9 @@ export default {
     }
   },
   methods: {
+    chatWith (item) {
+      this.$router.push({ path: `/ChatWith/${item.fromId}`, query: { userNickname: item.userNickname, userAvatar: item.userAvatar } })
+    },
     formatTime
   },
   components: {

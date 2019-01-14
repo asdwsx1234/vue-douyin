@@ -1,5 +1,5 @@
 import * as types from './mutation-types'
-
+import { deduplicatePrivateLetter } from 'common/js/util'
 const mutations = {
   [types.SET_ISLOGGED] (state, isLogged) {
     state.isLogged = isLogged
@@ -17,7 +17,7 @@ const mutations = {
     state.byCommentUnreadNum = byCommentUnreadNum
   },
   [types.SET_ALLPRIVATELETTER] (state, allPrivateLetter) {
-    state.allPrivateLetter = allPrivateLetter
+    state.allPrivateLetter = deduplicatePrivateLetter(allPrivateLetter)
   },
   [types.UPDATE_PRIVATELETTER] (state, privateLetter) {
     const index = state.allPrivateLetter.findIndex((item) => {

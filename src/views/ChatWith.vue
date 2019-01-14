@@ -1,6 +1,6 @@
 <template>
 <div>
-    <my-list :Title="$route.query.userNickname" :needBottomMargin="true" :scrollToEndFlag="true" ref="scroll" @back="unsubscribe">
+    <my-list :Title="$route.query.userNickname" :needBottomMargin="true" :scrollToEndFlag="true" ref="scroll">
       <div class="chat-item" v-for="item in chatList" :key="item.id">
         <div class="right" v-if="item.type !== 'time' && item.content.isMe">
           <div class="content">
@@ -18,7 +18,7 @@
       </div>
     </my-list>
     <div class="input-bar">
-      <input class="input" placeholder="  发送消息..." type="text" v-model="privateLetterContent">
+      <input class="input" placeholder="  发送消息..." type="text" v-model="privateLetterContent" @keyup.enter="sendPrivateLetter">
       <span class="iconfont icon-at"></span>
       <span class="iconfont icon-check" @click="sendPrivateLetter"></span>
     </div>
@@ -32,14 +32,13 @@ import { parseChatTime } from 'common/js/util'
 import { mapGetters } from 'vuex'
 export default {
   activated () {
-    console.log(1)
     const myId = this.loginInfo.userId
     const otherId = this.$route.params.id
     this.resetAndGetUnread(otherId)
     this.getPrivateLetter(myId, otherId)
     this.readPrivateLetter(myId, otherId)
     this.sockets.subscribe('receivePrivateLetter', (data) => {
-      if(data.fromId === this.loginInfo.userId) return
+      if (data.fromId === this.loginInfo.userId) return
       this.addMessageLocal({
         type: 'privateLetter',
         content: {
@@ -56,8 +55,8 @@ export default {
         createdAt: data.createdAt,
         userAvatar: data.userAvatar,
         userNickname: data.userNickname,
-        type:'privateLetter',
-        isEnterChat: this.$route.params.id === data.fromId  // 是否进入了聊天页面，进入了的话那么该条消息的unread就是0
+        type: 'privateLetter',
+        isEnterChat: this.$route.params.id === data.fromId // 是否进入了聊天页面，进入了的话那么该条消息的unread就是0
       })
       this.scrollToBottom()
     })
@@ -85,9 +84,6 @@ export default {
     }
   },
   methods: {
-    unsubscribe () {
-      this.sockets.unsubscribe('receivePrivateLetter')
-    },
     scrollToBottom () {
       setTimeout(() => {
         const scroll = this.$refs.scroll.$children[0]
@@ -188,12 +184,26 @@ export default {
               content: res.privateLetterContent,
               time: res.createdAt
             }
-          }) 
+          })
+          this.$store.commit('UPDATE_PRIVATELETTER', {
+            fromId: res.fromId,
+            toId: res.toId,
+            content: res.privateLetterContent,
+            createdAt: res.createdAt,
+            userAvatar: this.loginInfo.userAvatar,
+            userNickname: this.$route.query.userNickname,
+            type: 'privateLetter',
+            isEnterChat: true // 是否进入了聊天页面，进入了的话那么该条消息的unread就是0
+          })
           this.scrollToBottom()
         })
         this.privateLetterContent = ''
       }
     }
+  },
+  beforeRouteLeave (to, from, next) {
+    this.sockets.unsubscribe('receivePrivateLetter')
+    next()
   },
   components: {
     MyList

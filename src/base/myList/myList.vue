@@ -32,7 +32,6 @@ export default {
   methods: {
     GoBack () {
       this.$router.back()
-      this.$emit('back')
     },
     scrollToEnd () {
       this.$emit('scrollToEnd')

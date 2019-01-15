@@ -7,7 +7,18 @@
     <div class="backbtn-wrap" :class="{showbgcolor: fiexedtopshow}">
       <span class="backbtn iconfont icon-left" v-show="this.$route.params.id !== 'me'" @click.stop="GoBack"></span>
       <p class="name" :class="{showname: fiexedtopshow}" v-text="userInfo.userNickname"></p>
-      <span class="dotbtn iconfont icon-ellipsis"></span>
+      <div class="dotbtn iconfont icon-ellipsis" v-show="this.$route.params.id === 'me'" @click="showMenu = !showMenu">
+        <transition name="up">
+            <div class="more-menu" v-show="showMenu">
+              <div class="menu-item" @click="showModifyInfomation = true">
+                修改个人资料
+              </div>
+              <div class="menu-item" @click="logout">
+                注销
+              </div>
+            </div>
+        </transition>
+      </div>
     </div>
     <div class="background" :style="bgimgStyle" @touchstart.prevent>
       <img class="bg" src="./1.jpg" alt="">
@@ -21,7 +32,6 @@
             :pullup="true"
             @scrollToEnd="scrollToEnd">
       <div class="profile">
-        <a class="logout" v-show="this.$route.params.id === 'me'" @click="logout">logout</a>
         <div class="avatar-wrap">
           <img class="avatar" :src="`${baseURL}${userInfo.userAvatar}`" alt="">
         </div>
@@ -65,12 +75,17 @@
         @close="closeCommentList"
         @scrollToEnd="fetchCommentsAndShowList"></comment-list>
     </transition>
-    <transition name="up">
+    <transition name="left">
       <play-list
         class="play-list"
         ref="playList"
         v-show="showPlayList"
         @close="showPlayList=false"></play-list>
+    </transition>
+    <transition name="left">
+      <modify-infomation
+        v-show="showModifyInfomation"
+        @closeModifyInfomation="showModifyInfomation = false"></modify-infomation>
     </transition>
 </div>
 </template>
@@ -79,9 +94,10 @@
 import Scroll from 'base/scroll/scroll'
 import MeTab from 'components/MeTab/MeTab'
 import CommentList from 'components/CommentList/CommentList'
+import PlayList from 'components/PlayList/PlayList'
+import ModifyInfomation from 'components/ModifyInfomation/ModifyInfomation'
 import { baseURL } from 'common/js/config'
 import { mapGetters, mapMutations } from 'vuex'
-import PlayList from 'components/PlayList/PlayList'
 import { deduplicateCommentList } from 'common/js/util'
 
 const VIDEO_NUM_PER_REQUEST = 21
@@ -118,9 +134,11 @@ export default {
       byLikeNum: 0,
       followerNum: 0,
       bgimgHeight: 150,
+      showMenu: false,
       showPlayList: false,
       fiexedtopshow: false,
       showCommentList: false,
+      showModifyInfomation: false,
       commentList: [],
       currentCommentVideoId: ''
     }
@@ -270,7 +288,8 @@ export default {
     Scroll,
     MeTab,
     CommentList,
-    PlayList
+    PlayList,
+    ModifyInfomation
   }
 }
 </script>
@@ -282,6 +301,11 @@ export default {
 .up-enter, .up-leave-to
   opacity 0
   transform translateY(100%)
+.left-enter-active, .left-leave-active
+  transition all .5s
+.left-enter, .left-leave-to
+  opacity 0
+  transform translateX(100%)
 .play-list
   position fixed
   z-index 9999
@@ -321,12 +345,35 @@ export default {
     border-radius 50%
     font-size $font-size-small
   .dotbtn
+    position relative
     margin-right 10px
     padding 8px
     background rgba(22, 24, 35, .6)
     border-radius 50%
     font-size $font-size-small
     font-weight 600
+    .more-menu
+      position absolute
+      top 40px
+      right -2px
+      width 80px
+      display flex
+      flex-direction column
+      background rgba(22, 24, 35, .6)
+      .menu-item
+        flex 1
+        line-height 44px
+        height 44px
+        width 100%
+        text-align center
+      &:after
+        display block
+        position absolute
+        top -16px
+        right 8px
+        border 8px solid transparent
+        border-bottom 8px solid rgba(22, 24, 35, .6)
+        content ''
 .profile
   .background
     width 100%

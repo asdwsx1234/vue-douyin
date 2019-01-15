@@ -1,6 +1,6 @@
 <template>
 <div class="contact-wrap">
-  <my-header class="header-border" title="选择联系人" :hasBack="true"></my-header>
+  <my-header title="选择联系人" :hasBack="true" :goBack="goBack"></my-header>
   <list-view :data="groups" :list="list" @select="chooseUser"></list-view>
 </div>
 </template>
@@ -24,6 +24,9 @@ export default {
     }
   },
   methods: {
+    goBack () {
+      this.$router.push('/message')
+    },
     chooseUser (item) {
       this.$router.push(`/profile/${item.userId}`)
     },
@@ -85,6 +88,4 @@ export default {
   bottom 0
   left 0
   right 0
-  .header-border
-    border-bottom .5px solid $color-divide
 </style>

@@ -1012,8 +1012,8 @@ module.exports = {
       }
     })
     if (user) {
-      // await db.sequelize.query(`SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));`)
-      // 自己发送的但是对方未回的
+      // SET GLOBAL sql_mode = 'STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION';
+      // 自己发送的但是对方未回的(新建会话)
       let res = await db.sequelize.query(`select a.toId as fromId,b.userNickname,b.userAvatar,(0) as unread,
             (select privateLetterContent from PrivateLetter d
             where (d.toId = a.toId and d.fromId = a.fromId)
@@ -1029,7 +1029,6 @@ module.exports = {
       join userInfo b on a.fromId = '${userId}'
       and a.toId = b.userId
       group by toId`)
-      
       let res1 = await db.sequelize.query(`select a.fromId,b.userNickname,b.userAvatar,( select count(*)
       from PrivateLetter c
       where c.isRead = false

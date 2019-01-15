@@ -1,7 +1,7 @@
 <template>
   <div class="my-header">
     <div class="back-wrap" v-if="hasBack">
-      <span class="iconfont icon-left" @click="GoBack"></span>
+      <span class="iconfont icon-left" @click="goBack"></span>
     </div>
     <div>
       <span>
@@ -24,11 +24,10 @@ export default {
     hasBack: {
       type: Boolean,
       default: false
-    }
-  },
-  methods: {
-    GoBack () {
-      this.$router.push('/message')
+    },
+    goBack: {
+      type: Function,
+      default: function () {}
     }
   }
 }
@@ -45,6 +44,7 @@ export default {
   line-height 44px
   font-size $font-size-medium-x
   z-index 33
+  border-bottom .5px solid $color-divide
   .back-wrap
     position absolute
     left: 10px

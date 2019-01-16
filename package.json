@@ -10,6 +10,7 @@
   "dependencies": {
     "axios": "^0.18.0",
     "better-scroll": "^1.13.2",
+    "cropperjs": "^1.4.3",
     "ioredis": "^4.3.0",
     "koa": "^2.6.2",
     "koa-bodyparser": "3.2.0",

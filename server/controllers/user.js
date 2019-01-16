@@ -1,4 +1,6 @@
 const db = require('../db')
+const fs = require('fs')
+const path = require('path')
 const crypto = require('crypto')
 const redisClient = require('../redis')
 const APIError = require('../rest').APIError
@@ -159,19 +161,27 @@ module.exports = {
       throw new APIError('user:not_found', 'user not found by userId.')
     }
   },
-  'PUT /api/user/:userId/modifyUserInfo': async (ctx, next) => {
+  'POST /api/user/:userId/uploadAvatar': async (ctx, next) => {
+    const file = ctx.request.body.fieldName
+    const userId = ctx.params.userId
+    const base64Data = file.replace(/^data:image\/\w+;base64,/, '')
+    let dataBuffer = Buffer.from(base64Data, 'base64')
+    let r = fs.writeFileSync(path.join(__dirname, `../static/assets/avatar/${userId}.png`), dataBuffer)
+    ctx.rest(r)
+  },
+  'POST /api/user/:userId/modifyUserInfo': async (ctx, next) => {
     const user = {
       Id: ctx.params.userId,
-      Nickname: ctx.request.body.nickName,
-      Avatar: ctx.request.body.avatar,
-      Address: ctx.request.body.address,
-      Gender: ctx.request.body.gender,
-      Age: ctx.request.body.age,
-      Desc: ctx.request.body.desc
+      Nickname: ctx.request.body.userNickname,
+      Avatar: ctx.request.body.userAvatar,
+      Address: ctx.request.body.userAddress,
+      Gender: ctx.request.body.userGender,
+      Age: ctx.request.body.userAge,
+      Desc: ctx.request.body.userDesc
     }
     const ur = UserRegister.findOne({
       where: {
-        userId: user.Id
+        'userId': user.Id
       }
     })
     if (ur) {

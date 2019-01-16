@@ -1,11 +1,14 @@
 <template>
   <div class="modify-information-wrap">
+    <confirm :text="'是否保存修改'"
+      @confirm="confirm"
+      @cancel="cancel"
+      ref="confirm"></confirm>
     <my-header title="编辑个人资料" :hasBack="true" :goBack="goBack"></my-header>
     <div class="content">
       <div class="content-item">
-        <img class="avatar" :src="`${baseURL}${loginInfo.userAvatar}`" alt="" width="100" height="100" ref="avatar">
-        <span class="desc">点击更换头像</span>
-        <input class="img-input" type="file" accept="image/*" id="avatar" @change="imgChange">
+        <avatar-cropper :avatarImage="avatarUrl"
+        @getAvatarImage="getAvatarImage"></avatar-cropper>
       </div>
       <div class="content-item">
         <p>昵称</p><input class="input" type="text" name="nickname" id="nickname" :value="loginInfo.userNickname">
@@ -30,13 +33,22 @@
 
 <script>
 import MyHeader from 'components/MyHeader/MyHeader'
+import AvatarCropper from 'components/AvatarCropper/AvatarCropper'
+import Confirm from 'base/confirm/confirm'
 import { baseURL } from 'common/js/config'
 import { mapGetters } from 'vuex'
 export default {
   data () {
     return {
-      baseURL
+      baseURL,
+      avatarUrl: '',
+      isChanged: false,
+      avatarIsChanged: false,
+      userInfo: {}
     }
+  },
+  mounted () {
+    this.avatarUrl = `${this.baseURL}${this.loginInfo.userAvatar}`
   },
   computed: {
     ...mapGetters([
@@ -44,28 +56,58 @@ export default {
     ])
   },
   methods: {
-    imgChange () {
-      console.log(this)
+    getAvatarImage (url) {
+      this.avatarUrl = url
     },
-    goBack () {
+    async goBack () {
       let age = document.getElementById('age')
       let desc = document.getElementById('desc')
       let gender = document.getElementById('gender')
       let address = document.getElementById('address')
       let nickname = document.getElementById('nickname')
-      let userInfo = {
-        nickname: nickname.value,
-        desc: desc.value,
-        gender: gender.value === '1' ? '男' : '女',
-        age: age.value,
-        address: address.value
+      this.userInfo = {
+        userNickname: nickname.value,
+        userDesc: desc.value,
+        userGender: gender.value === '1' ? '男' : '女',
+        userAge: age.value,
+        userAddress: address.value,
+        userAvatar: `/assets/avatar/${this.loginInfo.userId}.png`
       }
-      console.log(userInfo)
+      for (let key in this.userInfo) {
+        if (this.userInfo[key] !== String(this.loginInfo[key])) {
+          this.isChanged = true
+          if (key === 'userAvatar') {
+            this.avatarIsChanged = true
+            break
+          }
+        }
+      }
+      if (this.isChanged) {
+        this.$refs.confirm.show()
+      } else {
+        this.$emit('closeModifyInfomation')
+      }
+    },
+    async confirm () {
+      if (this.avatarIsChanged) {
+        let r = await this.$axios.post(`/api/user/${this.loginInfo.userId}/uploadAvatar`, {
+          fieldName: this.avatarUrl
+        })
+        if (r.status === 200) await this.$axios.post(`/api/user/${this.loginInfo.userId}/modifyUserInfo`, this.userInfo)
+      } else {
+        await this.$axios.put(`/api/user/${this.loginInfo.userId}/modifyUserInfo`, this.userInfo)
+      }
+      this.$emit('closeModifyInfomation')
+    },
+    cancel () {
+      this.avatarUrl = `${this.baseURL}${this.loginInfo.userAvatar}`
       this.$emit('closeModifyInfomation')
     }
   },
   components: {
-    MyHeader
+    MyHeader,
+    AvatarCropper,
+    Confirm
   }
 }
 </script>
@@ -90,12 +132,6 @@ export default {
       line-height 44px
       height 44px
       justify-content space-between
-      .img-input
-        position absolute
-        opacity 0
-        top 20px
-        width 100px
-        height 140px
       .input
         background $color-background
         color $color-text
@@ -107,10 +143,4 @@ export default {
         flex-direction column
         align-items center
         border-bottom 1px solid $color-divide
-      .avatar
-        margin 20px 0
-        border-radius 50%
-      .desc
-        font-size $font-size-small
-        color $color-desc
 </style>

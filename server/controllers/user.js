@@ -185,7 +185,11 @@ module.exports = {
       }
     })
     if (ur) {
-      let userinfo = await ur.getUserInfo()
+      let userinfo = await UserInfo.findOne({
+        where: {
+          'userId': user.Id
+        }
+      })
       userinfo.userNickname = user.Nickname
       userinfo.userAvatar = user.Avatar
       userinfo.userAddress = user.Address
@@ -193,6 +197,7 @@ module.exports = {
       userinfo.userAge = user.Age
       userinfo.userDesc = user.Desc
       await userinfo.save()
+      ctx.rest(userinfo)
     } else {
       throw new APIError('user:not_found', 'user not found by userId.')
     }

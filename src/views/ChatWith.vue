@@ -189,7 +189,7 @@ export default {
             fromId: res.toId,
             content: res.privateLetterContent,
             createdAt: res.createdAt,
-            userAvatar: this.loginInfo.userAvatar,
+            userAvatar: this.$route.query.userAvatar,
             userNickname: this.$route.query.userNickname,
             type: 'privateLetter',
             isEnterChat: true // 是否进入了聊天页面，进入了的话那么该条消息的unread就是0

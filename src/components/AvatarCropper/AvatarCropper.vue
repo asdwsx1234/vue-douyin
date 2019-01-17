@@ -4,6 +4,7 @@
       <div>
         <img id="image" :src="url">
       </div>
+      <button type="button" id="cancel-button" @click="panel = false">取消</button>
       <button type="button" id="button" @click="crop">确定</button>
     </div>
     <div>
@@ -110,6 +111,10 @@ export default {
   right 0
   background #fff
   z-index 10000
+#cancel-button
+  position absolute
+  right 20px
+  top 60px
 #button
   position absolute
   right 20px

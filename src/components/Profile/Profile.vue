@@ -84,7 +84,8 @@
     </transition>
     <transition name="left">
       <modify-infomation
-        v-show="showModifyInfomation"
+        v-if="showModifyInfomation"
+        @InfomationChanged="InfomationChanged"
         @closeModifyInfomation="showModifyInfomation = false"></modify-infomation>
     </transition>
 </div>
@@ -157,6 +158,11 @@ export default {
     ])
   },
   methods: {
+    InfomationChanged (userinfo) {
+      this.userInfo = Object.assign({}, this.loginInfo, userinfo)
+      console.log(this.userInfo)
+      this.userInfo.userAvatar += `?v=${Math.random()}`
+    },
     scrollHandler (pos) {
       if (this.showCommentList) {
         this.showCommentList = false

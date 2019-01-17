@@ -48,7 +48,7 @@ export default {
     }
   },
   mounted () {
-    this.avatarUrl = `${this.baseURL}${this.loginInfo.userAvatar}`
+    this.avatarUrl = `${this.baseURL}${this.loginInfo.userAvatar}?v=${Math.random()}`
   },
   computed: {
     ...mapGetters([
@@ -58,6 +58,7 @@ export default {
   methods: {
     getAvatarImage (url) {
       this.avatarUrl = url
+      this.avatarIsChanged = true
     },
     async goBack () {
       let age = document.getElementById('age')
@@ -70,19 +71,15 @@ export default {
         userDesc: desc.value,
         userGender: gender.value === '1' ? '男' : '女',
         userAge: age.value,
-        userAddress: address.value,
-        userAvatar: `/assets/avatar/${this.loginInfo.userId}.png`
+        userAddress: address.value
       }
       for (let key in this.userInfo) {
         if (this.userInfo[key] !== String(this.loginInfo[key])) {
           this.isChanged = true
-          if (key === 'userAvatar') {
-            this.avatarIsChanged = true
-            break
-          }
+          break
         }
       }
-      if (this.isChanged) {
+      if (this.isChanged || this.avatarIsChanged) {
         this.$refs.confirm.show()
       } else {
         this.$emit('closeModifyInfomation')
@@ -93,10 +90,13 @@ export default {
         let r = await this.$axios.post(`/api/user/${this.loginInfo.userId}/uploadAvatar`, {
           fieldName: this.avatarUrl
         })
+        this.userInfo.userAvatar = `/assets/avatar/${this.loginInfo.userId}.png`
         if (r.status === 200) await this.$axios.post(`/api/user/${this.loginInfo.userId}/modifyUserInfo`, this.userInfo)
       } else {
-        await this.$axios.put(`/api/user/${this.loginInfo.userId}/modifyUserInfo`, this.userInfo)
+        await this.$axios.post(`/api/user/${this.loginInfo.userId}/modifyUserInfo`, this.userInfo)
       }
+      this.$store.dispatch('persistentConnection')
+      this.$emit('InfomationChanged', this.userInfo)
       this.$emit('closeModifyInfomation')
     },
     cancel () {

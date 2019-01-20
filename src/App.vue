@@ -1,10 +1,8 @@
 <template>
   <div id="app" :class="{ bcBlack: isHome }">
-    <div>
-      <keep-alive exclude="me">
-        <router-view/>
-      </keep-alive>
-    </div>
+    <keep-alive exclude="me">
+      <router-view/>
+    </keep-alive>
     <div class="tab-wrap">
       <home-tab></home-tab>
     </div>

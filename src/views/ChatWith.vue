@@ -1,6 +1,6 @@
 <template>
 <div>
-    <my-list :Title="$route.query.userNickname" :needBottomMargin="true" :scrollToEndFlag="true" ref="scroll">
+    <my-list :Title="$route.query.userNickname" :needBottomMargin="true" ref="scroll">
       <div class="chat-item" v-for="item in chatList" :key="item.id">
         <div class="right" v-if="item.type !== 'time' && item.content.isMe">
           <div class="content">

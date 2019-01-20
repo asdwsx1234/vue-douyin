@@ -160,7 +160,6 @@ export default {
   methods: {
     InfomationChanged (userinfo) {
       this.userInfo = Object.assign({}, this.loginInfo, userinfo)
-      console.log(this.userInfo)
       this.userInfo.userAvatar += `?v=${Math.random()}`
     },
     scrollHandler (pos) {
@@ -220,8 +219,8 @@ export default {
       }
     },
     GoBack () {
-      let path = localStorage.getItem('Routefrom')
-      this.$router.push(path)
+      // let path = localStorage.getItem('Routefrom')
+      this.$router.back()
     },
     GoInterestList () {
       this.$router.push(`/InterestList/${this.$route.params.id}`)

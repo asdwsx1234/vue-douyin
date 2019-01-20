@@ -1,13 +1,13 @@
 <template>
 <div class="search-list">
   <ul>
-    <li class="search-item" v-for="item in searches" :key="item.id">
+    <li class="search-item" v-for="item in searches" :key="item.id" @click="selectItem(item)">
       <img class="avatar" :src="`${baseURL}${item.userAvatar}`" width="50" height="50">
       <div class="main">
         <span class="name">{{item.userNickname}}</span>
         <span class="desc">{{item.userDesc}}</span>
       </div>
-      <span class="iconfont icon-message"></span>
+      <span class="iconfont icon-message" @click.stop="chatWith(item)"></span>
     </li>
   </ul>
 </div>
@@ -27,6 +27,14 @@ export default {
   data () {
     return {
       baseURL
+    }
+  },
+  methods: {
+    selectItem (item) {
+      this.$emit('select', item)
+    },
+    chatWith (item) {
+      this.$router.push({ path: `/ChatWith/${item.userId}`, query: { userNickname: item.userNickname, userAvatar: item.userAvatar } })
     }
   }
 }
@@ -55,6 +63,7 @@ export default {
         color $color-desc
         font-size $font-size-small
     .icon-message
-      margin-right 40px
+      margin-right 30px
+      padding 10px
       font-size $font-size-large
 </style>

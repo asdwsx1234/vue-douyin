@@ -1145,6 +1145,73 @@ module.exports = {
     }
     const c = await PrivateLetter.create(pl)
     ctx.rest(c)
+  },
+  'POST /api/user/:userId/searchUser/:page': async (ctx, next) => {
+    const userId = ctx.params.userId
+    const key = ctx.request.body.key
+    let page = ctx.params.page
+    if (page < 0 || isNaN(Number(page))) page = 1
+    const user = await UserRegister.findOne({
+      where: {
+        userId
+      }
+    })
+    if (user) {
+      let res = await db.sequelize.query(`select a.userId,b.userNickname,b.userAvatar,b.userDesc
+      from UserRegister a
+      inner join userInfo b 
+      on a.userId = b.userId
+      where a.userId like '%${key}%' or b.userNickname like '%${key}%' and a.userId != '${userId}' 
+      limit ${PER_PAGE_LIMIT_NUM} offset ${(page - 1) * PER_PAGE_LIMIT_NUM}`)
+      let result = res[0]
+      for (let i = 0, len = result.length; i < len; i++) {
+        let temp = result[i]
+        temp.myRelation = await UserController.getRelation(userId, temp.userId)
+      }
+      ctx.rest(result)
+    } else {
+      throw new APIError('user:not_found', 'user not found by userId.')
+    }
+  },
+  'POST /api/user/:userId/searchVideo/:page': async (ctx, next) => {
+    const userId = ctx.params.userId
+    const key = ctx.request.body.key
+    let page = ctx.params.page
+    if (page < 0 || isNaN(Number(page))) page = 1
+    const user = await UserRegister.findOne({
+      where: {
+        userId
+      }
+    })
+    if (user) {
+      let res = await db.sequelize.query(`select a.userId,a.videoId,a.videoCover,a.videoDesc,a.videoPath,b.userNickname,b.userAvatar,b.userDesc
+      from VideoInfo a
+      inner join userInfo b 
+      on a.userId = b.userId
+      where a.videoDesc like '%${key}%' and a.userId != '${userId}'
+      limit ${PER_PAGE_LIMIT_NUM} offset ${(page - 1) * PER_PAGE_LIMIT_NUM}`)
+      let result = res[0]
+      let r = []
+      for (let i = 0, len = result.length; i < len; i++) {
+        let temp = result[i]
+        let shareNum = await redisClient.zscore(KEY_SHARE_NUM, temp.videoId)
+        let watchNum = await redisClient.zscore(KEY_WATCH_NUM, temp.videoId)
+        let commentNum = await redisClient.zscore(KEY_COMMENT_NUM, temp.videoId)
+        let likeNum = await redisClient.zscore(KEY_LIKE_NUM, temp.videoId)
+        r.push({
+          Video: temp,
+          WSLCNum: {
+            shareNum,
+            watchNum,
+            commentNum,
+            likeNum
+          }
+        })
+      }
+      ctx.rest(r)
+    } else {
+      throw new APIError('user:not_found', 'user not found by userId.')
+    }
   }
 }
 

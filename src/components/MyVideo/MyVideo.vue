@@ -12,7 +12,7 @@
       <div class="avatar">
         <img :src="`${baseURL}${VideoItem.Video.userAvatar}`" alt="" width="40" height="40"
           @click="chooseUser">
-        <div class="follow">+</div>
+        <!-- <div class="follow">+</div> -->
       </div>
       <div class="like iconfont icon-heart-fill" :class="{ 'red-heart': like }" @click="toggleLike(VideoItem.Video.videoId)">
         <span class="likenum">{{likeNum}}</span>

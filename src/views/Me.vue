@@ -13,10 +13,10 @@ export default {
     Profile
   },
   beforeRouteEnter (to, from, next) {
-    let names = ['InterestList', 'FanList']
-    if (!names.includes(from.name) && typeof (from.params.id) === 'undefined') {
-      localStorage.setItem('Routefrom', from.path)
-    }
+    // let names = ['InterestList', 'FanList']
+    // if (!names.includes(from.name) && typeof (from.params.id) === 'undefined') {
+    //   localStorage.setItem('Routefrom', from.path)
+    // }
     next()
   }
 }

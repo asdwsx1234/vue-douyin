@@ -41,7 +41,10 @@
     <div class="fixed-title">{{fixedTitle}} </div>
   </div>
   <scroll class="search-list-wrap" v-if="querykey">
-    <search-list :searches="searches"></search-list>
+    <search-list
+    @select="selectItem"
+    :searches="searches">
+    </search-list>
   </scroll>
 </scroll>
 </template>

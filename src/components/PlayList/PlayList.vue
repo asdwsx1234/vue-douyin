@@ -20,6 +20,7 @@
       v-if="showCommentList"
       :commentList="commentList"
       :commentNum="commentNum"
+      :currentCommentVideoId="currentCommentVideoId"
       @close="closeCommentList"
       @scrollToEnd="fetchCommentsAndShowList"></comment-list>
   </transition>
@@ -30,6 +31,7 @@
 import Scroll from 'base/scroll/scroll'
 import MyVideo from 'components/MyVideo/MyVideo'
 import CommentList from 'components/CommentList/CommentList'
+import { deduplicateCommentList } from 'common/js/util'
 import { mapGetters, mapActions } from 'vuex'
 export default {
   data () {
@@ -58,7 +60,6 @@ export default {
       }
     },
     fetchCommentsAndShowList (videoId, commentNum) {
-      if (!this.isLogged) this.showLoginWrap = true
       if (this.currentCommentVideoId !== videoId) {
         this.isEnd = false
         this.page = 1
@@ -68,7 +69,7 @@ export default {
           if (res.data.data.length < 20) {
             this.isEnd = true
           }
-          this.commentList = res.data.data
+          this.commentList = deduplicateCommentList(res.data.data)
           this.showCommentList = true
         })
       } else {
@@ -78,7 +79,7 @@ export default {
           if (res.data.data.length < 20) {
             this.isEnd = true
           }
-          this.commentList = this.commentList.concat(res.data.data)
+          this.commentList = deduplicateCommentList(this.commentList.concat(res.data.data))
           this.showCommentList = true
         })
       }
@@ -89,9 +90,11 @@ export default {
     },
     close () {
       this.$emit('close')
+      
     },
     closeCommentList (e) {
-      if (this.showCommentList) {
+      if (this.showCommentList && (e.target.nodeName === 'VIDEO' || e.target.className.includes('icon-close'))) {
+        this.currentCommentVideoId = ''
         e.stopPropagation()
         this.showCommentList = false
       }

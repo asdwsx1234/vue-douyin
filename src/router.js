@@ -91,6 +91,23 @@ export default new Router({
       name: 'chatwith',
       path: '/ChatWith/:id',
       component: () => import('./views/ChatWith.vue')
+    },
+    {
+      path: '/search/',
+      component: () => import('./views/Search.vue'),
+      redirect: '/search/video',
+      children: [
+        {
+          name: 'search/video',
+          path: 'video',
+          component: () => import('./base/searchVideoList/searchVideoList.vue')
+        },
+        {
+          name: 'search/user',
+          path: 'user',
+          component: () => import('./base/searchUserList/searchUserList.vue')
+        }
+      ]
     }
   ]
 })

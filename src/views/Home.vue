@@ -1,5 +1,6 @@
 <template>
 <div class="wrap" @click.capture="closeCommentList($event)">
+  <span class="iconfont icon-search" @click="$router.push('/search')"></span>
   <tip ref="tip"></tip>
   <scroll class="scroll-wrap"
     ref="scroll"
@@ -162,6 +163,13 @@ export default {
   bottom 0
   left 0
   right 0
+  .icon-search
+    position absolute
+    right 10px
+    top 10px
+    padding 10px
+    font-size 24px
+    z-index 222
   .scroll-wrap
     position absolute
     top 0

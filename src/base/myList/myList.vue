@@ -4,7 +4,7 @@
     <span class="backbtn iconfont icon-left" @click="GoBack"></span>
     <p class="title">{{Title}}</p>
   </div>
-  <scroll class="scroll-wrap" :class=" {'scroll-wrap-bottom':needBottomMargin }" :pullup="true" @scrollToEnd="scrollToEnd" :scrollToEndFlag="scrollToEndFlag">
+  <scroll class="scroll-wrap" :class=" {'scroll-wrap-bottom':needBottomMargin }" :pullup="true" @scrollToEnd="scrollToEnd">
     <ul>
       <slot></slot>
     </ul>
@@ -21,10 +21,6 @@ export default {
       default: ''
     },
     needBottomMargin: {
-      type: Boolean,
-      default: false
-    },
-    scrollToEndFlag: {
       type: Boolean,
       default: false
     }

@@ -43,10 +43,6 @@ export default {
     momentum: {
       type: Boolean,
       default: true
-    },
-    scrollToEndFlag: {
-      type: Boolean,
-      default: false
     }
   },
   mounted () {

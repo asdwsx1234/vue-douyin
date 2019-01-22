@@ -4,6 +4,7 @@ const state = {
   fanUnreadNum: 0,
   byLikeUnreadNum: 0,
   byCommentUnreadNum: 0,
+  followedNewsNum: 0,
   allPrivateLetter: [],
   popularVideo: [],
   playList: []

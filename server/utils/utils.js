@@ -7,6 +7,9 @@ async function incrOrCut (key, deltascore, member) {
   await client.zadd(key, r, member)
 }
 
+
+function ArrayMinus (arr1, arr2)
+
 module.exports = {
   incrOrCut
 }

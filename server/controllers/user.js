@@ -537,6 +537,31 @@ module.exports = {
       throw new APIError('user:not_found', 'user not found by userId.')
     }
   },
+  'GET /api/user/:userId/followedNewsNum': async (ctx, next) => {
+    const userId = ctx.params.userId
+    const user = await UserRegister.findOne({
+      where: {
+        'userId': userId
+      }
+    })
+    if (user) {
+      let followedVideoIdList = await db.sequelize.query(`SELECT VideoInfo.videoId FROM UserRegister
+      inner join UserRelation
+      on UserRelation.fromId = UserRegister.userId
+      inner join VideoInfo
+      on VideoInfo.userId = UserRelation.toId
+      where UserRegister.userId = '${userId}'`)
+      let str = []
+      for (let i = 0, len = followedVideoIdList[0].length; i < len; i++) {
+        str.push(`'${followedVideoIdList[0][i].videoId}'`)
+      }
+      let res = await db.sequelize.query(`SELECT * from WatchInfo where WatchInfo.userId = '${userId}' and WatchInfo.videoId in (${str.join(',')}) 
+      group by WatchInfo.videoId;`)
+      ctx.rest(followedVideoIdList[0].length - res[0].length)
+    } else {
+      throw new APIError('user:not_found', 'user not found by userId.')
+    }
+  },
   'GET /api/user/:userId/byComment/page/:page': async (ctx, next) => {
     const userId = ctx.params.userId
     let page = ctx.params.page
@@ -946,6 +971,53 @@ module.exports = {
       'userId': fromUserId
     })
     ctx.rest('watch video')
+  },
+  'GET /api/user/:userId/watchAllFollowedNewVideo': async (ctx, next) => {
+    const userId = ctx.params.userId
+    const user = await UserRegister.findOne({
+      where: {
+        'userId': userId
+      }
+    })
+    if (user) {
+      let followedVideoIdList = await db.sequelize.query(`SELECT VideoInfo.videoId FROM UserRegister
+      inner join UserRelation
+      on UserRelation.fromId = UserRegister.userId
+      inner join VideoInfo
+      on VideoInfo.userId = UserRelation.toId
+      where UserRegister.userId = '${userId}'`)
+      let r = await WatchInfo.findAll({
+        where: {
+          userId
+        }
+      })
+      // 将followed的videoId与自己所有的WatchInfo的videoId取差集。
+      let allWatch = []
+      for (let i = 0, len = r.data.length; i < len; i++) {
+        allWatch.push(r.data[i].videoId)
+      }
+      let videoIdList = followedVideoIdList[0]
+      let followedVideoId = []
+      for (let i = 0, len = videoIdList.length; i < len; i++) {
+        followedVideoId.push(videoIdList[i].videoId)
+      }
+      // let watchInfos = []
+      // for (let i = 0, len = videoIdList.length; i < len; i++) {
+      //   let time = new Date().getTime()
+      //   watchInfos.push({
+      //     'id': db.generateId(),
+      //     'videoId': videoIdList[i].videoId,
+      //     'userId': userId,
+      //     'createdAt': time,
+      //     'updatedAt': time,
+      //     'version': 0
+      //   })
+      // }
+      // let r = await WatchInfo.bulkCreate(watchInfos)
+      ctx.rest(r)
+    } else {
+      throw new APIError('user:not_found', 'user not found by userId.')
+    }
   },
   'GET /api/user/:fromUserId/share/:toVideoId': async (ctx, next) => {
     const fromUserId = ctx.params.fromUserId

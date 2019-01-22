@@ -4,7 +4,10 @@
     <span class="tab-link">首页</span>
   </router-link>
   <router-link tag="div" class="tab-item" to="/followed">
-    <span class="tab-link">关注</span>
+    <span class="tab-link">
+      关注
+      <span class="point1" :class="{ 'point1-plus': followedNewsNum > 99 }" v-show="followedNewsNum!==0">{{followedNewsNum > 99 ? '99+' : followedNewsNum}}</span>
+    </span>
   </router-link>
   <div class="tab-item">
     <span class="tab-btn">+</span>
@@ -47,7 +50,8 @@ export default {
     ...mapGetters([
       'fanUnreadNum',
       'byLikeUnreadNum',
-      'byCommentUnreadNum'
+      'byCommentUnreadNum',
+      'followedNewsNum'
     ])
   }
 }
@@ -84,6 +88,23 @@ export default {
         height 8px
         width 8px
         background #face15
+      .point1
+        position absolute
+        right -16px
+        top -4px
+        border-radius 50%
+        height 16px
+        width 16px
+        background #face15
+        text-align center
+        line-height 16px
+        color $color-background
+        font-size $font-size-small
+        font-weight 600
+      .point1-plus
+        right -28px
+        border-radius 8px
+        width 26px
     &.router-link-active
       .tab-link
         color $color-white

@@ -18,6 +18,7 @@ export const loginByPassword = async ({ dispatch, commit, state }, user) => {
       dispatch('getFanUnreadNum', loginInfo.userId)
       dispatch('getByLikeUnreadNum', loginInfo.userId)
       dispatch('getByCommentUnreadNum', loginInfo.userId)
+      dispatch('getFollowedNewsNum', loginInfo.userId)
       dispatch('getAllPrivateLetter', loginInfo.userId)
     }
   }
@@ -32,6 +33,7 @@ export const persistentConnection = async ({ dispatch, commit, state }) => {
     dispatch('getFanUnreadNum', loginInfo.userId)
     dispatch('getByLikeUnreadNum', loginInfo.userId)
     dispatch('getByCommentUnreadNum', loginInfo.userId)
+    dispatch('getFollowedNewsNum', loginInfo.userId)
     dispatch('getAllPrivateLetter', loginInfo.userId)
     return {
       code: 200
@@ -76,6 +78,14 @@ export const getByCommentUnreadNum = async ({ commit, state }, userId) => {
   let res = await instance.get(`/api/user/${userId}/byCommentUnreadNum`)
   if (res.data.code === 200) {
     commit(types.SET_BYCOMMENTUNREADNUM, res.data.data)
+  } else {
+  }
+}
+
+export const getFollowedNewsNum = async ({ commit, state }, userId) => {
+  let res = await instance.get(`/api/user/${userId}/followedNewsNum`)
+  if (res.data.code === 200) {
+    commit(types.SET_FOLLOWEDNEWSNUM, res.data.data)
   } else {
   }
 }

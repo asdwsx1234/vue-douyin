@@ -6,7 +6,8 @@
       playsinline
       x5-video-player-type="h5"
       preload="none"
-      @click="playHandler"
+      @click="playHandler($event)"
+      @loadeddata="watchHandler"
       ref="video"></video>
     <div class="side-bar">
       <div class="avatar">
@@ -70,9 +71,12 @@ export default {
     ])
   },
   methods: {
-    playHandler () {
-      const v = this.$refs.video
-      v.paused ? v.play() : v.pause()
+    playHandler (e) {
+      this.$emit('playVideo', e)
+    },
+    watchHandler () {
+      this.$axios.get(`/api/user/${this.loginInfo.userId}/watch/${this.VideoItem.Video.videoId}`).then(res => {
+      })
     },
     showCommentList (videoId, commentNum) {
       this.$emit('showCommentList', videoId, commentNum)

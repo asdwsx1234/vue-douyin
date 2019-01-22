@@ -16,6 +16,9 @@ const mutations = {
   [types.SET_BYCOMMENTUNREADNUM] (state, byCommentUnreadNum) {
     state.byCommentUnreadNum = byCommentUnreadNum
   },
+  [types.SET_FOLLOWEDNEWSNUM] (state, followedNewsNum) {
+    state.followedNewsNum = followedNewsNum
+  },
   [types.SET_ALLPRIVATELETTER] (state, allPrivateLetter) {
     state.allPrivateLetter = deduplicatePrivateLetter(allPrivateLetter)
   },

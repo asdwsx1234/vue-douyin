@@ -9,8 +9,10 @@
     :momentum="false"
     @scrollEnd="scrollEnd">
     <div>
-      <my-video v-for="item in playList"
-        :key="item.id"
+      <my-video v-for="(item, index) in playList"
+        ref="videos"
+        :key="index"
+        @playVideo="playHandler"
         :VideoItem="item"
         @showCommentList="fetchCommentsAndShowList"></my-video>
     </div>
@@ -46,6 +48,17 @@ export default {
     }
   },
   methods: {
+    playHandler (e) {
+      let v = e.target
+      if (v.paused) {
+        this.$refs.videos.forEach(item => {
+          item.$refs.video.pause()
+        })
+        v.play()
+      } else {
+        v.pause()
+      }
+    },
     scrollEnd (pos) {
       let clientHeight = this.clientHeight
       if (Math.abs(pos.y) < this.currentY - clientHeight / 2) { // 上一页
@@ -90,7 +103,6 @@ export default {
     },
     close () {
       this.$emit('close')
-      
     },
     closeCommentList (e) {
       if (this.showCommentList && (e.target.nodeName === 'VIDEO' || e.target.className.includes('icon-close'))) {

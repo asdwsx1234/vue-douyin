@@ -2,7 +2,9 @@
 <div @click.capture="closeCommentList($event)">
   <scroll class="list-wrap"
     :data="list"
-    ref="listWrap">
+    ref="listWrap"
+    :pullup="true"
+    @scrollToEnd="fetchVideoList">
     <followed-list :list="list"
       @showCommentList="fetchCommentsAndShowList"></followed-list>
   </scroll>
@@ -22,14 +24,23 @@
 import Scroll from 'base/scroll/scroll'
 import FollowedList from 'components/FollowedList/FollowedList'
 import CommentList from 'components/CommentList/CommentList'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
 import { deduplicateCommentList } from 'common/js/util'
 export default {
   created () {
     this.fetchVideoList()
   },
+  activated () {
+    if (this.isFirst === false && this.followedNewsNum !== 0) {
+      this.videoPage = 0
+      this.videoIsEnd = false
+      this.fetchVideoList()
+    }
+    this.isFirst = false
+  },
   data () {
     return {
+      isFirst: true,
       showCommentList: false,
       commentNum: 0,
       commentList: [],
@@ -37,12 +48,14 @@ export default {
       page: 0,
       currentCommentVideoId: '',
       isEnd: false,
+      videoIsEnd: false,
       list: []
     }
   },
   computed: {
     ...mapGetters([
-      'loginInfo'
+      'loginInfo',
+      'followedNewsNum'
     ])
   },
   methods: {
@@ -80,7 +93,6 @@ export default {
           this.videoIsEnd = true
         }
         this.list = this.list.concat(r.data.data)
-        this.$refs.listWrap.refresh()
       })
     },
     closeCommentList (e) {
@@ -89,6 +101,21 @@ export default {
         e.stopPropagation()
         this.showCommentList = false
       }
+    },
+    ...mapMutations([
+      'SET_FOLLOWEDNEWSNUM'
+    ])
+  },
+  beforeRouteLeave (to, from, next) {
+    if (this.followedNewsNum > 0) {
+      this.$axios.get(`/api/user/${this.loginInfo.userId}/watchAllFollowedNewVideo`).then(r => {
+      if (r.data.code === 200) {
+        this.SET_FOLLOWEDNEWSNUM(0)
+        next()
+      }
+      })
+    } else {
+      next()
     }
   },
   components: {

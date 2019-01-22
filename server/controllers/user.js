@@ -993,28 +993,29 @@ module.exports = {
       })
       // 将followed的videoId与自己所有的WatchInfo的videoId取差集。
       let allWatch = []
-      for (let i = 0, len = r.data.length; i < len; i++) {
-        allWatch.push(r.data[i].videoId)
+      for (let i = 0, len = r.length; i < len; i++) {
+        allWatch.push(r[i].videoId)
       }
       let videoIdList = followedVideoIdList[0]
       let followedVideoId = []
       for (let i = 0, len = videoIdList.length; i < len; i++) {
         followedVideoId.push(videoIdList[i].videoId)
       }
-      // let watchInfos = []
-      // for (let i = 0, len = videoIdList.length; i < len; i++) {
-      //   let time = new Date().getTime()
-      //   watchInfos.push({
-      //     'id': db.generateId(),
-      //     'videoId': videoIdList[i].videoId,
-      //     'userId': userId,
-      //     'createdAt': time,
-      //     'updatedAt': time,
-      //     'version': 0
-      //   })
-      // }
-      // let r = await WatchInfo.bulkCreate(watchInfos)
-      ctx.rest(r)
+      let unWatchVideoId = utils.ArrayMinus(followedVideoId, allWatch)
+      let watchInfos = []
+      for (let i = 0, len = unWatchVideoId.length; i < len; i++) {
+        let time = new Date().getTime()
+        watchInfos.push({
+          'id': db.generateId(),
+          'videoId': unWatchVideoId[i],
+          'userId': userId,
+          'createdAt': time,
+          'updatedAt': time,
+          'version': 0
+        })
+      }
+      let res = await WatchInfo.bulkCreate(watchInfos)
+      ctx.rest(res)
     } else {
       throw new APIError('user:not_found', 'user not found by userId.')
     }

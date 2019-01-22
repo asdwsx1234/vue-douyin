@@ -109,10 +109,10 @@ export default {
   beforeRouteLeave (to, from, next) {
     if (this.followedNewsNum > 0) {
       this.$axios.get(`/api/user/${this.loginInfo.userId}/watchAllFollowedNewVideo`).then(r => {
-      if (r.data.code === 200) {
-        this.SET_FOLLOWEDNEWSNUM(0)
-        next()
-      }
+        if (r.data.code === 200) {
+          this.SET_FOLLOWEDNEWSNUM(0)
+          next()
+        }
       })
     } else {
       next()

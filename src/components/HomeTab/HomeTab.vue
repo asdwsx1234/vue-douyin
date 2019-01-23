@@ -9,9 +9,9 @@
       <span class="point1" :class="{ 'point1-plus': followedNewsNum > 99 }" v-show="followedNewsNum!==0">{{followedNewsNum > 99 ? '99+' : followedNewsNum}}</span>
     </span>
   </router-link>
-  <div class="tab-item">
+  <router-link tag="div" class="tab-item" to="/uploadVideo">
     <span class="tab-btn">+</span>
-  </div>
+  </router-link>
   <router-link tag="div" class="tab-item" to="/message">
     <span class="tab-link">
       消息
@@ -23,7 +23,6 @@
   </router-link>
 </div>
 </template>
-
 <script>
 import { mapGetters } from 'vuex'
 export default {
@@ -53,6 +52,11 @@ export default {
       'byCommentUnreadNum',
       'followedNewsNum'
     ])
+  },
+  methods: {
+    uploadVideo () {
+      this.$emit('uploadVideo')
+    }
   }
 }
 </script>
@@ -68,6 +72,7 @@ export default {
   font-size $font-size-medium
   transition background 0.5s
   .tab-item
+    position relative
     flex 1
     text-align center
     .tab-btn

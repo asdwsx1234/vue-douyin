@@ -1,5 +1,5 @@
 export const regEmail = /^([a-zA-Z0-9]+[_|.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/
-
+export const regVideoUrl = /^https?.+\.(mp4|avi|flv|mpg|rm|mov|asf|3gp|mkv|rmvb)$/i
 export function debounce (func, delay, ctx) {
   let timer = null
   return function (...args) {

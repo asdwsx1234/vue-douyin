@@ -20,6 +20,10 @@ export default {
       }
     })
   },
+  data () {
+    return {
+    }
+  },
   sockets: {
     connect: function () {
       console.log('socket connected')

@@ -1,8 +1,9 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Home from './views/Home.vue'
+import store from './store'
 Vue.use(Router)
-export default new Router({
+let router = new Router({
   routes: [
     {
       path: '/',
@@ -18,6 +19,11 @@ export default new Router({
           component: Home
         }
       ]
+    },
+    {
+      path: '/uploadVideo',
+      name: 'uploadVideo',
+      component: () => import('./views/UploadVideo.vue')
     },
     {
       path: '/followed',
@@ -111,3 +117,13 @@ export default new Router({
     }
   ]
 })
+
+router.beforeEach((to, from, next) => {
+  if (!store.state.isLogged && to.path !== '/home') {
+    next({ path: '/home' })
+  } else {
+    next()
+  }
+})
+
+export default router

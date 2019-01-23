@@ -1004,10 +1004,12 @@ module.exports = {
       let unWatchVideoId = utils.ArrayMinus(followedVideoId, allWatch)
       let watchInfos = []
       for (let i = 0, len = unWatchVideoId.length; i < len; i++) {
+        let videoId = unWatchVideoId[i]
+        utils.incrOrCut(KEY_WATCH_NUM, 1, videoId)
         let time = new Date().getTime()
         watchInfos.push({
           'id': db.generateId(),
-          'videoId': unWatchVideoId[i],
+          'videoId': videoId,
           'userId': userId,
           'createdAt': time,
           'updatedAt': time,

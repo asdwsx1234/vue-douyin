@@ -8,6 +8,7 @@ const staticFiles = require('./staticFiles')
 const bodyParser = require('koa-bodyparser')
 const cors = require('koa2-cors')
 const redisClient = require('./redis')
+const UserRelation = require('./models/UserRelation')
 const VideoInfo = require('./models/VideoInfo')
 const CommentInfo = require('./models/CommentInfo')
 const app = new Koa()
@@ -22,6 +23,18 @@ io.on('connection', socket => {
       userId,
       socketId
     })
+  })
+  socket.on('publishVideo', async data => {
+    const { fromUserId } = data
+    let fansList = await UserRelation.findAll({
+      where: {
+        toId: fromUserId
+      }
+    })
+    for (let i = 0, len = fansList.length; i < len; i++) {
+      const socketId = await redisClient.get(`SOCKET:${fansList[i].fromId}`)
+      io.to(socketId).emit('receiveNewVideo', data)
+    }
   })
   socket.on('sendPrivateLetter', async data => {
     const { toId } = data

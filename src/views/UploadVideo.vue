@@ -6,7 +6,7 @@
       @confirm="confirm"
       @cancel="cancel"
       ref="confirm"></confirm>
-    <my-header title="发布动态" :hasBack="true" :goBack="goBack"></my-header>    
+    <my-header title="发布动态" :hasBack="true" :goBack="goBack"></my-header>
       <div class="content">
         <div class="video-wrap">
           <video class="video" src="" ref="video" @click="playHandler" x5-playsinline="" playsinline="" webkit-playsinline preload="auto"></video>
@@ -36,7 +36,7 @@
 // https://image.pearvideo.com/cont/20190118/cont-1507651-11802750.jpg
 import MyHeader from 'components/MyHeader/MyHeader'
 import Confirm from 'base/confirm/confirm'
-import { baseURL }from 'common/js/config'
+import { baseURL } from 'common/js/config'
 import { regVideoUrl, regCoverUrl } from 'common/js/util'
 import { mapGetters } from 'vuex'
 export default {
@@ -137,7 +137,7 @@ export default {
     },
     async confirm () {
       if (this.isLocalVideoFile) {
-        // 上传视频到服务器 保存入数据库
+        // 本地上传视频到服务器，记录保存入数据库
         let fd = new FormData()
         fd.append('videoPath', this.realVideo)
         let r = await this.$axios.post(`/api/user/uploadFile`, fd)
@@ -150,24 +150,39 @@ export default {
           })
           if (r1.status === 200) {
             // 插入数据库
-            await this.$axios.post(`/api/user/${this.loginInfo.userId}/publishVideo`, {
+            let r2 = await this.$axios.post(`/api/user/${this.loginInfo.userId}/publishVideo`, {
               videoId,
               videoCover: `${baseURL}/assets/videoCover/${videoId}.jpg`,
               videoPath: `${baseURL}/assets/videoPath/${videoId}.${filename.substr(filename.indexOf('.') + 1)}`,
               videoDesc: this.videoDesc
             })
+            if (r2.status === 200) {
+              this.$socket.emit('publishVideo', {
+                fromUserId: this.loginInfo.userId
+              })
+              this.$router.push('home')
+            } else {
+              this.$refs.tip.show('发布失败')
+            }
           }
         }
       } else {
-        // 直接保存入数据库
+        // url上传，直接将记录保存入数据库
         let videoInfo = {
           videoId: undefined,
           videoCover: this.coverUrl,
           videoPath: this.videoUrl,
           videoDesc: this.videoDesc
         }
-        // await this.$axios.post(`/api/user/${this.loginInfo.userId}/publishVideo`, videoInfo)
-        console.log(videoInfo)
+        let r = await this.$axios.post(`/api/user/${this.loginInfo.userId}/publishVideo`, videoInfo)
+        if (r.status === 200) {
+          this.$socket.emit('publishVideo', {
+            fromUserId: this.loginInfo.userId
+          })
+          this.$router.push('home')
+        } else {
+          this.$refs.tip.show('发布失败')
+        }
       }
     },
     cancel () {

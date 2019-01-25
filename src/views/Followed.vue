@@ -34,6 +34,7 @@ export default {
     if (this.isFirst === false && this.followedNewsNum !== 0) {
       this.videoPage = 0
       this.videoIsEnd = false
+      this.list = []
       this.fetchVideoList()
     }
     this.isFirst = false

@@ -229,6 +229,8 @@ export default {
     background #fff
     color #000
     padding 10px
+    word-break break-all
+    flex 1
   .avatar
     border-radius 50%
     margin 0 15px

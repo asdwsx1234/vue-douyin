@@ -43,6 +43,9 @@ export default {
     receiveComment () {
       this.getByCommentUnreadNum(this.loginInfo.userId)
     },
+    receiveNewVideo () {
+      this.getFollowedNewsNum(this.loginInfo.userId)
+    },
     receivePrivateLetter (data) {
       this.UPDATE_PRIVATELETTER({
         fromId: data.fromId,
@@ -69,7 +72,8 @@ export default {
       'persistentConnection',
       'getFanUnreadNum',
       'getByLikeUnreadNum',
-      'getByCommentUnreadNum'
+      'getByCommentUnreadNum',
+      'getFollowedNewsNum'
     ]),
     ...mapMutations([
       'UPDATE_PRIVATELETTER'

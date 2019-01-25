@@ -88,6 +88,7 @@ export default {
         .desc
           color $color-desc
           font-size $font-size-small
+          flex 1
         .point
           border-radius 50%
           height 16px

@@ -6,51 +6,61 @@
       @confirm="confirm"
       @cancel="cancel"
       ref="confirm"></confirm>
-    <my-header title="发布动态" :hasBack="true" :goBack="goBack"></my-header>
-    <div class="content">
-      <div class="video-wrap">
-        <video class="video" src="" ref="video" @click="playHandler" x5-playsinline="" playsinline="" webkit-playsinline preload="auto"></video>
-        <p class="video-guide" v-show="!videoUrl">点击上传或者在下方输入url,推荐使用url</p>
-        <input class="video-input" v-show="!videoUrl" type="file" accept="video/*" @change="change">
+    <my-header title="发布动态" :hasBack="true" :goBack="goBack"></my-header>    
+      <div class="content">
+        <div class="video-wrap">
+          <video class="video" src="" ref="video" @click="playHandler" x5-playsinline="" playsinline="" webkit-playsinline preload="auto"></video>
+          <p class="video-guide" v-show="!videoUrl">点击上传或者在下方输入url,推荐使用url</p>
+          <input class="video-input" v-show="!videoUrl" type="file" id="file" accept="video/*" @change="change">
+        </div>
+        <div class="content-item">
+          <input placeholder="请输入视频链接（如本地上传可不填）" class="input" type="text" v-model="videoUrl">
+        </div>
+        <div class="content-item" v-show="!isLocalVideoFile">
+          <input placeholder="请输入封面链接（如本地上传默认第一帧）" class="input" type="text" v-model="coverUrl">
+        </div>
+        <div class="content-item">
+          <textarea class="input" placeholder="请输入视频描述" rows="10" cols="30" v-model="videoDesc"/>
+        </div>
+        <div class="content-item">
+          <div class="btn" @click="preview">预览</div>
+          <div class="btn" @click="upload">发布</div>
+        </div>
       </div>
-      <div class="content-item">
-        <input placeholder="请输入视频链接（如本地上传可不填）" class="input" type="text" v-model="videoUrl">
-      </div>
-      <div class="content-item">
-        <textarea class="input" placeholder="请输入视频描述" rows="10" cols="30" v-model="videoDesc"/>
-      </div>
-      <div class="content-item">
-        <div class="btn" @click="preview">预览</div>
-        <div class="btn" @click="upload">发布</div>
-      </div>
-    </div>
   </div>
 </transition>
 </template>
 
 <script>
 // https://video.pearvideo.com/mp4/adshort/20190122/cont-1509435-13511623_adpkg-ad_hd.mp4
+// https://image.pearvideo.com/cont/20190118/cont-1507651-11802750.jpg
 import MyHeader from 'components/MyHeader/MyHeader'
 import Confirm from 'base/confirm/confirm'
-import { regVideoUrl } from 'common/js/util'
+import { baseURL }from 'common/js/config'
+import { regVideoUrl, regCoverUrl } from 'common/js/util'
 import { mapGetters } from 'vuex'
 export default {
   activated () {
     this.$refs.video.src = ''
-    this.isLocalVideoFile = false
     this.videoUrl = ''
     this.videoDesc = ''
     this.coverUrl = ''
   },
   data () {
     return {
-      isLocalVideoFile: false,
       videoUrl: '',
       videoDesc: '',
       coverUrl: ''
     }
   },
   computed: {
+    isLocalVideoFile () {
+      if (this.videoUrl.startsWith('blob:')) {
+        return true
+      } else {
+        return false
+      }
+    },
     ...mapGetters([
       'loginInfo'
     ])
@@ -61,22 +71,24 @@ export default {
       let v = this.$refs.video
       v.src = this.videoUrl
       v.addEventListener('loadeddata', captureImage)
-      v.play()
       function captureImage () {
-        let scale = 1
-        let canvas = document.createElement('canvas')
-        canvas.width = v.videoWidth * scale
-        canvas.height = v.videoHeight * scale
-        canvas.getContext('2d').drawImage(v, 0, 0, canvas.width, canvas.height)
-        v.removeEventListener('loadeddata', captureImage)
-        that.coverUrl = canvas.toDataURL('image/png')
+        v.play()
+        if (that.isLocalVideoFile) {
+          let scale = 1
+          let canvas = document.createElement('canvas')
+          canvas.width = v.videoWidth * scale
+          canvas.height = v.videoHeight * scale
+          canvas.getContext('2d').drawImage(v, 0, 0, canvas.width, canvas.height)
+          that.coverUrl = canvas.toDataURL('image/png')
+          v.removeEventListener('loadeddata', captureImage)
+        }
       }
     },
     change (e) {
       let files = e.target.files || e.dataTransfer.files
       if (!files.length) return
-      this.isLocalVideoFile = true
-      this.videoUrl = this.getObjectURL(files[0])
+      this.realVideo = files[0]
+      this.videoUrl = this.getObjectURL(this.realVideo)
       this.setSrcAndCaptureImage()
     },
     getObjectURL (file) {
@@ -112,7 +124,7 @@ export default {
     },
     upload () {
       if (!this.isLocalVideoFile) {
-        if (!regVideoUrl.test(this.videoUrl)) {
+        if (!regVideoUrl.test(this.videoUrl) || !regCoverUrl.test(this.coverUrl)) {
           this.$refs.tip.show('请输入有效url')
           return
         }
@@ -123,14 +135,40 @@ export default {
         this.$refs.tip.show('请输入有效描述')
       }
     },
-    confirm () {
+    async confirm () {
       if (this.isLocalVideoFile) {
         // 上传视频到服务器 保存入数据库
+        let fd = new FormData()
+        fd.append('videoPath', this.realVideo)
+        let r = await this.$axios.post(`/api/user/uploadFile`, fd)
+        if (r.status === 200) {
+          let filename = r.data.filename
+          const videoId = filename.substr(0, filename.indexOf('.'))
+          let r1 = await this.$axios.post(`/api/user/${this.loginInfo.userId}/uploadVideoCover`, {
+            videoId,
+            videoCover: this.coverUrl
+          })
+          if (r1.status === 200) {
+            // 插入数据库
+            await this.$axios.post(`/api/user/${this.loginInfo.userId}/publishVideo`, {
+              videoId,
+              videoCover: `${baseURL}/assets/videoCover/${videoId}.jpg`,
+              videoPath: `${baseURL}/assets/videoPath/${videoId}.${filename.substr(filename.indexOf('.') + 1)}`,
+              videoDesc: this.videoDesc
+            })
+          }
+        }
       } else {
         // 直接保存入数据库
+        let videoInfo = {
+          videoId: undefined,
+          videoCover: this.coverUrl,
+          videoPath: this.videoUrl,
+          videoDesc: this.videoDesc
+        }
+        // await this.$axios.post(`/api/user/${this.loginInfo.userId}/publishVideo`, videoInfo)
+        console.log(videoInfo)
       }
-      console.log(this.videoUrl)
-      console.log(this.coverUrl)
     },
     cancel () {
 
@@ -179,6 +217,7 @@ export default {
         opacity 0
       .video
         width 100%
+        height 100%
     .content-item
       position relative
       display flex
@@ -187,7 +226,7 @@ export default {
       height 44px
       justify-content flex-start
       .btn
-        padding 10px
+        padding 5px
         text-align center
         line-height 25px
         font-size $font-size-small

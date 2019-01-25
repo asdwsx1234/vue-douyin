@@ -25,6 +25,9 @@ const KEY_COMMENT_LIKE_NUM = 'commmentLikeNum'
 const PER_PAGE_LIMIT_NUM = 21
 
 const regEmail = /^([a-zA-Z0-9]+[_|.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/
+const regVideoUrl = /^https?.+\.(mp4|avi|flv|mpg|rm|mov|asf|3gp|mkv|rmvb)$/i
+const regCoverUrl = /^https?.+\.(jpg|jpeg|gif|png|bmp)$/i
+
 module.exports = {
   'GET /api/common/user/detectEmail/:email': async (ctx, next) => {
     const email = ctx.params.email
@@ -1286,6 +1289,45 @@ module.exports = {
       ctx.rest(r)
     } else {
       throw new APIError('user:not_found', 'user not found by userId.')
+    }
+  },
+  'POST /api/user/:userId/uploadVideoCover': async (ctx, next) => {
+    const videoId = ctx.request.body.videoId
+    const videoCover = ctx.request.body.videoCover
+    const base64Data = videoCover.replace(/^data:image\/\w+;base64,/, '')
+    let dataBuffer = Buffer.from(base64Data, 'base64')
+    fs.writeFileSync(path.join(__dirname, `../static/assets/videoCover/${videoId}.jpg`), dataBuffer)
+    ctx.rest(videoId)
+  },
+  'POST /api/user/:userId/publishVideo': async (ctx, next) => {
+    let videoInfo = {
+      id: db.generateId(),
+      videoId: ctx.request.body.videoId || db.generateId(),
+      userId: ctx.params.userId,
+      videoDuration: '222',
+      videoCover: ctx.request.body.videoCover,
+      videoPath: ctx.request.body.videoPath,
+      videoDesc: ctx.request.body.videoDesc,
+      videoStatus: '正常'
+    }
+    const user = await UserRegister.findOne({
+      where: {
+        'userId': videoInfo.userId
+      }
+    })
+    if (!user) {
+      throw new APIError('user:not_existed', 'user not found by id.')
+    } else {
+      if (!regCoverUrl.test(videoInfo.videoCover) || !regVideoUrl.test(videoInfo.videoPath)) {
+        throw new APIError('video:format_error', 'video path/cover url format invalid.')
+      } else {
+        let r = await VideoInfo.create(videoInfo)
+        await redisClient.zadd(KEY_LIKE_NUM, 0, videoInfo.videoId)
+        await redisClient.zadd(KEY_SHARE_NUM, 0, videoInfo.videoId)
+        await redisClient.zadd(KEY_WATCH_NUM, 0, videoInfo.videoId)
+        await redisClient.zadd(KEY_COMMENT_NUM, 0, videoInfo.videoId)
+        ctx.rest(r)
+      }
     }
   }
 }

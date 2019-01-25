@@ -1,6 +1,6 @@
 const fs = require('fs')
 const path = require('path')
-
+const db = require('./db')
 function addMapping (router, mapping) {
   for (var url in mapping) {
     if (url.startsWith('GET ')) {
@@ -37,9 +37,29 @@ function addControllers (router, dir) {
   }
 }
 
+function addUploadFile (router) {
+  const multer = require('koa-multer')
+  let storage = multer.diskStorage({
+    destination: path.join(__dirname, `./static/assets/videoPath/`),
+    filename: function (req, file, cb) {
+      let fileFormat = (file.originalname).split('.')
+      cb(null, db.generateId() + '.' + fileFormat[fileFormat.length - 1])
+    }
+  })
+  let upload = multer({ storage })
+  router.post('/api/user/uploadFile', upload.single('videoPath'), async (ctx, next) => {
+    if (ctx.req.file) {
+      ctx.body = ctx.req.file
+    } else {
+      ctx.body = 'upload error'
+    }
+  })
+}
+
 module.exports = function (dir) {
   let controllersDir = dir || 'controllers'
   let router = require('koa-router')()
   addControllers(router, controllersDir)
+  addUploadFile(router)
   return router.routes()
 }

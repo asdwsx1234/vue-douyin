@@ -39,7 +39,11 @@ export default {
       return false
     },
     hasMessageUnread () {
-      let totalUnreadNum = this.fanUnreadNum + this.byLikeUnreadNum + this.byCommentUnreadNum
+      let privateLetterNum = 0
+      for (let value of this.allPrivateLetter) {
+        privateLetterNum += value.unread
+      }
+      let totalUnreadNum = this.fanUnreadNum + this.byLikeUnreadNum + this.byCommentUnreadNum + privateLetterNum
       if (totalUnreadNum === 0) {
         return false
       } else {
@@ -50,7 +54,8 @@ export default {
       'fanUnreadNum',
       'byLikeUnreadNum',
       'byCommentUnreadNum',
-      'followedNewsNum'
+      'followedNewsNum',
+      'allPrivateLetter'
     ])
   },
   methods: {

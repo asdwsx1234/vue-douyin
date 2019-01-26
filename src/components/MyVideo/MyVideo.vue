@@ -1,5 +1,5 @@
 <template>
-  <div class="my-video">
+  <div class="my-video" :style="VideoItemHeightStyle">
     <video class="video" :src="VideoItem.Video.videoPath"
       :poster="VideoItem.Video.videoCover"
       webkit-playsinline
@@ -65,6 +65,14 @@ export default {
     isHome () {
       return this.$route.name === 'home'
     },
+    VideoItemHeightStyle () {
+      let clientWidth = document.body.clientWidth
+      let clientHeight = document.body.clientHeight
+      return {
+        height: clientHeight + 'px',
+        width: clientWidth + 'px'
+      }
+    },
     ...mapGetters([
       'isLogged',
       'loginInfo'
@@ -111,8 +119,6 @@ export default {
 @import '~@/common/stylus/variable'
 .my-video
   position relative
-  height 100vh
-  width 100vw
   .input-bar
     border-top .5px solid $color-divide
     width 100%

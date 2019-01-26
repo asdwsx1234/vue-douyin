@@ -12,7 +12,7 @@
               <span class="time">{{formatTime(item.createdAt)}}</span>
             </div>
             <div class="bottom">
-              <span class="desc">{{item.content}}</span>
+              <span class="desc">{{`${item.content.length > 30 ? item.content.substr(0, 30) : item.content}`}}</span>
               <span class="point" :class="{ 'point-plus': item.unread > 99 }" v-show="item.unread!==0">{{item.unread > 99 ? '99+' : item.unread}}</span>
             </div>
           </div>

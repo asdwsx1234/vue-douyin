@@ -160,7 +160,7 @@ export default {
               this.$socket.emit('publishVideo', {
                 fromUserId: this.loginInfo.userId
               })
-              this.$router.push('home')
+              this.$router.push('/profile/me/video')
             } else {
               this.$refs.tip.show('发布失败')
             }
@@ -179,7 +179,7 @@ export default {
           this.$socket.emit('publishVideo', {
             fromUserId: this.loginInfo.userId
           })
-          this.$router.push('home')
+          this.$router.push('/profile/me/video')
         } else {
           this.$refs.tip.show('发布失败')
         }

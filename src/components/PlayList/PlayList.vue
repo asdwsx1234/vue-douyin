@@ -2,6 +2,7 @@
 <div @click.capture="closeCommentList($event)">
   <div class="back iconfont icon-left" @click="close"></div>
   <scroll class="wrap"
+    :style="VideoItemHeightStyle"
     ref="scroll"
     :probeType="3"
     :data="playList"
@@ -119,6 +120,14 @@ export default {
     clientHeight () {
       return document.body.clientHeight
     },
+    VideoItemHeightStyle () {
+      let clientWidth = document.body.clientWidth
+      let clientHeight = document.body.clientHeight
+      return {
+        height: clientHeight + 'px',
+        width: clientWidth + 'px'
+      }
+    },
     ...mapGetters([
       'playList'
     ])
@@ -139,8 +148,6 @@ export default {
   transform translateY(100%)
 .wrap
   position relative
-  height 100vh
-  width 100vw
 .back
   position absolute
   left 10px

@@ -46,6 +46,9 @@ export default {
     receiveNewVideo () {
       this.getFollowedNewsNum(this.loginInfo.userId)
     },
+    receiveAt () {
+      this.getAtUnreadNum(this.loginInfo.userId)
+    },
     receivePrivateLetter (data) {
       this.UPDATE_PRIVATELETTER({
         fromId: data.fromId,
@@ -73,6 +76,7 @@ export default {
       'getFanUnreadNum',
       'getByLikeUnreadNum',
       'getByCommentUnreadNum',
+      'getAtUnreadNum',
       'getFollowedNewsNum'
     ]),
     ...mapMutations([

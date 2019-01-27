@@ -7,7 +7,7 @@
       <div class="main">
         <p class="name">@{{item.userNickname}}</p>
         <p class="name">{{item.commentContent}}</p>
-        <p class="desc">评论了你的作品 {{formatTime(item.createdAt)}}</p>
+        <p class="desc">评论了你的{{item.commentReplyID ? '评论' : '作品'}} {{formatTime(item.createdAt)}}</p>
       </div>
       <img class="cover" v-if="item.videoCover" :src="item.videoCover" alt="" width="60" height="60">
     </li>

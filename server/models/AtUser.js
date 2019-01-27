@@ -15,6 +15,13 @@ module.exports = db.defineModel('AtUser', {
       key: 'videoId'
     }
   },
+  commentId: {
+    type: db.ID,
+    references: {
+      model: 'CommentInfo',
+      key: 'commentId'
+    }
+  },
   userId: {
     type: db.ID,
     references: {

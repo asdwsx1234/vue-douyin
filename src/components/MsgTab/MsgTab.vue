@@ -18,7 +18,9 @@
     </li>
     <li class="tab-item">
       <router-link tag="div" to="/message/at">
-        <div class="icon iconfont icon-at"></div>
+        <div class="icon iconfont icon-at">
+          <span class="point" :class="{ 'point-plus': atNum > 99 }" v-show="atNum!==0">{{atNum > 99 ? '99+' : atNum}}</span>
+        </div>
         <span class="desc">@我的</span>
       </router-link>
     </li>
@@ -48,7 +50,8 @@ export default {
     ...mapGetters([
       'fanUnreadNum',
       'byLikeUnreadNum',
-      'byCommentUnreadNum'
+      'byCommentUnreadNum',
+      'atNum'
     ])
   }
 }

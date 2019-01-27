@@ -16,6 +16,9 @@ const mutations = {
   [types.SET_BYCOMMENTUNREADNUM] (state, byCommentUnreadNum) {
     state.byCommentUnreadNum = byCommentUnreadNum
   },
+  [types.SET_ATNUM] (state, atNum) {
+    state.atNum = atNum
+  },
   [types.SET_FOLLOWEDNEWSNUM] (state, followedNewsNum) {
     state.followedNewsNum = followedNewsNum
   },

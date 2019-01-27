@@ -45,6 +45,7 @@ export default {
   font-size $font-size-medium-x
   z-index 33
   border-bottom .5px solid $color-divide
+  background $color-background
   .back-wrap
     position absolute
     left: 10px

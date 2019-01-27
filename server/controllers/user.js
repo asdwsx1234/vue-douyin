@@ -15,6 +15,7 @@ const CommentInfo = require('../models/CommentInfo')
 const PrivateLetter = require('../models/PrivateLetter')
 const UserRegister = require('../models/UserRegister')
 const UserRelation = require('../models/UserRelation')
+const AtUser = require('../models/AtUser')
 
 const KEY_WATCH_NUM = 'videoWatchNum'
 const KEY_SHARE_NUM = 'videoShareNum'
@@ -585,7 +586,7 @@ module.exports = {
       where UserRegister.userId = '${userId}'
       order by CommentInfo.createdAt
       limit ${PER_PAGE_LIMIT_NUM} offset ${(page - 1) * PER_PAGE_LIMIT_NUM}`)
-      let commentByCommentList = await db.sequelize.query(`select VideoInfo.videoId,VideoInfo.videoCover,c2.commentId,c2.commentContent,c2.isRead,c2.createdAt,UserInfo.userNickname,UserInfo.userAvatar  from UserRegister
+      let commentByCommentList = await db.sequelize.query(`select VideoInfo.videoId,VideoInfo.videoCover,c2.commentId,c2.commentReplyID,c2.commentContent,c2.isRead,c2.createdAt,UserInfo.userNickname,UserInfo.userAvatar  from UserRegister
       inner join CommentInfo as c1
       on UserRegister.userId = c1.userId
       inner join CommentInfo as c2
@@ -597,7 +598,8 @@ module.exports = {
       where UserRegister.userId = '${userId}'
       order by c2.createdAt
       limit ${PER_PAGE_LIMIT_NUM} offset ${(page - 1) * PER_PAGE_LIMIT_NUM}`)
-      ctx.rest(videoByCommentList[0].concat(commentByCommentList[0]))
+      let result = videoByCommentList[0].concat(commentByCommentList[0])
+      ctx.rest(result.sort((a, b) => b.createdAt - a.createdAt))
     } else {
       throw new APIError('user:not_found', 'user not found by userId.')
     }
@@ -1080,12 +1082,10 @@ module.exports = {
     if (!video) {
       throw new APIError('user:not_existed', 'toVideo is not existed.')
     }
-    if (!comment.commentReplyID) {
-      comment.commentReplyID = ''
-    } else {
+    if (comment.commentReplyID !== '') {
       const replyComment = await CommentInfo.findOne({
         where: {
-          id: comment.commentReplyID
+          'commentId': comment.commentReplyID
         }
       })
       if (!replyComment) {
@@ -1328,6 +1328,89 @@ module.exports = {
         await redisClient.zadd(KEY_COMMENT_NUM, 0, videoInfo.videoId)
         ctx.rest(r)
       }
+    }
+  },
+  'POST /api/user/:userId/AtUser': async (ctx, next) => {
+    let userId = ctx.params.userId
+    let userIdList = ctx.request.body.userIdStr.split(',')
+    let videoId = ctx.request.body.videoId
+    let commentId = ctx.request.body.commentId
+    const user = await UserRegister.findOne({
+      where: {
+        'userId': userId
+      }
+    })
+    if (!user) {
+      throw new APIError('user:not_existed', 'user not found by id.')
+    } else {
+      for (let i = 0, len = userIdList.length; i < len; i++) {
+        await AtUser.create({
+          'atUserId': userIdList[i],
+          'videoId': videoId,
+          'userId': userId,
+          'commentId': commentId,
+          'isRead': false
+        })
+      }
+      ctx.rest('at suc!')
+    }
+  },
+  'GET /api/user/:userId/getAtUnreadNum': async (ctx, next) => {
+    let userId = ctx.params.userId
+    const user = await UserRegister.findOne({
+      where: {
+        'userId': userId
+      }
+    })
+    if (!user) {
+      throw new APIError('user:not_existed', 'user not found by id.')
+    } else {
+      let res = await AtUser.findAll({
+        where: {
+          'atUserId': userId,
+          'isRead': false
+        }
+      })
+      ctx.rest(res.length)
+    }
+  },
+  'GET /api/user/:userId/readAllAt': async (ctx, next) => {
+    let userId = ctx.params.userId
+    const user = await UserRegister.findOne({
+      where: {
+        'userId': userId
+      }
+    })
+    if (!user) {
+      throw new APIError('user:not_existed', 'user not found by id.')
+    } else {
+      await db.sequelize.query(`update AtUser set isRead = true where atUserId = '${userId}'`)
+      ctx.rest('read at suc')
+    }
+  },
+  'GET /api/user/:userId/getAt/page/:page': async (ctx, next) => {
+    const userId = ctx.params.userId
+    let page = ctx.params.page
+    if (page < 0 || isNaN(Number(page))) page = 1
+    const user = await UserRegister.findOne({
+      where: {
+        'userId': userId
+      }
+    })
+    if (user) {
+      let AtList = await db.sequelize.query(`select c.userId,c.userAvatar,c.userNickname,b.videoId,b.videoCover,d.commentId,d.commentContent,a.createdAt from AtUser a
+      inner join VideoInfo b
+      on a.videoId = b.videoId
+      inner join UserInfo c
+      on a.userId = c.userId
+      inner join CommentInfo d
+      on a.commentId = d.commentId
+      where atUserId = '${userId}'
+      order by a.createdAt
+      limit ${PER_PAGE_LIMIT_NUM} offset ${(page - 1) * PER_PAGE_LIMIT_NUM}`)
+      ctx.rest(AtList[0])
+    } else {
+      throw new APIError('user:not_existed', 'user not found by id.')
     }
   }
 }

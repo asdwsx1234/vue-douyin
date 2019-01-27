@@ -84,6 +84,14 @@ io.on('connection', socket => {
       toUserSocketId
     })
   })
+  socket.on('sendAt', async data => {
+    const { toUserId } = data
+    const toUserSocketId = await redisClient.get(`SOCKET:${toUserId}`)
+    io.to(toUserSocketId).emit('receiveAt', {
+      toUserId,
+      toUserSocketId
+    })
+  })
   socket.on('logout', async userId => {
     // 删除
     const socketId = await redisClient.get(`SOCKET:${userId}`)

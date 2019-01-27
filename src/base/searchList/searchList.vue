@@ -7,7 +7,7 @@
         <span class="name">{{item.userNickname}}</span>
         <span class="desc">{{item.userDesc}}</span>
       </div>
-      <span class="iconfont icon-message" @click.stop="chatWith(item)"></span>
+      <span v-if="hasMessageBtn" class="iconfont icon-message" @click.stop="chatWith(item)"></span>
     </li>
   </ul>
 </div>
@@ -22,6 +22,10 @@ export default {
       default () {
         return []
       }
+    },
+    hasMessageBtn: {
+      type: Boolean,
+      default: true
     }
   },
   data () {

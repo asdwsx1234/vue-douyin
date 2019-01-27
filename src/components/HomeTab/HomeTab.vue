@@ -43,7 +43,7 @@ export default {
       for (let value of this.allPrivateLetter) {
         privateLetterNum += value.unread
       }
-      let totalUnreadNum = this.fanUnreadNum + this.byLikeUnreadNum + this.byCommentUnreadNum + privateLetterNum
+      let totalUnreadNum = this.fanUnreadNum + this.byLikeUnreadNum + this.byCommentUnreadNum + this.atNum + privateLetterNum
       if (totalUnreadNum === 0) {
         return false
       } else {
@@ -54,6 +54,7 @@ export default {
       'fanUnreadNum',
       'byLikeUnreadNum',
       'byCommentUnreadNum',
+      'atNum',
       'followedNewsNum',
       'allPrivateLetter'
     ])

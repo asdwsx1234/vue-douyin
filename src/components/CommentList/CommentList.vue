@@ -11,11 +11,15 @@
       :pullup="true"
       @scrollToEnd="scrollToEnd">
       <div>
-        <div class="comment-item" v-for="(item, index) in acommentList" :key="index">
+        <div class="comment-item" v-for="(item, index) in acommentList" :key="index"
+          @touchstart="touchstart(item)"
+          @touchmove="touchmove"
+          @touchend="touchend">
           <img class="avatar" :src="`${baseURL}${item.Comment.userAvatar}`" alt="" width="40" height="40">
           <div class="main">
             <p class="name">@{{item.Comment.userNickname}}</p>
-            <p class="content">{{item.Comment.commentContent}}</p>
+            <p class="content" v-if="item.replyComment">{{`${item.Comment.commentContent}//@${item.replyComment.userNickname}:${item.replyComment.commentContent}`}}</p>
+            <p class="content" v-else>{{item.Comment.commentContent}}</p>
             <p class="time">{{formatTime(item.Comment.createdAt)}}</p>
           </div>
           <div class="like" :class="{ 'red-heart': likes[index] }" @click.stop="toggleLike(item, index)">
@@ -27,16 +31,18 @@
       </div>
     </scroll>
     <div class="input-bar">
-      <input class="input" placeholder="  有爱评论，说点儿好听的~" v-model="commentContent" type="text">
-      <span class="iconfont icon-at"></span>
+      <input class="input" :placeholder="placeholder" v-model="commentContent" type="text">
+      <span class="iconfont icon-at" @click="AtFriend"></span>
       <span class="iconfont icon-check" @click="sendComment"></span>
     </div>
+    <at-list ref="atList" @chooseUser="chooseUser"></at-list>
   </div>
 </template>
 
 <script>
 import Scroll from 'base/scroll/scroll'
 import NoMore from 'base/NoMore/NoMore'
+import AtList from 'components/AtList/AtList'
 import { formatTime } from 'common/js/util'
 import { baseURL } from 'common/js/config'
 import { mapGetters } from 'vuex'
@@ -81,8 +87,13 @@ export default {
   data () {
     return {
       likes: [],
+      atIdList: [],
+      atUserList: [],
       acommentList: this.commentList,
       commentContent: '',
+      timer: null,
+      replyId: '',
+      placeholder: '  有爱评论，说点儿好听的~',
       baseURL
     }
   },
@@ -94,6 +105,14 @@ export default {
   methods: {
     close (e) {
       this.$emit('close', e)
+    },
+    chooseUser (item) {
+      this.$refs.atList.hide()
+      for (let value of this.atUserList) {
+        if (value.userId === item.userId) return
+      }
+      this.commentContent = this.commentContent.concat(`@${item.userNickname}.`)
+      this.atUserList.push(item)
     },
     toggleLike (item, index) {
       this.$axios.get(`/api/user/${this.loginInfo.userId}/triggerLikeComment/${item.Comment.videoId}/${item.Comment.commentId}`).then((res) => {
@@ -117,11 +136,25 @@ export default {
       }
     },
     sendComment () {
+      let usernickList = this.commentContent.match(/@(.+?)\./g)
+      usernickList.forEach((item, index, arr) => {
+        let temp = arr[index]
+        arr[index] = temp.substr(1, temp.length - 2)
+      })
+      for (let i = 0, len = usernickList.length; i < len; i++) {
+        for (let user of this.atUserList) {
+          if (user.userNickname === usernickList[i]) {
+            this.atIdList.push(user.userId)
+            break
+          }
+        }
+      }
+
       let cc = this.commentContent.trim()
       if (cc) {
         let comment = {
           fromUserId: this.loginInfo.userId,
-          replyId: '',
+          replyId: this.replyId,
           content: cc,
           toVideoId: this.currentCommentVideoId
         }
@@ -130,9 +163,25 @@ export default {
             Comment: res.data.data,
             likeNum: 0
           }
+          if (this.atIdList.length > 0) {
+            this.$axios.post(`/api/user/${this.loginInfo.userId}/AtUser`, {
+              userIdStr: this.atIdList.join(','),
+              videoId: this.currentCommentVideoId,
+              commentId: mycomment.Comment.commentId
+            }).then(r => {
+              for (let i = 0, len = this.atIdList.length; i < len; i++) {
+                this.$socket.emit('sendAt', {
+                  fromUserId: this.loginInfo.userId,
+                  toUserId: this.atIdList[i]
+                })
+              }
+            })
+          }
           mycomment.Comment.userAvatar = this.loginInfo.userAvatar
           mycomment.Comment.userNickname = this.loginInfo.userNickname
           this.commentContent = ''
+          this.atIdList = []
+          this.atUserList = []
           this.acommentList = [mycomment].concat(this.acommentList)
           this.likes = [false].concat(this.likes)
           this.$socket.emit('sendComment', {
@@ -142,11 +191,29 @@ export default {
         })
       }
     },
+    AtFriend () {
+      this.$refs.atList.show()
+    },
+    touchstart (item) {
+      this.replyId = ''
+      this.placeholder = '  有爱评论，说点儿好听的~'
+      this.timer = setTimeout(() => {
+        this.replyId = item.Comment.commentId
+        this.placeholder = `  回复@${item.Comment.userNickname}`
+      }, 1000)
+    },
+    touchmove (e) {
+      clearTimeout(this.timer)
+    },
+    touchend (e) {
+      clearTimeout(this.timer)
+    },
     formatTime
   },
   components: {
     Scroll,
-    NoMore
+    NoMore,
+    AtList
   }
 }
 </script>

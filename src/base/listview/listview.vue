@@ -20,7 +20,7 @@
             <span class="name">{{item.userNickname}}</span>
             <span class="desc">{{item.userDesc}}</span>
           </div>
-          <span class="iconfont icon-message" @click.stop="chatWith(item)"></span>
+          <span v-if="hasMessageBtn" class="iconfont icon-message" @click.stop="chatWith(item)"></span>
         </li>
       </ul>
     </li>
@@ -43,7 +43,8 @@
   <scroll class="search-list-wrap" v-if="querykey">
     <search-list
     @select="selectItem"
-    :searches="searches">
+    :searches="searches"
+    :hasMessageBtn="hasMessageBtn">
     </search-list>
   </scroll>
 </scroll>
@@ -71,6 +72,10 @@ export default {
       default () {
         return []
       }
+    },
+    hasMessageBtn: {
+      type: Boolean,
+      default: true
     }
   },
   mounted () {

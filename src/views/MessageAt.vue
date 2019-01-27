@@ -1,35 +1,80 @@
 <template>
 <div>
-  <my-list Title="@我的">
-    <li v-for="item in Interests" :key="item.id" class="list-item">
-      <img src="./1.jpg" width="45" height="45" alt="" class="avatar">
+  <my-list Title="@我的" @scrollToEnd="scrollToEnd">
+    <li v-for="item in list" :key="item.userId" class="list-item">
+      <img :src="`${baseURL}${item.userAvatar}`" width="45" height="45" alt="" class="avatar">
       <div class="main">
-        <p class="name">@{{item.name}}</p>
-        <p class="name">{{item.content}}</p>
-        <p class="desc">提到了你 {{item.time}}</p>
+        <p class="name">@{{item.userNickname}}</p>
+        <p class="name">{{item.commentContent}}</p>
+        <p class="desc">提到了你 {{formatTime(item.createdAt)}}</p>
       </div>
-      <img class="cover" src="./1.jpg" alt="" width="60" height="60">
+      <img class="cover" :src="item.videoCover" alt="" width="60" height="60">
     </li>
-    <div v-if="!Interests.length" class="tip-wrap">
+    <div v-if="!list.length" class="tip-wrap">
       <p>您还没有被@哦</p>
       <p class="desc">赶快去和好友互动起来吧！</p>
     </div>
+    <loading v-show="isLoading"></loading>
   </my-list>
 </div>
 </template>
 
 <script>
 import MyList from 'base/myList/myList'
+import { baseURL } from 'common/js/config'
+import { formatTime } from 'common/js/util'
+import { mapGetters, mapActions } from 'vuex'
+import Loading from 'base/loading/loading'
+const PER_PAGE_LIMIT_NUM = 21
 export default {
+  created () {
+    this.fetchAtList()
+  },
+  beforeDestroy () {
+    const userId = this.loginInfo.userId
+    this.$axios.get(`/api/user/${userId}/readAllAt`).then(() => {
+      this.getAtUnreadNum(userId)
+    })
+  },
   data () {
     return {
-      Interests: [
-        { id: 1, avatar: '', name: 'well啊', content: '@测试小号 艾特', time: '刚刚' }
-      ]
+      list: [],
+      isLoading: false,
+      page: 0,
+      isEnd: false,
+      baseURL
     }
   },
+  computed: {
+    ...mapGetters([
+      'loginInfo'
+    ])
+  },
+  methods: {
+    fetchAtList () {
+      if (this.isEnd) return
+      let userId = this.loginInfo.userId
+      this.isLoading = true
+      this.page++
+      this.$axios.get(`/api/user/${userId}/getAt/page/${this.page}`).then((r) => {
+        this.isLoading = false
+        if (r.data.data.length < PER_PAGE_LIMIT_NUM) {
+          this.isEnd = true
+        }
+        this.list = this.list.concat(r.data.data)
+      })
+    },
+    scrollToEnd () {
+      this.fetchAtList()
+    },
+    ...mapActions([
+      'getAtUnreadNum'
+    ]),
+    formatTime
+  },
   components: {
-    MyList
+    MyList,
+    Loading
   }
 }
 </script>

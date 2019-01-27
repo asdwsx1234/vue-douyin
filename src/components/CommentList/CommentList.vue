@@ -93,7 +93,7 @@ export default {
       commentContent: '',
       timer: null,
       replyId: '',
-      placeholder: '  有爱评论，说点儿好听的~',
+      placeholder: '  有爱评论，说点儿好听的~（长按评论回复）',
       baseURL
     }
   },
@@ -196,7 +196,7 @@ export default {
     },
     touchstart (item) {
       this.replyId = ''
-      this.placeholder = '  有爱评论，说点儿好听的~'
+      this.placeholder = '  有爱评论，说点儿好听的~（长按评论回复）'
       this.timer = setTimeout(() => {
         this.replyId = item.Comment.commentId
         this.placeholder = `  回复@${item.Comment.userNickname}`

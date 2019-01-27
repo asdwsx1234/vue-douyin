@@ -29,10 +29,10 @@
       <div class="name">@{{VideoItem.Video.userNickname}}</div>
       <div class="desc">{{VideoItem.Video.videoDesc}}</div>
     </div>
-    <div class="input-bar" v-show="!isHome">
+    <div class="input-bar" v-show="!isHome" @click.stop="showCommentList(VideoItem.Video.videoId, VideoItem.WSLCNum.commentNum)">
       <input class="input" placeholder="  有爱评论，说点儿好听的~" type="text">
-      <span class="iconfont icon-at"></span>
-      <span class="iconfont icon-at"></span>
+      <span class="iconfont icon-at" ></span>
+      <span class="iconfont icon-check"></span>
     </div>
   </div>
 </template>

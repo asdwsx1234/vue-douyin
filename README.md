@@ -49,9 +49,9 @@ npm run serve （前端项目）
 
 ## 效果演示
 [查看demo请戳这里](http://www.zhoubaba.club)（请用chrome手机模式预览）
-__移动端扫描下方二维码__
 
-<img src="" width="250" height="250"/>
+__移动端扫描下方二维码__
+<img src="./screenshot/QRcode.png" width="250" height="250"/>
 
 ## 目标功能
  - [x] 登录、注册

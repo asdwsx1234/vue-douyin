@@ -1,5 +1,6 @@
 <template>
 <div class="profile">
+    <tip ref="tip"></tip>
     <me-tab class="fiexedtop"
       :videoNum="videoNum"
       :likeNum="likeNum"
@@ -38,6 +39,7 @@
         <div class="name-wrap">
           <p class="name" v-text="userInfo.userNickname"></p>
           <p class="subname">抖音号：{{userInfo.userId}}</p>
+          <div class="btn" v-if="userInfo.myRelation" :class="{'btn-inactive': ['follow', 'both'].includes(userInfo.myRelation) ? true : false}" @click="triggerFollow(userInfo)" v-html="getBtnHtml(userInfo.myRelation)"></div>
         </div>
         <div class="desc-wrap">
           <p class="desc" v-text="userInfo.userDesc"></p>
@@ -114,7 +116,7 @@ export default {
       this.getLikeNum(userId)
       this.getVideoNum(userId)
     } else {
-      this.$axios.get(`/api/common/user/${this.$route.params.id}/getUserInfo`).then((r) => {
+      this.$axios.get(`/api/user/${this.$route.params.id}/getUserInfo/${this.loginInfo.userId}`).then((r) => {
         this.userInfo = r.data.data
         let userId = this.userInfo.userId
         this.getFollowerNum(userId)
@@ -128,6 +130,7 @@ export default {
   data () {
     return {
       baseURL,
+      timer: null,
       userInfo: {},
       fanNum: 0,
       likeNum: 0,
@@ -231,6 +234,52 @@ export default {
     chooseVideo (index) {
       this.showPlayList = true
       this.$refs.playList.scrollToIndex(index)
+    },
+    triggerFollow (item) {
+      if (this.timer) return
+      this.timer = setTimeout(() => {
+        this.$axios.get(`/api/user/${this.loginInfo.userId}/triggerFollow/${item.userId}`).then(res => {
+          if (this.$route.params.id === 'me') {
+            if (res.data.data.includes('取消')) {
+              this.$refs.tip.show('取关成功')
+              item.bothStatus = false
+            } else {
+              this.$refs.tip.show('关注成功')
+              item.bothStatus = true
+            }
+          } else {
+            if (res.data.data.includes('取消')) {
+              this.$refs.tip.show('取关成功')
+              switch (item.myRelation) {
+                case 'follow': item.myRelation = 'none'; break
+                case 'both': item.myRelation = 'fan'; break
+              }
+            } else {
+              this.$refs.tip.show('关注成功')
+              switch (item.myRelation) {
+                case 'fan': item.myRelation = 'both'; break
+                case 'none': item.myRelation = 'follow'; break
+              }
+            }
+          }
+          this.$socket.emit('sendTriggerFollow', {
+            fromUserId: this.loginInfo.userId,
+            toUserId: item.userId
+          })
+          this.timer = null
+        }).catch(e => {
+          this.$refs.tip.show('网络错误')
+          this.timer = null
+        })
+      }, 300)
+    },
+    getBtnHtml (myRelation) {
+      switch (myRelation) {
+        case 'fan':
+        case 'none': return '关注'
+        case 'follow': return '已关注'
+        case 'both': return '互相关注'
+      }
     },
     async logout () {
       let res = await this.$axios.get(`/api/user/${this.loginInfo.userId}/logout`)
@@ -417,9 +466,23 @@ export default {
           width 100%
           height 100%
       .name-wrap
+        position relative
         margin 0 10px
         padding 80px 10px 10px
         border-bottom 1px solid $color-divide
+        .btn
+          position absolute
+          right 5px
+          top 20px
+          text-align center
+          line-height 25px
+          font-size $font-size-small
+          margin-right 5px
+          width 70px
+          height 25px
+          background rgb(248, 53, 95)
+        .btn-inactive
+          background rgb(56, 59, 68)
         .name
           color $color-white
           font-size $font-size-large-x

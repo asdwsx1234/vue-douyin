@@ -206,8 +206,9 @@ module.exports = {
       throw new APIError('user:not_found', 'user not found by userId.')
     }
   },
-  'GET /api/common/user/:userId/getUserInfo': async (ctx, next) => {
+  'GET /api/user/:userId/getUserInfo/:myUserId': async (ctx, next) => {
     let userId = ctx.params.userId
+    let myUserId = ctx.params.myUserId
     if (userId === 'persistent') {
       let session = JSON.parse(await redisClient.get(`SESSION:${ctx.cookies.get('koa:sess')}`))
       userId = session.userId
@@ -218,7 +219,12 @@ module.exports = {
       }
     })
     if (user) {
-      const userInfo = await user.getUserInfo()
+      let r = await db.sequelize.query(`select * from UserInfo where userId = '${userId}'`)
+      let userInfo = r[0][0]
+      if (myUserId !== 'undefined' && userId !== myUserId) {
+        let r = await UserController.getRelation(myUserId, userId)
+        userInfo.myRelation = r
+      }
       ctx.rest(userInfo)
     } else {
       throw new APIError('user:not_found', 'user not found by userId.')

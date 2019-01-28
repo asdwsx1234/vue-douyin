@@ -11,7 +11,7 @@ export const loginByPassword = async ({ dispatch, commit, state }, user) => {
   if (res.data.code === 200) {
     let userId = res.data.data.userId
     commit(types.SET_ISLOGGED, true)
-    let res1 = await instance.get(`/api/common/user/${userId}/getUserInfo`)
+    let res1 = await instance.get(`/api/user/${userId}/getUserInfo/undefined`)
     if (res1.data.code === 200) {
       let loginInfo = res1.data.data
       commit(types.SET_LOGININFO, loginInfo)
@@ -26,7 +26,7 @@ export const loginByPassword = async ({ dispatch, commit, state }, user) => {
 }
 
 export const persistentConnection = async ({ dispatch, commit, state }) => {
-  let res = await instance.get('/api/common/user/persistent/getUserInfo')
+  let res = await instance.get('/api/user/persistent/getUserInfo/undefined')
   if (res.data.code === 200) {
     let loginInfo = res.data.data
     commit(types.SET_ISLOGGED, true)

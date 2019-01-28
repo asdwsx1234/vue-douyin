@@ -136,22 +136,23 @@ export default {
       }
     },
     sendComment () {
-      let usernickList = this.commentContent.match(/@(.+?)\./g)
-      usernickList.forEach((item, index, arr) => {
-        let temp = arr[index]
-        arr[index] = temp.substr(1, temp.length - 2)
-      })
-      for (let i = 0, len = usernickList.length; i < len; i++) {
-        for (let user of this.atUserList) {
-          if (user.userNickname === usernickList[i]) {
-            this.atIdList.push(user.userId)
-            break
-          }
-        }
-      }
-
       let cc = this.commentContent.trim()
       if (cc) {
+        let usernickList = cc.match(/@(.+?)\./g)
+        if (usernickList !== null) {
+          usernickList.forEach((item, index, arr) => {
+            let temp = arr[index]
+            arr[index] = temp.substr(1, temp.length - 2)
+          })
+          for (let i = 0, len = usernickList.length; i < len; i++) {
+            for (let user of this.atUserList) {
+              if (user.userNickname === usernickList[i]) {
+                this.atIdList.push(user.userId)
+                break
+              }
+            }
+          }
+        }
         let comment = {
           fromUserId: this.loginInfo.userId,
           replyId: this.replyId,

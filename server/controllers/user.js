@@ -1125,7 +1125,7 @@ module.exports = {
             order by f.createdAt desc
             limit 1) as createdAt
       from PrivateLetter a
-      join userInfo b on a.fromId = '${userId}'
+      join UserInfo b on a.fromId = '${userId}'
       and a.toId = b.userId
       group by toId`)
       let res1 = await db.sequelize.query(`select a.fromId,b.userNickname,b.userAvatar,( select count(*)
@@ -1144,7 +1144,7 @@ module.exports = {
       order by f.createdAt desc
       limit 1) as createdAt
       from PrivateLetter a
-      join userInfo b on a.toId = '${userId}'
+      join UserInfo b on a.toId = '${userId}'
       and a.fromId = b.userId
       group by fromId`)
       ctx.rest(res[0].concat(res1[0]))
@@ -1243,7 +1243,7 @@ module.exports = {
     if (user) {
       let res = await db.sequelize.query(`select a.userId,b.userNickname,b.userAvatar,b.userDesc
       from UserRegister a
-      inner join userInfo b 
+      inner join UserInfo b 
       on a.userId = b.userId
       where a.userId like '%${key}%' or b.userNickname like '%${key}%' and a.userId != '${userId}' 
       limit ${PER_PAGE_LIMIT_NUM} offset ${(page - 1) * PER_PAGE_LIMIT_NUM}`)
@@ -1270,7 +1270,7 @@ module.exports = {
     if (user) {
       let res = await db.sequelize.query(`select a.userId,a.videoId,a.videoCover,a.videoDesc,a.videoPath,b.userNickname,b.userAvatar,b.userDesc
       from VideoInfo a
-      inner join userInfo b 
+      inner join UserInfo b 
       on a.userId = b.userId
       where a.videoDesc like '%${key}%' and a.userId != '${userId}'
       limit ${PER_PAGE_LIMIT_NUM} offset ${(page - 1) * PER_PAGE_LIMIT_NUM}`)

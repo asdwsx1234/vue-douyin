@@ -3,8 +3,8 @@
   <i class="iconfont icon-left" @click="back"></i>
   <div class="form-wrap">
     <h1 class="title">注册</h1>
-    <input class="input" type="email" placeholder="输入邮箱" autocomplete="off" v-model="email" @keyup="listenBtn($event)" id="email">
-    <input class="input" type="password" placeholder="输入密码" v-model="password" id="password">
+    <input class="input" type="email" placeholder="输入邮箱" autocomplete="off" v-model="email" @blur="inputBlur" id="email">
+    <input class="input" type="password" placeholder="输入密码" v-model="password" @blur="inputBlur" id="password">
     <code-input
       :email="email"
       @code-tip="_emitTip"
@@ -27,6 +27,15 @@ export default {
       email: '',
       password: '',
       code: ''
+    }
+  },
+  watch: {
+    email (newVal) {
+      if (!regEmail.test(newVal)) {
+        this.$refs.codeInput.setDisabled(true)
+        return
+      }
+      this.$refs.codeInput.setDisabled(false)
     }
   },
   methods: {
@@ -67,12 +76,8 @@ export default {
         this._emitTip('邮箱已被注册！')
       })
     },
-    listenBtn (e) {
-      if (!regEmail.test(this.email)) {
-        this.$refs.codeInput.setDisabled(true)
-        return
-      }
-      this.$refs.codeInput.setDisabled(false)
+    inputBlur () {
+      window.scroll(0, 0)
     },
     ...mapActions([
       'loginByPassword'

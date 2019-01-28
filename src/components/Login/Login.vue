@@ -4,8 +4,8 @@
   <a class="register" @click="showRegister = true">注册账号</a>
   <div class="form-wrap">
     <h1 class="title">登录</h1>
-    <input class="input" type="email" placeholder="输入邮箱" autocomplete="off" v-model="email" id="email">
-    <input class="input" type="password" placeholder="输入密码" v-model="password" id="password" @keyup.enter="login">
+    <input class="input" type="email" placeholder="输入邮箱" autocomplete="off" v-model="email" id="email" @blur="inputBlur">
+    <input class="input" type="password" placeholder="输入密码" v-model="password" id="password" @keyup.enter="login" @blur="inputBlur">
     <a class="forget-password" @click="retrievePassword">忘记了？找回密码</a>
     <div class="login-btn" @click="login">
       <i class="iconfont icon-check"></i>
@@ -47,6 +47,9 @@ export default {
   methods: {
     _emitTip (message) {
       this.$emit('login-tip', message)
+    },
+    inputBlur () {
+      window.scroll(0, 0)
     },
     close () {
       this.$emit('login-close')

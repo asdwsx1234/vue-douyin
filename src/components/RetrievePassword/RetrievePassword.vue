@@ -9,7 +9,7 @@
       ref="codeInput"
       @code-tip="_emitTip"
       @code="_code"></code-input>
-    <input class="input" type="password" v-model="password" placeholder="输入新密码" id="password">
+    <input class="input" type="password" v-model="password" placeholder="输入新密码" id="password" @blur="inputBlur">
     <div class="login-btn" @click="retrievePassword">
       <i class="iconfont icon-check"></i>
     </div>
@@ -58,6 +58,9 @@ export default {
       }).catch((e) => {
         this._emitTip('验证码错误')
       })
+    },
+    inputBlur () {
+      window.scroll(0, 0)
     }
   },
   components: {

@@ -109,8 +109,6 @@ export default {
     chooseUser () {
       this.$router.push(`/profile/${this.VideoItem.Video.userId}`)
     }
-  },
-  components: {
   }
 }
 </script>

@@ -14,13 +14,13 @@
           <input class="video-input" v-show="!videoUrl" type="file" id="file" accept="video/*" @change="change">
         </div>
         <div class="content-item">
-          <input placeholder="请输入视频链接（如本地上传可不填）" class="input" type="text" v-model="videoUrl">
+          <input placeholder="请输入视频链接（如本地上传可不填）" class="input" type="text" v-model="videoUrl" @blur="inputBlur">
         </div>
         <div class="content-item" v-show="!isLocalVideoFile">
-          <input placeholder="请输入封面链接（如本地上传默认第一帧）" class="input" type="text" v-model="coverUrl">
+          <input placeholder="请输入封面链接（如本地上传默认第一帧）" class="input" type="text" v-model="coverUrl" @blur="inputBlur">
         </div>
         <div class="content-item">
-          <textarea class="input" placeholder="请输入视频描述" rows="10" cols="30" v-model="videoDesc"/>
+          <textarea class="input" placeholder="请输入视频描述" rows="10" cols="30" v-model="videoDesc" @blur="inputBlur"/>
         </div>
         <div class="content-item">
           <div class="btn" @click="preview">预览</div>
@@ -187,6 +187,9 @@ export default {
     },
     cancel () {
 
+    },
+    inputBlur () {
+      window.scroll(0, 0)
     }
   },
   components: {

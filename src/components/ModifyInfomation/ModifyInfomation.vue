@@ -11,10 +11,10 @@
         @getAvatarImage="getAvatarImage"></avatar-cropper>
       </div>
       <div class="content-item">
-        <p>昵称</p><input class="input" type="text" name="nickname" id="nickname" :value="loginInfo.userNickname">
+        <p>昵称</p><input class="input" type="text" name="nickname" id="nickname" :value="loginInfo.userNickname" @blur="inputBlur">
       </div>
       <div class="content-item">
-        <p>签名</p><input class="input" type="text" name="desc" id="desc" :value="loginInfo.userDesc">
+        <p>签名</p><input class="input" type="text" name="desc" id="desc" :value="loginInfo.userDesc" @blur="inputBlur">
       </div>
       <div class="content-item">
         <p>性别</p><select class="input" name="gender" id="gender" :value="loginInfo.userGender === '男' ? 1 : 0">
@@ -22,10 +22,10 @@
                     <option value="0">女</option></select>
       </div>
       <div class="content-item">
-        <p>年龄</p><input class="input number-input" type="number" name="age" id="age" min="1" max="150" :value="loginInfo.userAge"/>
+        <p>年龄</p><input class="input number-input" type="number" name="age" id="age" min="1" max="150" :value="loginInfo.userAge" @blur="inputBlur"/>
       </div>
       <div class="content-item">
-        <p>地区</p><input class="input" type="text" name="address" id="address" :value="loginInfo.userAddress">
+        <p>地区</p><input class="input" type="text" name="address" id="address" :value="loginInfo.userAddress" @blur="inputBlur">
       </div>
     </div>
   </div>
@@ -59,6 +59,9 @@ export default {
     getAvatarImage (url) {
       this.avatarUrl = url
       this.avatarIsChanged = true
+    },
+    inputBlur () {
+      window.scroll(0, 0)
     },
     async goBack () {
       let age = document.getElementById('age')

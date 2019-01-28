@@ -1,6 +1,6 @@
 <template>
 <div class="row">
-  <input class="input" type="text" id="code" @keyup="codeInput($event.target.value)" placeholder="输入邮箱验证码">
+  <input class="input" type="text" id="code" @keyup="codeInput($event.target.value)" @blur="inputBlur" placeholder="输入邮箱验证码">
   <div class="code-btn" :class="{'btn-active': !disabled }" @click="getCode" ref="codeBtn">获取验证码</div>
 </div>
 </template>
@@ -33,6 +33,9 @@ export default {
       })
       this.setDisabled(true)
       this.cutdownMethod()
+    },
+    inputBlur () {
+      window.scroll(0, 0)
     },
     cutdownMethod () {
       if (this.cutdown === 0) {

@@ -18,7 +18,7 @@
       </div>
     </my-list>
     <div class="input-bar">
-      <input class="input" placeholder="  发送消息..." type="text" v-model="privateLetterContent" @keyup.enter="sendPrivateLetter">
+      <input class="input" placeholder="  发送消息..." type="text" v-model="privateLetterContent" @keyup.enter="sendPrivateLetter" @blur="scrollToBottom">
       <span class="iconfont icon-at"></span>
       <span class="iconfont icon-check" @click="sendPrivateLetter"></span>
     </div>

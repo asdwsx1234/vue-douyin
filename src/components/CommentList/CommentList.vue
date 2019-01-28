@@ -31,7 +31,7 @@
       </div>
     </scroll>
     <div class="input-bar">
-      <input class="input" :placeholder="placeholder" v-model="commentContent" type="text">
+      <input class="input" ref="input" :placeholder="placeholder" v-model="commentContent" type="text" @blur="inputBlur">
       <span class="iconfont icon-at" @click="AtFriend"></span>
       <span class="iconfont icon-check" @click="sendComment"></span>
     </div>
@@ -71,6 +71,9 @@ export default {
       })
     }
   },
+  mounted () {
+    this.$refs.input.focus()
+  },
   watch: {
     commentList (newVal, oldVal) {
       this.acommentList = newVal
@@ -105,6 +108,9 @@ export default {
   methods: {
     close (e) {
       this.$emit('close', e)
+    },
+    inputBlur () {
+      window.scroll(0, 0)
     },
     chooseUser (item) {
       this.$refs.atList.hide()

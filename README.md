@@ -354,3 +354,6 @@ __移动端扫描下方二维码__
 
 54 directories, 153 files
 ```
+
+## License
+[MIT](./LICENSE)

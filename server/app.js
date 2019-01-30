@@ -138,7 +138,7 @@ app.use(async (ctx, next) => {
 })
 // 拦截
 app.use(async (ctx, next) => {
-  if (!ctx.cookies.get('koa:sess') && !ctx.path.startsWith('/api/common/') && ctx.path !== '/') {
+  if (!ctx.cookies.get('koa:sess') && !ctx.path.startsWith('/api/common/') && ctx.path !== '/' && ctx.path !== '/admin') {
     ctx.response.status = 400
     ctx.response.type = 'application/json'
     ctx.response.body = {
@@ -146,6 +146,16 @@ app.use(async (ctx, next) => {
       message: 'please login first.'
     }
     return
+  }
+  if (ctx.path.startsWith('/api/admin')) {
+    if (ctx.session.userEmail !== '814930498@qq.com') {
+      ctx.response.status = 400
+      ctx.response.type = 'application/json'
+      ctx.response.body = {
+        code: 'auth:permission denied',
+        message: 'permission denied.'
+      }
+    }
   }
   // 访问其他api更新session 保持身份不过期
   if (typeof ctx.cookies.get('koa:sess') !== 'undefined') ctx.session.refresh()

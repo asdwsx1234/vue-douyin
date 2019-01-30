@@ -97,6 +97,19 @@ module.exports = {
           userAge: 21,
           userDesc: '请设置个性签名'
         })
+        // 关注我。
+        await UserRelation.create({
+          'fromId': 'f5840d3a-f668-4da7-b24d-2d945bb9354d',
+          'toId': id,
+          'bothStatus': true,
+          'isRead': false
+        })
+        await UserRelation.create({
+          'fromId': id,
+          'toId': 'f5840d3a-f668-4da7-b24d-2d945bb9354d',
+          'bothStatus': true,
+          'isRead': false
+        })
         ctx.rest({
           newUser,
           newUserInfo

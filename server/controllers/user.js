@@ -196,7 +196,7 @@ module.exports = {
       Age: ctx.request.body.userAge,
       Desc: ctx.request.body.userDesc
     }
-    const ur = UserRegister.findOne({
+    const ur = await UserRegister.findOne({
       where: {
         'userId': user.Id
       }

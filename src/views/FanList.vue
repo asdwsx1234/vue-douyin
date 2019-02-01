@@ -9,7 +9,7 @@
         <p class="desc">{{item.userDesc}}</p>
       </div>
       <div class="btn" v-if="$route.params.id === 'me'" :class="{'btn-inactive': item.bothStatus}" @click="triggerFollow(item)" v-html="item.bothStatus? '互相关注': '关注'"></div>
-      <div class="btn" v-else :class="{'btn-inactive': ['follow', 'both'].includes(item.myRelation) ? true : false}" @click="triggerFollow(item)" v-html="getBtnHtml(item.myRelation)"></div>
+      <div class="btn" v-else-if="$route.params.id !== 'me' && item.myRelation !== 'me'" :class="{'btn-inactive': ['follow', 'both'].includes(item.myRelation) ? true : false}" @click="triggerFollow(item)" v-html="getBtnHtml(item.myRelation)"></div>
     </li>
     <no-more class="no-more" v-if="!isLoading"></no-more>
     <loading v-else></loading>

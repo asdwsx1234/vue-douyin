@@ -18,7 +18,7 @@
       </div>
     </my-list>
     <div class="input-bar">
-      <input class="input" placeholder="  发送消息..." type="text" v-model="privateLetterContent" @keyup.enter="sendPrivateLetter" @blur="scrollToBottom">
+      <input class="input" placeholder="  发送消息..." type="text" v-model="privateLetterContent" @keyup.enter="sendPrivateLetter" @blur="inputBlur">
       <span class="iconfont icon-at"></span>
       <span class="iconfont icon-check" @click="sendPrivateLetter"></span>
     </div>
@@ -84,6 +84,9 @@ export default {
     }
   },
   methods: {
+    inputBlur () {
+      window.scroll(0, 0)
+    },
     scrollToBottom () {
       setTimeout(() => {
         const scroll = this.$refs.scroll.$children[0]

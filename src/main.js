@@ -15,7 +15,7 @@ const axiosInstance = axios.create({
 Vue.prototype.$axios = axiosInstance
 Vue.config.productionTip = false
 Vue.use(new VueSocketIO({
-  debug: true,
+  debug: false,
   connection: baseURL,
   vuex: {
     store,

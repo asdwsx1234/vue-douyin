@@ -1439,9 +1439,10 @@ class UserController {
    * @description 获取to用户和from用户是什么关系
    * @param {String} fromUserId from用户id
    * @param {String} toUserId to用户id
-   * @return {String} result 结果 （‘both‘：互相关注、’fan‘：粉丝、’follow‘：关注、’none‘：没有关系）
+   * @return {String} result 结果 （'me': 自己、‘both‘：互相关注、’fan‘：粉丝、’follow‘：关注、’none‘：没有关系）
    */
   static async getRelation (fromUserId, toUserId) {
+    if (fromUserId === toUserId) return 'me'
     const toUser = await UserRegister.findOne({
       where: {
         'userId': toUserId

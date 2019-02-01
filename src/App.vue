@@ -26,7 +26,7 @@ export default {
   },
   sockets: {
     connect: function () {
-      console.log('socket connected')
+      // console.log('socket connected')
     },
     responselogin (data) {
       // console.log(`socket connected ${data.userId}=====>${data.socketId}`)

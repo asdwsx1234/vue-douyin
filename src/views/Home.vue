@@ -7,7 +7,9 @@
     :probeType="3"
     :data="popularVideo"
     :scrollEnd="true"
-    :momentum="false"
+    :momentum="true"
+    :listenScroll="true"
+    @scroll="scroll"
     @scrollEnd="scrollEnd">
     <div>
       <my-video v-for="(item, index) in popularVideo"
@@ -56,7 +58,8 @@ export default {
       commentList: [],
       page: 0,
       currentCommentVideoId: '',
-      isEnd: false
+      isEnd: false,
+      timer: null
     }
   },
   methods: {
@@ -71,18 +74,23 @@ export default {
         v.pause()
       }
     },
-    scrollEnd (pos) {
+    scroll (pos) {
       let clientHeight = this.clientHeight
-      if (Math.abs(pos.y) < this.currentY - clientHeight / 2) { // 上一页
-        this.currentY -= clientHeight
-        this.$refs.scroll.scrollTo(0, -this.currentY)
-      }
-      if (Math.abs(pos.y) < this.currentY + clientHeight / 2) { // 本页
-        this.$refs.scroll.scrollTo(0, -this.currentY)
+      let absY = Math.abs(pos.y)
+      if (absY > this.currentY + clientHeight / 2) {
+        this.currentY = Math.ceil(absY / clientHeight) * clientHeight
+        this.$refs.scroll.scrollTo(0, -this.currentY, 500)
+      } else if (absY < this.currentY - clientHeight / 2) {
+        this.currentY = Math.floor(absY / clientHeight) * clientHeight
+        this.$refs.scroll.scrollTo(0, -this.currentY, 500)
       } else {
-        this.currentY += clientHeight
-        this.$refs.scroll.scrollTo(0, -this.currentY) // 下一页
+        if (this.timer) clearTimeout(this.timer)
+        this.timer = setTimeout(() => {
+          this.$refs.scroll.scrollTo(0, -this.currentY, 500)
+        }, 500)
       }
+    },
+    scrollEnd (pos) {
     },
     fetchCommentsAndShowList (videoId, commentNum) {
       if (!this.isLogged) {

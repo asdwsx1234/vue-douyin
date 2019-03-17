@@ -1,7 +1,7 @@
 <template>
   <div>
     <img class="cover" :src="item.Video.videoCover" alt="">
-    <i class="icon iconfont icon-delete" v-if="$route.params.id === 'me'" @click.stop="delVideo"></i>
+    <i class="icon iconfont icon-delete" v-if="$route.params.id === 'me' && $route.name === 'profile/video'" @click.stop="delVideo"></i>
     <div class="desc">
       <div>
         <i class="icon iconfont icon-heart"></i>{{item.WSLCNum.likeNum}}
@@ -20,6 +20,7 @@ export default {
   },
   methods: {
     delVideo () {
+      console.log(this.$route)
       this.$emit('delVideo', this.item.Video.videoId)
     }
   }

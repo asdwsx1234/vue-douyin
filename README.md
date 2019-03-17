@@ -144,215 +144,30 @@ __移动端扫描下方二维码__
 ## 目录结构
 ```
 .
-├── README.md
-├── babel.config.js
-├── dump.rdb
-├── package-lock.json
-├── package.json
-├── postcss.config.js
 ├── public
-│   ├── favicon.ico
-│   └── index.html
-├── server
-│   ├── Store.js
-│   ├── app.js
-│   ├── config.js
-│   ├── controller.js
-│   ├── controllers
-│   │   ├── index.js
-│   │   ├── test.js
-│   │   ├── user.js
-│   │   └── video.js
-│   ├── db.js
-│   ├── init-db.js
-│   ├── model.js
-│   ├── models
-│   │   ├── AtUser.js
-│   │   ├── CommentInfo.js
-│   │   ├── LikeInfo.js
-│   │   ├── PrivateLetter.js
-│   │   ├── ShareInfo.js
-│   │   ├── UserInfo.js
-│   │   ├── UserRegister.js
-│   │   ├── UserRelation.js
-│   │   ├── VideoInfo.js
-│   │   └── WatchInfo.js
-│   ├── redis.js
-│   ├── rest.js
+├── server(服务器在这里)
+│   ├── controllers(各个类别的controller)
+│   ├── models(sequelize模型)
 │   ├── static
 │   │   ├── assets
-│   │   │   ├── avatar
-│   │   │   │   ├── default.png
-│   │   │   │   └── f5840d3a-f668-4da7-b24d-2d945bb9354d.png
+│   │   │   ├── avatar(静态资源头像)
 │   │   │   ├── css
-│   │   │   │   ├── app.fe807076.css
-│   │   │   │   ├── chunk-16732778.6ee186fb.css
-│   │   │   │   ├── chunk-17236c33.76901edf.css
-│   │   │   │   ├── chunk-333c4bdf.401d13ca.css
-│   │   │   │   ├── chunk-35139864.de4d88c1.css
-│   │   │   │   ├── chunk-37724660.f3943024.css
-│   │   │   │   ├── chunk-58b5b620.23bfe588.css
-│   │   │   │   ├── chunk-5a336464.383681ce.css
-│   │   │   │   ├── chunk-708d9602.740a589b.css
-│   │   │   │   ├── chunk-826275ae.3b2bc3ae.css
-│   │   │   │   ├── chunk-903230d8.9e903249.css
-│   │   │   │   ├── chunk-9b041398.9b3b6e2f.css
-│   │   │   │   ├── chunk-b8cebac4.3fdeae11.css
-│   │   │   │   ├── chunk-ed831976.93a4b5ac.css
-│   │   │   │   └── chunk-f23e4304.3c8d356e.css
-│   │   │   ├── favicon.ico
 │   │   │   ├── fonts
-│   │   │   │   ├── iconfont.24db4a73.ttf
-│   │   │   │   └── iconfont.c7ce54f8.eot
 │   │   │   ├── img
-│   │   │   │   ├── 1.a9b784ef.jpg
-│   │   │   │   ├── iconfont.0b144f4b.svg
-│   │   │   │   └── logo.82b9c7a5.png
 │   │   │   ├── js
-│   │   │   │   ├── app.5dbb627e.js
-│   │   │   │   ├── chunk-16732778.147ace44.js
-│   │   │   │   ├── chunk-17236c33.ad601b09.js
-│   │   │   │   ├── chunk-333c4bdf.a7df8e6c.js
-│   │   │   │   ├── chunk-35139864.9590e581.js
-│   │   │   │   ├── chunk-37724660.8a3e7ee1.js
-│   │   │   │   ├── chunk-58b5b620.a4c1b6f9.js
-│   │   │   │   ├── chunk-5a336464.39aea61b.js
-│   │   │   │   ├── chunk-708d9602.4ccd8cea.js
-│   │   │   │   ├── chunk-826275ae.095b936f.js
-│   │   │   │   ├── chunk-903230d8.8aaaed2d.js
-│   │   │   │   ├── chunk-9b041398.05211648.js
-│   │   │   │   ├── chunk-b8cebac4.57ed5304.js
-│   │   │   │   ├── chunk-ed831976.2cbb4cee.js
-│   │   │   │   ├── chunk-f23e4304.0d50caec.js
-│   │   │   │   └── chunk-vendors.779f5ebc.js
-│   │   │   ├── videoCover
-│   │   │   └── videoPath
-│   │   └── index.html
-│   ├── staticFiles.js
-│   └── utils
-│       ├── backup.sql
-│       ├── crawler.py
-│       ├── nodemailer.js
-│       └── utils.js
-├── src
-│   ├── App.vue
-│   ├── base
-│   │   ├── CodeInput
-│   │   │   └── CodeInput.vue
-│   │   ├── NoMore
-│   │   │   └── NoMore.vue
-│   │   ├── Tip
-│   │   │   └── Tip.vue
-│   │   ├── VideoItem
-│   │   │   └── VideoItem.vue
-│   │   ├── confirm
-│   │   │   └── confirm.vue
-│   │   ├── listview
-│   │   │   └── listview.vue
-│   │   ├── loading
-│   │   │   └── loading.vue
-│   │   ├── myList
-│   │   │   └── myList.vue
-│   │   ├── scroll
-│   │   │   └── scroll.vue
-│   │   ├── searchBar
-│   │   │   └── searchBar.vue
-│   │   ├── searchList
-│   │   │   └── searchList.vue
-│   │   ├── searchUserList
-│   │   │   └── searchUserList.vue
-│   │   ├── searchVideoList
-│   │   │   └── searchVideoList.vue
-│   │   └── swipeout
-│   │       ├── index.js
-│   │       ├── swipeout-button.vue
-│   │       ├── swipeout-item.vue
-│   │       └── swipeout.vue
+│   │   │   ├── videoCover(静态资源视频封面)
+│   │   │   └── videoPath(静态资源视频)
+│   └── utils(服务器util)
+├── src（前端项目在这里）
+│   ├── base(基础组件)
 │   ├── common
-│   │   ├── fonts
-│   │   │   ├── iconfont.eot
-│   │   │   ├── iconfont.svg
-│   │   │   ├── iconfont.ttf
-│   │   │   └── iconfont.woff
-│   │   ├── js
-│   │   │   ├── config.js
-│   │   │   ├── dom.js
-│   │   │   ├── pinyin.js
-│   │   │   └── util.js
-│   │   └── stylus
-│   │       ├── base.styl
-│   │       ├── iconfont.styl
-│   │       ├── index.styl
-│   │       ├── reset.styl
-│   │       └── variable.styl
-│   ├── components
-│   │   ├── AtList
-│   │   │   └── AtList.vue
-│   │   ├── AvatarCropper
-│   │   │   └── AvatarCropper.vue
-│   │   ├── CommentList
-│   │   │   └── CommentList.vue
-│   │   ├── FollowedList
-│   │   │   └── FollowedList.vue
-│   │   ├── HomeTab
-│   │   │   └── HomeTab.vue
-│   │   ├── Login
-│   │   │   └── Login.vue
-│   │   ├── MeTab
-│   │   │   └── MeTab.vue
-│   │   ├── ModifyInfomation
-│   │   │   └── ModifyInfomation.vue
-│   │   ├── MsgList
-│   │   │   └── MsgList.vue
-│   │   ├── MsgTab
-│   │   │   └── MsgTab.vue
-│   │   ├── MyHeader
-│   │   │   └── MyHeader.vue
-│   │   ├── MyVideo
-│   │   │   └── MyVideo.vue
-│   │   ├── PlayList
-│   │   │   └── PlayList.vue
-│   │   ├── Profile
-│   │   │   ├── 1.jpg
-│   │   │   └── Profile.vue
-│   │   ├── Register
-│   │   │   └── Register.vue
-│   │   ├── RetrievePassword
-│   │   │   └── RetrievePassword.vue
-│   │   └── VideoList
-│   │       └── VideoList.vue
-│   ├── main.js
-│   ├── router.js
-│   ├── store
-│   │   ├── actions.js
-│   │   ├── getter.js
-│   │   ├── index.js
-│   │   ├── mutation-types.js
-│   │   ├── mutations.js
-│   │   └── state.js
-│   └── views
-│       ├── 1.jpg
-│       ├── 2.jpg
-│       ├── ChatWith.vue
-│       ├── Contact.vue
-│       ├── FanList.vue
-│       ├── Followed.vue
-│       ├── Home.vue
-│       ├── InterestList.vue
-│       ├── Me.vue
-│       ├── Message.vue
-│       ├── MessageAt.vue
-│       ├── MessageComment.vue
-│       ├── MessageFan.vue
-│       ├── MessageLike.vue
-│       ├── Search.vue
-│       ├── UploadVideo.vue
-│       ├── likes.vue
-│       ├── video.vue
-│       └── videoAndDesc.vue
-└── vue.config.js
+│   │   ├── fonts(iconfont)
+│   │   ├── js(util/config)
+│   │   └── stylus
+│   ├── components(逻辑组件)
+│   ├── store(vuex)
+│   └── views(页面)
 
-54 directories, 153 files
 ```
 
 ## License

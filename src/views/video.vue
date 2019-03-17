@@ -4,7 +4,8 @@
     <div v-if="!isLoading">
       <video-list
       :list="list"
-      @chooseVideo="chooseVideo"></video-list>
+      @chooseVideo="chooseVideo"
+      @delVideo="delVideo"></video-list>
       <no-more class="no-more"></no-more>
     </div>
   </div>
@@ -35,6 +36,9 @@ export default {
     chooseVideo (index) {
       this.SET_PLAYLIST(this.list)
       this.$emit('chooseVideo', index)
+    },
+    delVideo (videoId) {
+      this.$emit('delVideo', videoId)
     },
     fetchVideoList () {
       let userId = this.$route.params.id === 'me' ? this.loginInfo.userId : this.$route.params.id

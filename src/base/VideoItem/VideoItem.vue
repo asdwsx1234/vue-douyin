@@ -1,13 +1,11 @@
 <template>
   <div>
     <img class="cover" :src="item.Video.videoCover" alt="">
+    <i class="icon iconfont icon-delete" v-if="$route.params.id === 'me'" @click.stop="delVideo"></i>
     <div class="desc">
-        <div v-if="item.type == 1">
-          <i class="icon iconfont icon-delete"></i>本地草稿箱
-        </div>
-        <div v-else>
-          <i class="icon iconfont icon-heart"></i>{{item.WSLCNum.likeNum}}
-        </div>
+      <div>
+        <i class="icon iconfont icon-heart"></i>{{item.WSLCNum.likeNum}}
+      </div>
     </div>
   </div>
 </template>
@@ -19,6 +17,11 @@ export default {
       type: Object,
       required: true
     }
+  },
+  methods: {
+    delVideo () {
+      this.$emit('delVideo', this.item.Video.videoId)
+    }
   }
 }
 </script>
@@ -28,6 +31,12 @@ export default {
 .cover
   height 100%
   width 100%
+.icon-delete
+  position absolute
+  right 5px
+  top 5px
+  font-size $font-size-large
+  padding 0 0 10px 10px
 .desc
   position absolute
   left 5px

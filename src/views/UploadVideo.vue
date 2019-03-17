@@ -2,6 +2,9 @@
 <transition name="right">
   <div class="upload-video-wrap">
     <tip ref="tip"></tip>
+    <div class="loading-wrap" v-show="publishing">
+      <loading></loading>
+    </div>
     <confirm :text="'是否发布动态'"
       @confirm="confirm"
       @cancel="cancel"
@@ -36,6 +39,7 @@
 // https://image.pearvideo.com/cont/20190118/cont-1507651-11802750.jpg
 import MyHeader from 'components/MyHeader/MyHeader'
 import Confirm from 'base/confirm/confirm'
+import Loading from 'base/loading/loading'
 import { baseURL } from 'common/js/config'
 import { regVideoUrl, regCoverUrl } from 'common/js/util'
 import { mapGetters } from 'vuex'
@@ -45,12 +49,14 @@ export default {
     this.videoUrl = ''
     this.videoDesc = ''
     this.coverUrl = ''
+    this.publishing = false
   },
   data () {
     return {
       videoUrl: '',
       videoDesc: '',
-      coverUrl: ''
+      coverUrl: '',
+      publishing: false
     }
   },
   computed: {
@@ -102,6 +108,16 @@ export default {
       }
       return url
     },
+    dataURItoBlob(dataURI) {//图片转成Buffer
+      var byteString = atob(dataURI.split(',')[1]);
+      var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+      var ab = new ArrayBuffer(byteString.length);
+      var ia = new Uint8Array(ab);
+      for (var i = 0; i < byteString.length; i++) {
+          ia[i] = byteString.charCodeAt(i);
+      }
+      return new Blob([ab], {type: mimeString});
+    },
     playHandler () {
       if (!this.isLocalVideoFile) {
         if (!regVideoUrl.test(this.videoUrl)) return
@@ -136,6 +152,7 @@ export default {
       }
     },
     async confirm () {
+      this.publishing = true
       if (this.isLocalVideoFile) {
         // 本地上传视频到服务器，记录保存入数据库
         let fd = new FormData()
@@ -144,10 +161,12 @@ export default {
         if (r.status === 200) {
           let filename = r.data.filename
           const videoId = filename.substr(0, filename.indexOf('.'))
-          let r1 = await this.$axios.post(`/api/user/${this.loginInfo.userId}/uploadVideoCover`, {
-            videoId,
-            videoCover: this.coverUrl
-          })
+          let bolb = this.dataURItoBlob(this.coverUrl)
+          let fd1 = new FormData()
+          fd1.append('videoId', videoId)
+          fd1.append('videoCover', bolb)
+          let r1 = await this.$axios.post(`/api/user/uploadCover`, fd1)
+          this.publishing = false
           if (r1.status === 200) {
             // 插入数据库
             let r2 = await this.$axios.post(`/api/user/${this.loginInfo.userId}/publishVideo`, {
@@ -164,6 +183,8 @@ export default {
             } else {
               this.$refs.tip.show('发布失败')
             }
+          } else {
+            this.$refs.tip.show('上传封面失败')
           }
         }
       } else {
@@ -175,6 +196,7 @@ export default {
           videoDesc: this.videoDesc
         }
         let r = await this.$axios.post(`/api/user/${this.loginInfo.userId}/publishVideo`, videoInfo)
+        this.publishing = false
         if (r.status === 200) {
           this.$socket.emit('publishVideo', {
             fromUserId: this.loginInfo.userId
@@ -194,7 +216,8 @@ export default {
   },
   components: {
     MyHeader,
-    Confirm
+    Confirm,
+    Loading
   }
 }
 </script>
@@ -206,6 +229,17 @@ export default {
 .right-enter, .right-leave-to
   opacity 0
   transform translateX(100%)
+.loading-wrap
+  position absolute
+  z-index 10000
+  left 0
+  right 0
+  top 0
+  bottom 0
+  display flex
+  justify-content center
+  align-items center
+  background rgba(0, 0, 0, .7)
 .upload-video-wrap
   position absolute
   z-index 9999

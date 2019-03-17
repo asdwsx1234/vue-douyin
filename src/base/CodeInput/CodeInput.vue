@@ -28,11 +28,13 @@ export default {
     },
     getCode () {
       if (this.disabled) return
-      this.$axios.get(`/api/common/user/getCode/${this.email}`).catch((e) => {
+      this.setDisabled(true)
+      this.$axios.get(`/api/common/user/getCode/${this.email}`).then(() => {
+        this.cutdownMethod()
+      }).catch((e) => {
+        this.setDisabled(false)
         this.$emit('code-tip', '验证码发送失败')
       })
-      this.setDisabled(true)
-      this.cutdownMethod()
     },
     inputBlur () {
       window.scroll(0, 0)
@@ -68,6 +70,7 @@ export default {
     border-top-right-radius 0
     border-bottom-right-radius 0
     caret-color $color-point
+    width 150px
     &:focus
       outline none
       border none

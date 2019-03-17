@@ -183,8 +183,8 @@ module.exports = {
     const userId = ctx.params.userId
     const base64Data = file.replace(/^data:image\/\w+;base64,/, '')
     let dataBuffer = Buffer.from(base64Data, 'base64')
-    let r = fs.writeFileSync(path.join(__dirname, `../static/assets/avatar/${userId}.png`), dataBuffer)
-    ctx.rest(r)
+    fs.writeFileSync(path.join(__dirname, `../static/assets/avatar/${userId}.png`), dataBuffer)
+    ctx.rest('upload avatar suc')
   },
   'POST /api/user/:userId/modifyUserInfo': async (ctx, next) => {
     const user = {
@@ -1310,14 +1310,6 @@ module.exports = {
       throw new APIError('user:not_found', 'user not found by userId.')
     }
   },
-  'POST /api/user/:userId/uploadVideoCover': async (ctx, next) => {
-    const videoId = ctx.request.body.videoId
-    const videoCover = ctx.request.body.videoCover
-    const base64Data = videoCover.replace(/^data:image\/\w+;base64,/, '')
-    let dataBuffer = Buffer.from(base64Data, 'base64')
-    fs.writeFileSync(path.join(__dirname, `../static/assets/videoCover/${videoId}.jpg`), dataBuffer)
-    ctx.rest(videoId)
-  },
   'POST /api/user/:userId/publishVideo': async (ctx, next) => {
     let videoInfo = {
       id: db.generateId(),
@@ -1430,6 +1422,24 @@ module.exports = {
       ctx.rest(AtList[0])
     } else {
       throw new APIError('user:not_existed', 'user not found by id.')
+    }
+  },
+  'POST /api/user/:userId/delVideo': async (ctx, next) => {
+    const userId = ctx.params.userId
+    const videoId = ctx.request.body.videoId
+    const user = await UserRegister.findOne({
+      where: {
+        'userId': userId
+      }
+    })
+    if (!user) {
+      throw new APIError('user:not_existed', 'user not found by id.')
+    } else {
+      /**
+       * 删除视频要先删除（先后顺序）所有观看记录，评论点赞记录，评论记录，点赞记录
+       * redis里要删除videoId对应的WSCLNum记录，评论点赞数记录。
+       */
+      ctx.rest(videoId)
     }
   }
 }

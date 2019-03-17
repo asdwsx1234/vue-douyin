@@ -2,6 +2,7 @@
   <div class="video-list">
     <video-item
       @click.native="chooseVideo(index)"
+      @delVideo="delVideo"
       :style="VideoItemHeightStyle"
       class="video-item"
       v-for="(item, index) in list"
@@ -22,6 +23,9 @@ export default {
   methods: {
     chooseVideo (index) {
       this.$emit('chooseVideo', index)
+    },
+    delVideo (videoId) {
+      this.$emit('delVideo', videoId)
     }
   },
   computed: {

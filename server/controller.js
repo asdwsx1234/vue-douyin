@@ -56,10 +56,29 @@ function addUploadFile (router) {
   })
 }
 
+function addUploadCover (router) {
+  const multer = require('koa-multer')
+  let storage = multer.diskStorage({
+    destination: path.join(__dirname, `./static/assets/videoCover/`),
+    filename: function (req, file, cb) {
+      cb(null, req.body.videoId + '.jpg')
+    }
+  })
+  let upload = multer({ storage })
+  router.post('/api/user/uploadCover', upload.single('videoCover'), async (ctx, next) => {
+    if (ctx.req.file) {
+      ctx.body = ctx.req.file
+    } else {
+      ctx.body = 'upload error'
+    }
+  })
+}
+
 module.exports = function (dir) {
   let controllersDir = dir || 'controllers'
   let router = require('koa-router')()
   addControllers(router, controllersDir)
   addUploadFile(router)
+  addUploadCover(router)
   return router.routes()
 }

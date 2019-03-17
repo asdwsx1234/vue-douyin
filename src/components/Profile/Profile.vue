@@ -1,6 +1,10 @@
 <template>
 <div class="profile">
     <tip ref="tip"></tip>
+    <confirm :text="'是否保删除该视频'"
+      @confirm="confirm"
+      @cancel="cancel"
+      ref="confirm"></confirm>
     <me-tab class="fiexedtop"
       :videoNum="videoNum"
       :likeNum="likeNum"
@@ -63,7 +67,8 @@
               @click.native.capture="closeCommentList"
               @showCommentList="fetchCommentsAndShowList"
               :userInfo="userInfo"
-              @chooseVideo="chooseVideo"></router-view>
+              @chooseVideo="chooseVideo"
+              @delVideo="delVideo"></router-view>
           </keep-alive>
         </div>
       </div>
@@ -99,6 +104,7 @@ import MeTab from 'components/MeTab/MeTab'
 import CommentList from 'components/CommentList/CommentList'
 import PlayList from 'components/PlayList/PlayList'
 import ModifyInfomation from 'components/ModifyInfomation/ModifyInfomation'
+import Confirm from 'base/confirm/confirm'
 import { baseURL } from 'common/js/config'
 import { mapGetters, mapMutations } from 'vuex'
 import { deduplicateCommentList } from 'common/js/util'
@@ -222,7 +228,6 @@ export default {
       }
     },
     GoBack () {
-      // let path = localStorage.getItem('Routefrom')
       this.$router.back()
     },
     GoInterestList () {
@@ -234,6 +239,15 @@ export default {
     chooseVideo (index) {
       this.showPlayList = true
       this.$refs.playList.scrollToIndex(index)
+    },
+    delVideo (videoId) {
+      this.$refs.confirm.show()
+    },
+    confirm () {
+      this.$refs.tip.show('暂不支持删除')
+    },
+    cancel () {
+
     },
     triggerFollow (item) {
       if (this.timer) return
@@ -343,7 +357,8 @@ export default {
     MeTab,
     CommentList,
     PlayList,
-    ModifyInfomation
+    ModifyInfomation,
+    Confirm
   }
 }
 </script>

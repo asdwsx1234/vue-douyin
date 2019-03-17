@@ -80,6 +80,7 @@ __移动端扫描下方二维码__
 >  不定时补充，就当写毕业论文了 :grin:
 
 1、项目断断续续大概写了3个月，重要的功能基本已经完成，而且对vue的MVVM框架有了进一步的理解（数据和视图的分离，解耦，以数据驱动视图，只关心数据变化，DOM操作被封装），也更熟悉了vue的使用。
+2、会话管理是用的koa-session2插件，通过session和cookie结合来管理会话。用户登录成功之后可以用户信息存入session中。koa-session2会将sessionId写入cookie，再把session对象写入redis，键值为sessionId，这样只要cookie没有过期，客户端的每次请求就会携带这个sessionId，在服务端就可以从redis中获取登录信息，当然也可以用作会话拦截。注销的时候只需要将ctx.session置为空对象，这样cookie就会被清掉了。
 
 ### 前端
 

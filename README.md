@@ -78,6 +78,7 @@ __移动端扫描下方二维码__
  
 ## 总结
 >  不定时补充，就当写毕业论文了 :grin:
+
 1、项目断断续续大概写了3个月，重要的功能基本已经完成，而且对vue的MVVM框架有了进一步的理解（数据和视图的分离，解耦，以数据驱动视图，只关心数据变化，DOM操作被封装），也更熟悉了vue的使用。
 
 ### 前端
@@ -148,28 +149,28 @@ __移动端扫描下方二维码__
 ```
 .
 ├── public
-├── server(服务器在这里)
-│   ├── controllers(各个类别的controller)
-│   ├── models(sequelize模型)
+├── server                                             (服务器在这里)
+│   ├── controllers                                    (各个类别的controller)
+│   ├── models                                         (sequelize模型)
 │   ├── static
 │   │   ├── assets
-│   │   │   ├── avatar(静态资源头像)
+│   │   │   ├── avatar                                 (静态资源头像)
 │   │   │   ├── css
 │   │   │   ├── fonts
 │   │   │   ├── img
 │   │   │   ├── js
-│   │   │   ├── videoCover(静态资源视频封面)
-│   │   │   └── videoPath(静态资源视频)
-│   └── utils(服务器util)
-├── src（前端项目在这里）
-│   ├── base(基础组件)
+│   │   │   ├── videoCover                             (静态资源视频封面)
+│   │   │   └── videoPath                              (静态资源视频)
+│   └── utils                                          (服务器util)
+├── src                                                (前端项目在这里)
+│   ├── base                                           (基础组件)
 │   ├── common
-│   │   ├── fonts(iconfont)
-│   │   ├── js(util/config)
+│   │   ├── fonts                                      (iconfont)
+│   │   ├── js                                         (util/config)
 │   │   └── stylus
-│   ├── components(逻辑组件)
-│   ├── store(vuex)
-│   └── views(页面)
+│   ├── components                                     (逻辑组件)
+│   ├── store                                          (vuex)
+│   └── views                                          (页面)
 
 ```
 

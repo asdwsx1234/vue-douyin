@@ -48,11 +48,11 @@ npm run serve （前端项目）
 >  如果对您有帮助，您可以点右上角 "Star" 支持一下 谢谢！ :grin:
 
 ## 效果演示
-有憨批搞我服务器，不给演示了
+服务器2020.03.03到期，到时候就预览不了啦，不续了。
 
-~~[查看demo请戳这里](http://www.zhoubaba.club)（请用chrome手机模式预览）~~
+[查看demo请戳这里](http://www.zhoubaba.club)（请用chrome手机模式预览）
 
-~~__移动端扫描下方二维码__~~
+__移动端扫描下方二维码__
 
 <img src="./screenshot/QRcode.png" width="200" height="200"/>
 

@@ -19,8 +19,18 @@ __注：本项目仅供学习交流使用，切勿用于商业用途，如有侵
  - socket.io
 
 ## 项目运行
-__注意：由于涉及大量的 ES6/7 等新属性，node 需要 6.0 以上版本__
+### 使用Docker
 
+自学docker时用这个项目做了实践， 可以使用这种方法：
+
+1. 首先安装[docker](https://www.docker.com/products/docker-desktop)， 如果安装过就不需要了。
+2. 终端在该项目目录下运行 ```docker image build -t vue-douyin .```, 构建image，需要等待一段时间。
+3. 然后运行 ```docker container run --rm -p 3000:3000 -it vue-douyin``` 运行该容器， 端口必须是3000啊，否则请求的地址会错！
+4. 浏览器访问本机[http://127.0.0.1:3000](http://127.0.0.1:3000)
+
+### 在本机部署的方法： 
+
+__注意：node 需要 6.0 以上版本__
 ```
 git clone https://github.com/asdwsx1234/vue-douyin.git 
 
@@ -48,11 +58,11 @@ npm run serve （前端项目）
 >  如果对您有帮助，您可以点右上角 "Star" 支持一下 谢谢！ :grin:
 
 ## 效果演示
-服务器2020.03.03到期，到时候就预览不了啦，不续了。
+~~服务器2020.03.03到期，到时候就预览不了啦，不续了。~~
 
-[查看demo请戳这里](http://www.zhoubaba.club)（请用chrome手机模式预览）
+~~[查看demo请戳这里](http://www.zhoubaba.club)（请用chrome手机模式预览）~~
 
-__移动端扫描下方二维码__
+~~__移动端扫描下方二维码__~~
 
 <img src="./screenshot/QRcode.png" width="200" height="200"/>
 

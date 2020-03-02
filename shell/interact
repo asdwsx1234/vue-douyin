@@ -1,0 +1,16 @@
+#!/usr/local/bin/expect
+
+spawn mysql
+expect "*>*"
+send "create database test;\r"
+expect "*>*"
+send "use mysql;\r"
+expect "*>*"
+send "update mysql.user set authentication_string=password('123456') where user='root' and Host ='localhost';\r"
+expect "*>*"
+send "update user set  plugin='mysql_native_password';\r"
+expect "*>*"
+send "flush privileges;\r"
+expect "*>*"
+send "exit;\r"
+

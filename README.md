@@ -26,7 +26,11 @@ __注：本项目仅供学习交流使用，切勿用于商业用途，如有侵
 2. (方案1)自己构建镜像，需要等待一段时间。终端在该项目目录下运行 ```docker image build -t vue-douyin .``` 
 
    (方案2)直接从dockerhub拉取镜像，需要等待一段时间。终端运行```docker pull asdwsx1234/vue-douyin```
-3. 然后运行 ```docker container run --rm -p 3000:3000 -it vue-douyin``` 运行该容器， 端口必须是3000啊，否则请求的地址会错！
+3. (方案1)然后运行 ```docker container run --rm -p 3000:3000 -it vue-douyin``` 运行该容器。
+   
+   (方案2)然后运行 ```docker container run --rm -p 3000:3000 -it asdwsx1234/vue-douyin``` 运行该容器。
+
+   端口必须是3000啊，否则请求的地址会错！
 4. 浏览器访问[http://127.0.0.1:3000](http://127.0.0.1:3000)或者[http://127.0.0.1:3000/admin](http://127.0.0.1:3000/admin)
 
 ### 在本机部署的方法： 
